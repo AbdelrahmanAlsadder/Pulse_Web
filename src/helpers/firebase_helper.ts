@@ -185,6 +185,36 @@ class FirebaseAuthBackend {
     }
   }
 
+  /**
+   * Adds a new product to the products collection
+   * @param {Object} productData - The product data to be added
+   * @returns {Promise} - A promise that resolves when the product is added
+   */
+  addProductToFirestore = (productData: any): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      // Ensure user is authenticated before adding the product
+      if (this.uuid) {
+        const collection = this.firestore.collection("products");
+        const newProduct = {
+          ...productData,
+          store_id: this.uuid, // Ensure the product is associated with the user's store
+          createdDtm: firebase.firestore.FieldValue.serverTimestamp(), // Automatically set the creation timestamp
+        };
+
+        collection
+          .add(newProduct)
+          .then((docRef) => {
+            resolve({ id: docRef.id, ...newProduct });
+          })
+          .catch((error) => {
+            reject(this._handleError(error));
+          });
+      } else {
+        reject("User is not authenticated.");
+      }
+    });
+  };
+
   setLoggeedInUser = (user: any) => {
     sessionStorage.setItem("authUser", JSON.stringify(user));
   };
