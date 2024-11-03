@@ -5,18 +5,23 @@ import "firebase/compat/auth";
 import "firebase/compat/firestore";
 
 class FirebaseAuthBackend {
+  firestore: firebase.firestore.Firestore;
+  uuid: String | undefined;
   constructor(firebaseConfig: any) {
     if (firebaseConfig) {
       // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
       firebase.auth().onAuthStateChanged((user: any) => {
         if (user) {
+          console.log("user :>> ", user);
+          this.uuid = user.uid;
           sessionStorage.setItem("authUser", JSON.stringify(user));
         } else {
           sessionStorage.removeItem("authUser");
         }
       });
     }
+    this.firestore = firebase.firestore();
   }
 
   /**
@@ -147,6 +152,38 @@ class FirebaseAuthBackend {
     collection.doc(firebase.auth().currentUser?.uid).set(details);
     return { user, details };
   };
+  /**
+   * Returns the fetch Products
+   */
+  // Firestore functions
+  async fetchProducts(keyword = "") {
+    try {
+      if (this.uuid != undefined) {
+        let query = this.firestore
+          .collection("products")
+          .where("store_id", "==", this.uuid); // Filter by store_id
+
+        // If a keyword is provided, filter products by name or description
+        if (keyword) {
+          query = query
+            .where("title", ">=", keyword)
+            .where("title", "<=", keyword + "\uf8ff");
+        }
+
+        const querySnapshot = await query.get();
+
+        return querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+      }
+      // Return an empty array if uuid is undefined
+      return [];
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      throw error;
+    }
+  }
 
   setLoggeedInUser = (user: any) => {
     sessionStorage.setItem("authUser", JSON.stringify(user));

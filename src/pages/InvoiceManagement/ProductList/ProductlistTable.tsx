@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Card, Col, Dropdown, Form, Row } from "react-bootstrap";
+import { Card, Col, Dropdown, Form, Row, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import TableContainer from "../../../Common/Tabledata/TableContainer";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,6 +13,7 @@ import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
 import { DeleteModal } from "../../../Common/DeleteModal";
 import { handleSearchData } from "../../../Common/Tabledata/SorttingData";
 import EditProductList from "../../../Common/CrudModal/EditProductList";
+import { getFirebaseBackend } from "../../../helpers/firebase_helper";
 
 const ProductlistTable = () => {
   const dispatch = useDispatch();
@@ -24,17 +25,34 @@ const ProductlistTable = () => {
     })
   );
 
-  const { productList } = useSelector(selectProductList);
+  // const { productList } = useSelector(selectProductList);
 
   const [products, setProducts] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const firebaseBackend = getFirebaseBackend();
+
+  // useEffect(() => {
+  //   dispatch(onGetProductList());
+  // }, [dispatch]);
+
+  // useEffect(() => {
+  //   setProducts(productList);
+  // }, [productList]);
 
   useEffect(() => {
-    dispatch(onGetProductList());
-  }, [dispatch]);
-
-  useEffect(() => {
-    setProducts(productList);
-  }, [productList]);
+    const loadProducts = async () => {
+      try {
+        setIsLoading(true);
+        const productsList = await firebaseBackend.fetchProducts();
+        setProducts(productsList);
+      } catch (error) {
+        console.error("Error loading products:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadProducts();
+  }, [firebaseBackend]);
 
   // Delete modal
 
@@ -54,17 +72,17 @@ const ProductlistTable = () => {
   };
 
   // search
-  const handleSearch = (ele: any) => {
-    let item = ele.value;
+  const handleSearch = async (ele: any) => {
+    const item = ele.value.trim(); // Trim whitespace
 
-    if (item === "All Tasks") {
-      setProducts([...productList]);
-    } else {
-      handleSearchData({
-        data: productList,
-        item: item,
-        setState: setProducts,
-      });
+    try {
+      setIsLoading(true);
+      const productsList = await firebaseBackend.fetchProducts(item);
+      setProducts(productsList);
+    } catch (error) {
+      console.error("Error loading products:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -98,23 +116,23 @@ const ProductlistTable = () => {
 
   const columns: columnsType[] = useMemo(
     () => [
-      {
-        Header: () => (
-          <Form>
-            <Form.Check type="checkbox" />
-          </Form>
-        ),
-        accessor: "id",
-        key: "id",
-        Filter: false,
-        isSortable: false,
-        width: 50,
-        Cell: () => (
-          <Form>
-            <Form.Check type="checkbox" />
-          </Form>
-        ),
-      },
+      // {
+      //   Header: () => (
+      //     <Form>
+      //       <Form.Check type="checkbox" />
+      //     </Form>
+      //   ),
+      //   accessor: "id",
+      //   key: "id",
+      //   Filter: false,
+      //   isSortable: false,
+      //   width: 50,
+      //   Cell: () => (
+      //     <Form>
+      //       <Form.Check type="checkbox" />
+      //     </Form>
+      //   ),
+      // },
       {
         Header: "PRODUCT NAME",
         accessor: "productName",
@@ -124,17 +142,19 @@ const ProductlistTable = () => {
           return (
             <div className="d-flex align-items-center">
               <div className="flex-shrink-0 me-3 avatar-sm">
-                <div className="avatar-title bg-light rounded">
-                  {" "}
-                  <img
-                    src={cell.row.original.productImage}
-                    alt=""
-                    className="avatar-xs"
-                  />
-                </div>
+                {cell.row.original.images?.length > 0 && (
+                  <div className="avatar-title bg-light rounded">
+                    {" "}
+                    <img
+                      src={cell.row.original.images[0]}
+                      alt=""
+                      className="avatar-xs"
+                    />
+                  </div>
+                )}
               </div>
               <div className="flex-grow-1">
-                <h6 className="fs-16 mb-1">{cell.row.original.productName}</h6>
+                <h6 className="fs-16 mb-1">{cell.row.original.title}</h6>
               </div>
             </div>
           );
@@ -145,24 +165,20 @@ const ProductlistTable = () => {
         accessor: "category",
         Filter: false,
         isSortable: true,
+        Cell: (cell: any) => <>{cell.row.original.category}</>,
       },
+      // {
+      //   Header: "IN STOCK",
+      //   accessor: "inStock",
+      //   Filter: false,
+      //   isSortable: true,
+      // },
       {
-        Header: "IN STOCK",
-        accessor: "inStock",
+        Header: "Quantity",
+        accessor: "quantity",
         Filter: false,
         isSortable: true,
-      },
-      {
-        Header: "RATE",
-        accessor: "rate",
-        Filter: false,
-        isSortable: true,
-        Cell: (cell: any) => (
-          <span className="badge bg-light text-body fs-12 fw-medium">
-            <i className="mdi mdi-star text-warning me-1"></i>
-            {cell.row.original.rate}
-          </span>
-        ),
+        Cell: (cell: any) => <>{cell.row.original.quantity}</>,
       },
 
       {
@@ -187,12 +203,12 @@ const ProductlistTable = () => {
               <i className="las la-ellipsis-h align-middle fs-18"></i>
             </Dropdown.Toggle>
             <Dropdown.Menu className="dropdown-menu-end">
-              <li>
+              {/* <li>
                 <Dropdown.Item>
                   <i className="las la-eye fs-18 align-middle me-2 text-muted"></i>
                   View
                 </Dropdown.Item>
-              </li>
+              </li> */}
               <li>
                 <Dropdown.Item
                   onClick={() => {
@@ -202,12 +218,6 @@ const ProductlistTable = () => {
                 >
                   <i className="las la-pen fs-18 align-middle me-2 text-muted"></i>
                   Edit
-                </Dropdown.Item>
-              </li>
-              <li>
-                <Dropdown.Item>
-                  <i className="las la-file-download fs-18 align-middle me-2 text-muted"></i>
-                  Download
                 </Dropdown.Item>
               </li>
               <li className="dropdown-divider"></li>
@@ -250,7 +260,7 @@ const ProductlistTable = () => {
               />
               <i className="las la-search search-icon"></i>
             </div>
-            <Dropdown>
+            {/* <Dropdown>
               <Dropdown.Toggle
                 as="button"
                 className="btn btn-soft-info btn-icon fs-14 arrow-none"
@@ -263,7 +273,7 @@ const ProductlistTable = () => {
                 <Dropdown.Item>Last Month</Dropdown.Item>
                 <Dropdown.Item>Last Year</Dropdown.Item>
               </Dropdown.Menu>
-            </Dropdown>
+            </Dropdown> */}
           </div>
         </div>
       </Row>
@@ -272,7 +282,11 @@ const ProductlistTable = () => {
         <Col xl={12}>
           <Card>
             <Card.Body>
-              {products && products.length > 0 ? (
+              {isLoading ? (
+                <Spinner animation="grow" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+              ) : products && products.length > 0 ? (
                 <TableContainer
                   isPagination={true}
                   columns={columns}
