@@ -367,7 +367,7 @@ const AddProduct = () => {
                               aria-hidden="true"
                             ></span>
                           ) : (
-                            "Save"
+                            "Add"
                           )}
                         </button>
                         <button
