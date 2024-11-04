@@ -44,13 +44,15 @@ const AddProduct = () => {
       productImage: "",
       category: "",
       price: "",
+      quantity:"",
       productDesc: "",
     },
     validationSchema: Yup.object({
       productName: Yup.string().required("Please enter your product name"),
       productImage: Yup.mixed().required("Please select an image"),
       category: Yup.string().required("Please enter your category"),
-      price: Yup.number().required("Please enter your billed amount"),
+      price: Yup.number().required("Please enter price"),
+      quantity: Yup.number().required("Please enter the quantity"),
       productDesc: Yup.string().required("Please enter product description"),
     }),
     onSubmit: async (values: {
@@ -58,6 +60,7 @@ const AddProduct = () => {
       productImage: File;
       category: any;
       price: any;
+      quantity: any;
       productDesc: any;
     }) => {
       const newProduct = {
@@ -65,6 +68,7 @@ const AddProduct = () => {
         images: values.productImage, // Handle image upload to Firestore
         category: values.category,
         price: values.price,
+        quantity: values.quantity,
         description: values.productDesc,
       };
       console.log("newProduct :>> ", newProduct);
@@ -237,6 +241,31 @@ const AddProduct = () => {
                             />
                             <Form.Control.Feedback type="invalid">
                               {formik.errors.price}
+                            </Form.Control.Feedback>
+                          </div>
+                        </Col>
+                        
+                      </Row>
+                      <Row>
+                      <Col lg={6}>
+                          <div className="mb-3">
+                            <Form.Label htmlFor="quantity">
+                              Product Quantity
+                            </Form.Label>
+                            <Form.Control
+                              id="quantity"
+                              name="quantity"
+                              placeholder="Enter Quantity"
+                              type="text"
+                              onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
+                              value={formik.values.quantity}
+                              isInvalid={
+                                formik.touched.quantity && !!formik.errors.quantity
+                              }
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {formik.errors.quantity}
                             </Form.Control.Feedback>
                           </div>
                         </Col>
