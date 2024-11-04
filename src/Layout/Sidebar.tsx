@@ -88,13 +88,6 @@ const Sidebar = ({ layoutType }: any) => {
                 <div id="two-column-menu"></div>
                 <ul className="navbar-nav" id="navbar-nav">
                   <VerticalLayout layoutType={layoutType} />
-                  <div className="help-box text-center">
-                      <img src={createInvoice} className="img-fluid" alt="" aria-expanded="false" />
-                      <p className="mb-3 mt-2 text-muted">Upgrade To Pro For More Features</p>
-                      <div className="mt-3">
-                          <Link to="/invoice-add" className="btn btn-primary"> Create Invoice</Link>
-                      </div>
-                  </div>
                 </ul>
               </Container>
             </SimpleBar>
