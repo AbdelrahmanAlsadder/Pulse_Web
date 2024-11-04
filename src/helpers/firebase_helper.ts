@@ -185,6 +185,32 @@ class FirebaseAuthBackend {
     }
   }
 
+  //return fetched categories
+  async fetchCategories(keyword = "") {
+    try {
+     
+        let query = this.firestore
+          .collection("categories");
+          
+
+        // If a keyword is provided, filter products by name or description
+      
+
+        const querySnapshot = await query.get();
+
+        return querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+      
+      // Return an empty array if uuid is undefined
+      return [];
+    } catch (error) {
+      console.error("Error fetching Categories:", error);
+      throw error;
+    }
+  }
+
   /**
    * Adds a new product to the products collection
    * @param {Object} productData - The product data to be added

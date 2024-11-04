@@ -188,6 +188,13 @@ const ProductlistTable = () => {
         isSortable: true,
         Cell: (cell: any) => <>${cell.row.original.price}</>,
       },
+      {
+        Header: "Exp Date",
+        accessor: "expiryDate",
+        Filter: false,
+        isSortable: true,
+        Cell: (cell: any) => <>{cell.row.original.expiryDate}</>,
+      },
 
       {
         Header: "Action",
