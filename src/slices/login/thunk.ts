@@ -1,59 +1,41 @@
 //Include Both Helper File with needed methods
 
+import { getFirebaseBackend } from "../../helpers/firebase_helper";
+import {
+  loginSuccess,
+  logoutUserSuccess,
+  apiError,
+  reset_login_flag,
+} from "./reducer";
+import { postFakeLogin, postJwtLogin } from "../../helpers/fakebackend_helper";
 
-import { getFirebaseBackend } from '../../helpers/firebase_helper';
-import { loginSuccess, logoutUserSuccess, apiError, reset_login_flag } from './reducer';
-import { postFakeLogin, postJwtLogin } from '../../helpers/fakebackend_helper';
-
-
-export const loginUser = (user: any, history: any) => async (dispatch: any) => {   
+export const loginUser = (user: any, history: any) => async (dispatch: any) => {
   try {
-    let response:any;
+    let response: any;
 
-    if (process.env.REACT_APP_DEFAULTAUTH === "firebase") {
-      let fireBaseBackend = getFirebaseBackend();
-      response = fireBaseBackend.loginUser(
-        user.email,
-        user.password
-      );
-       
-      
-    } else if (process.env.REACT_APP_DEFAULTAUTH === "jwt") {
-      response = postJwtLogin({
-        email: user.email,
-        password: user.password
-      });
-    } else if (process.env.REACT_APP_DEFAULTAUTH) {        
-        response = postFakeLogin({
-            email: user.email,
-            password: user.password,
-        });   
-
-    }
+    let fireBaseBackend = getFirebaseBackend();
+    response = await fireBaseBackend.loginUser(user.email, user.password);
 
     var data = await response;
-    
+
     if (data) {
-      if (process.env.REACT_APP_DEFAULTAUTH === "fake") {
-        var finallogin: any = JSON.stringify(data);
-        sessionStorage.setItem("authUser", finallogin);
-        finallogin = JSON.parse(finallogin);
-        data = finallogin.data;
-        if ((finallogin.status === "success") || (finallogin.username && finallogin.password)) {
-          dispatch(loginSuccess(data));
-          history("/dashboard");
+      console.log("data :>> ", data.uid);
+      var user_details = await fireBaseBackend.getUserDetailsByUid(data.uid);
+      if (user_details) {
+        if (user_details.status == -1) {
+          // disabled
+          console.log("disabled");
+        } else if (user_details.status == 0) {
+          // waiting for approval
+          console.log("waiting for approval");
         } else {
-          history("/login");
-          dispatch(apiError(finallogin));
+          dispatch(loginSuccess(user_details));
+          history("/dashboard");
         }
-      } else {
-        dispatch(loginSuccess(data));
-        history("/dashboard");
       }
     }
   } catch (error) {
     dispatch(apiError(error));
-    
   }
 };
 
@@ -67,36 +49,34 @@ export const logoutUser = () => async (dispatch: any) => {
     } else {
       dispatch(logoutUserSuccess(true));
     }
-
   } catch (error) {
     dispatch(apiError(error));
   }
 };
 
-export const socialLogin = (type: any, history: any) => async (dispatch: any) => {
-  try {
-    let response;
+export const socialLogin =
+  (type: any, history: any) => async (dispatch: any) => {
+    try {
+      let response;
 
-    if (process.env.REACT_APP_DEFAULTAUTH === "firebase") {
-      const fireBaseBackend = getFirebaseBackend();
-      response = fireBaseBackend.socialLoginUser(type);
-      
+      if (process.env.REACT_APP_DEFAULTAUTH === "firebase") {
+        const fireBaseBackend = getFirebaseBackend();
+        response = fireBaseBackend.socialLoginUser(type);
+      }
+      //  else {
+      //   response = postSocialLogin(data);
+      // }
+
+      const socialdata = await response;
+      if (socialdata) {
+        localStorage.setItem("authUser", JSON.stringify(socialdata));
+        dispatch(loginSuccess(socialdata));
+        history("/dashboard");
+      }
+    } catch (error) {
+      dispatch(apiError(error));
     }
-    //  else {
-    //   response = postSocialLogin(data);
-    // }
-
-    const socialdata = await response;
-    if (socialdata) {
-      localStorage.setItem("authUser", JSON.stringify(socialdata));
-      dispatch(loginSuccess(socialdata));
-      history('/dashboard');
-    }
-
-  } catch (error) {
-    dispatch(apiError(error));
-  }
-};
+  };
 
 export const resetLoginFlag = () => async (dispatch: any) => {
   try {

@@ -61,11 +61,11 @@ const Register = () => {
     enableReinitialize: true,
 
     initialValues: {
-      email: "",
-      username: "",
-      password: "",
-      phone: "",
-      CommercialRegister: null,
+      email: String,
+      username: String,
+      password: String,
+      phone: String,
+      CommercialRegister: File,
     },
     validationSchema: Yup.object({
       email: Yup.string().required("Please Enter Email"),
@@ -98,7 +98,7 @@ const Register = () => {
           await fireBaseBackend.addNewUserToFirestore(validation.values);
 
         successnotify();
-        setTimeout(() => navigate("/login"), 3000);
+        navigate("/login");
       } catch (error) {
         errornotify();
       } finally {

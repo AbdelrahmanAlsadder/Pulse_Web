@@ -39,18 +39,18 @@ const ProductlistTable = () => {
   //   setProducts(productList);
   // }, [productList]);
 
+  const loadProducts = async (item?: undefined) => {
+    try {
+      setIsLoading(true);
+      const productsList = await firebaseBackend.fetchProducts(item);
+      setProducts(productsList);
+    } catch (error) {
+      console.error("Error loading products:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setIsLoading(true);
-        const productsList = await firebaseBackend.fetchProducts();
-        setProducts(productsList);
-      } catch (error) {
-        console.error("Error loading products:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     loadProducts();
   }, [firebaseBackend]);
 
@@ -66,8 +66,9 @@ const ProductlistTable = () => {
     [delet]
   );
 
-  const handleDeleteId = () => {
-    dispatch(onDeleteProductList(deletid.id));
+  const handleDeleteId = async () => {
+    await firebaseBackend.deleteProductById(deletid.id);
+    loadProducts();
     setDelet(false);
   };
 
@@ -75,15 +76,7 @@ const ProductlistTable = () => {
   const handleSearch = async (ele: any) => {
     const item = ele.value.trim(); // Trim whitespace
 
-    try {
-      setIsLoading(true);
-      const productsList = await firebaseBackend.fetchProducts(item);
-      setProducts(productsList);
-    } catch (error) {
-      console.error("Error loading products:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    loadProducts(item);
   };
 
   // edit data
@@ -91,18 +84,13 @@ const ProductlistTable = () => {
   const [editProduct, setEditProduct] = useState<boolean>(false);
   const [edit, setEdit] = useState<any>();
 
-  const handleCloseEdit = () => setEditProduct(false);
+  const handleCloseEdit = (reset: boolean) => {
+    if (reset) loadProducts();
+    setEditProduct(false);
+  };
   const handleEditProduct = (item: any) => {
     setEditProduct(true);
-    setEdit({
-      id: item.id,
-      productName: item.productName,
-      productImage: item.productImage,
-      inStock: item.inStock,
-      rate: item.rate,
-      category: item.category,
-      price: item.price,
-    });
+    setEdit(item);
   };
 
   interface columnsType {

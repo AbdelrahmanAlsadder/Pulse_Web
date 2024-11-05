@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, Col, Container, Form, Row } from "react-bootstrap";
 import BreadCrumb from "../../../Common/BreadCrumb";
 import Dropzone from "react-dropzone";
@@ -10,7 +10,6 @@ import { toast } from "react-toastify";
 import firebase from "firebase/compat/app";
 
 import { collection, getDocs } from "firebase/firestore";
-
 
 const AddProduct = () => {
   document.title = "Add Product";
@@ -27,9 +26,8 @@ const AddProduct = () => {
       try {
         const categoryCollection = await firebaseBackend.fetchCategories();
         setCategories(categoryCollection);
-  
+
         console.log("Fetched categories:", categoryCollection);
-     
       } catch (error) {
         console.error("Error fetching categories:", error);
         toast.error("Failed to load categories.");
@@ -84,8 +82,8 @@ const AddProduct = () => {
       productImage: "",
       category: "",
       price: "",
-      quantity:"",
-      expiryDate:"",
+      quantity: "",
+      expiryDate: "",
       productDesc: "",
     },
     validationSchema: Yup.object({
@@ -94,7 +92,7 @@ const AddProduct = () => {
       category: Yup.string().required("Please enter your category"),
       price: Yup.number().required("Please enter price"),
       quantity: Yup.number().required("Please enter the quantity"),
-      expiryDate:Yup.date().required("Please enter the expiry date"),
+      expiryDate: Yup.date().required("Please enter the expiry date"),
       productDesc: Yup.string().required("Please enter product description"),
     }),
     onSubmit: async (values: {
@@ -103,7 +101,7 @@ const AddProduct = () => {
       category: any;
       price: any;
       quantity: any;
-      expiryDate:any;
+      expiryDate: any;
       productDesc: any;
     }) => {
       const newProduct = {
@@ -112,7 +110,7 @@ const AddProduct = () => {
         category: values.category,
         price: values.price,
         quantity: values.quantity,
-        expiryDate:values.expiryDate,
+        expiryDate: values.expiryDate,
         description: values.productDesc,
       };
       console.log("newProduct :>> ", newProduct);
@@ -126,6 +124,7 @@ const AddProduct = () => {
       } finally {
         setIsLoading(false);
         formik.resetForm();
+        handleRemoveImage();
       }
     },
   });
@@ -237,28 +236,37 @@ const AddProduct = () => {
                       <Row className="mt-3">
                         <Col md={6}>
                           <div className="mb-3">
-                          <Form.Label htmlFor="choices-single-default" className="form-label">
-                        Category
-                      </Form.Label>
-                      <Form.Select
-                        className="form-select"
-                        name="category"
-                        id="choices-single-category"
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        value={formik.values.category}
-                        isInvalid={formik.touched.category && !!formik.errors.category}
-                      >
-                        <option value="">Select</option>
-                        {categories.map((category) => (
-                          <option key={category.id} value={category.title}>
-                            {category.title}
-                          </option>
-                        ))}
-                      </Form.Select>
-                      <Form.Control.Feedback type="invalid">
-                        {formik.errors.category}
-                      </Form.Control.Feedback>
+                            <Form.Label
+                              htmlFor="choices-single-default"
+                              className="form-label"
+                            >
+                              Category
+                            </Form.Label>
+                            <Form.Select
+                              className="form-select"
+                              name="category"
+                              id="choices-single-category"
+                              onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
+                              value={formik.values.category}
+                              isInvalid={
+                                formik.touched.category &&
+                                !!formik.errors.category
+                              }
+                            >
+                              <option value="">Select</option>
+                              {categories.map((category) => (
+                                <option
+                                  key={category.id}
+                                  value={category.title}
+                                >
+                                  {category.title}
+                                </option>
+                              ))}
+                            </Form.Select>
+                            <Form.Control.Feedback type="invalid">
+                              {formik.errors.category}
+                            </Form.Control.Feedback>
                           </div>
                         </Col>
                         <Col lg={6}>
@@ -283,10 +291,9 @@ const AddProduct = () => {
                             </Form.Control.Feedback>
                           </div>
                         </Col>
-                        
                       </Row>
                       <Row>
-                      <Col lg={6}>
+                        <Col lg={6}>
                           <div className="mb-3">
                             <Form.Label htmlFor="quantity">
                               Product Quantity
@@ -300,7 +307,8 @@ const AddProduct = () => {
                               onBlur={formik.handleBlur}
                               value={formik.values.quantity}
                               isInvalid={
-                                formik.touched.quantity && !!formik.errors.quantity
+                                formik.touched.quantity &&
+                                !!formik.errors.quantity
                               }
                             />
                             <Form.Control.Feedback type="invalid">
@@ -309,21 +317,26 @@ const AddProduct = () => {
                           </div>
                         </Col>
                         <Col>
-                        <div className="mb-3">
-                          <Form.Label htmlFor="expiryDate">Expiry Date</Form.Label>
-                          <Form.Control
-                            id="expiryDate"
-                            name="expiryDate"
-                            type="date"
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            value={formik.values.expiryDate}
-                            isInvalid={formik.touched.expiryDate && !!formik.errors.expiryDate}
-                          />
-                          <Form.Control.Feedback type="invalid">
-                            {formik.errors.expiryDate}
-                          </Form.Control.Feedback>
-                        </div>
+                          <div className="mb-3">
+                            <Form.Label htmlFor="expiryDate">
+                              Expiry Date
+                            </Form.Label>
+                            <Form.Control
+                              id="expiryDate"
+                              name="expiryDate"
+                              type="date"
+                              onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
+                              value={formik.values.expiryDate}
+                              isInvalid={
+                                formik.touched.expiryDate &&
+                                !!formik.errors.expiryDate
+                              }
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {formik.errors.expiryDate}
+                            </Form.Control.Feedback>
+                          </div>
                         </Col>
                       </Row>
 

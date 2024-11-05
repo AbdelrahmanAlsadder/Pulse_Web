@@ -3,14 +3,17 @@ import firebase from "firebase/compat/app";
 // Add the Firebase products that you want to use
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
+import "firebase/compat/storage";
 
 class FirebaseAuthBackend {
   firestore: firebase.firestore.Firestore;
+  storage: firebase.storage.Storage;
   uuid: String | undefined;
   constructor(firebaseConfig: any) {
     if (firebaseConfig) {
       // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
+      this.storage = firebase.storage();
       firebase.auth().onAuthStateChanged((user: any) => {
         if (user) {
           console.log("user :>> ", user);
@@ -21,8 +24,29 @@ class FirebaseAuthBackend {
         }
       });
     }
+    this.storage = firebase.storage();
     this.firestore = firebase.firestore();
   }
+
+  /**
+   * Uploads a file to Firebase Storage and returns the download URL.
+   * Allows specifying a custom path for saving the file, defaulting to 'uploads/'.
+   */
+  uploadFileToStorage = async (
+    file: File,
+    path: string = "uploads"
+  ): Promise<string> => {
+    try {
+      const storageRef = this.storage.ref();
+      const fileRef = storageRef.child(`${file.name}`);
+      await fileRef.put(file);
+      const downloadURL = await fileRef.getDownloadURL();
+      return downloadURL;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      throw error;
+    }
+  };
 
   /**
    * Registers the user with given details
@@ -137,17 +161,44 @@ class FirebaseAuthBackend {
     }
   };
 
-  addNewUserToFirestore = (user: any) => {
+  /*
+  Returns the fetched user details by UID
+*/
+  getUserDetailsByUid = async (uid: string) => {
+    try {
+      const collection = firebase.firestore().collection("users");
+      const userDoc = await collection.doc(uid).get();
+
+      if (userDoc.exists) {
+        return userDoc.data(); // returns the user's data if found
+      } else {
+        console.log("No user found with the given UID.");
+        return null; // return null if no user found
+      }
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      return null; // return null in case of error
+    }
+  };
+
+  /*
+    add New User To Firestore
+  */
+  addNewUserToFirestore = async (user: any) => {
     const collection = firebase.firestore().collection("users");
     // const { profile } = user.additionalUserInfo;
     let commercial_register;
     if (user.CommercialRegister) {
-      // commercial_register= await firebase.storage();
+      // try {
+      //   commercial_register = await this.uploadFileToStorage(
+      //     user.CommercialRegister
+      //   );
+      // } catch (error) {
+      //   console.error("Failed to upload commercial register:", error);
+      // }
     }
 
     const details = {
-      // firstName: profile.given_name ? profile.given_name : profile.first_name,
-      // lastName: profile.family_name ? profile.family_name : profile.last_name,
       username: user.username,
       email: user.email,
       phone: user.phone,
@@ -160,10 +211,10 @@ class FirebaseAuthBackend {
     collection.doc(firebase.auth().currentUser?.uid).set(details);
     return { user, details };
   };
-  /**
-   * Returns the fetch Products
-   */
-  // Firestore functions
+
+  /*
+    Returns the fetch Products
+  */
   async fetchProducts(keyword = "") {
     try {
       if (this.uuid != undefined) {
@@ -189,6 +240,37 @@ class FirebaseAuthBackend {
       return [];
     } catch (error) {
       console.error("Error fetching products:", error);
+      throw error;
+    }
+  }
+
+  // Function to update a product by ID
+  async updateProductById(id: string, updatedData: any) {
+    try {
+      const productRef = this.firestore.collection("products").doc(id);
+      await productRef.update({
+        title: updatedData.title || "",
+        images: updatedData.images || "",
+        category: updatedData.category || "",
+        price: updatedData.price || "",
+        quantity: updatedData.quantity || "",
+        expiryDate: updatedData.expiryDate || "",
+      });
+      console.log("Product updated successfully");
+    } catch (error) {
+      console.error("Error updating product:", error);
+      throw error;
+    }
+  }
+
+  // Function to delete a product by ID
+  async deleteProductById(id: string) {
+    try {
+      const productRef = this.firestore.collection("products").doc(id);
+      await productRef.delete();
+      console.log("Product deleted successfully");
+    } catch (error) {
+      console.error("Error deleting product:", error);
       throw error;
     }
   }
