@@ -9,10 +9,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { loginUser, resetLoginFlag, socialLogin } from '../../slices/thunk';
 import * as Yup from "yup";
-
+import { toast, Slide, ToastContainer } from "react-toastify";
 const Login = (props:any) => {
   document.title = "Login | Invoika Admin & Dashboard Template";
 
+  const errornotify1 = () =>
+    toast("Incorrect Email or Password.", {
+      position: "top-center",
+      hideProgressBar: true,
+      closeOnClick: false,
+      className: "bg-danger text-white",
+      transition: Slide,
+      autoClose: 3000,
+    });
   const dispatch: any = useDispatch();
     const selectAccountAndLogin = createSelector(
         (state: any) => state.Account,
@@ -59,6 +68,11 @@ const Login = (props:any) => {
         }),
         onSubmit: (values:any) => { 
             dispatch(loginUser(values, props.router.navigate));
+            if (error) { // Check if there's an error after login
+                errornotify1(); // Show error notification
+            }
+            
+           
         }
     });
 
@@ -74,9 +88,11 @@ const Login = (props:any) => {
     useEffect(() => {
         if (errorMsg) {
             setTimeout(() => {
+                errornotify1();
                 dispatch(resetLoginFlag());
             }, 3000);
         }
+
     }, [dispatch, errorMsg]);
     
   return (

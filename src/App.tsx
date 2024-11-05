@@ -4,12 +4,13 @@ import "./App.css";
 //import Scss
 import "./assets/scss/themes.scss";
 import fakeBackend from "./helpers/AuthType/fakeBackend";
-
+import { getFirestore } from "firebase/firestore";
 // routes
 import Route from "./Routes/Index";
-
+import { initializeApp } from "firebase/app";
 // Import Firebase Configuration file
 import { initFirebaseBackend } from "./helpers/firebase_helper";
+import { ToastContainer } from 'react-toastify';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_APIKEY,
@@ -24,6 +25,11 @@ const firebaseConfig = {
 
 // init firebase backend
 initFirebaseBackend(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Export the database to use it in other files
+export { db };
 
 fakeBackend();
 
@@ -31,7 +37,9 @@ function App() {
   return (
     <React.Fragment>
       <Route />
+      <ToastContainer />
     </React.Fragment>
+    
   );
 }
 

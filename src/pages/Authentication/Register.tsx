@@ -60,6 +60,8 @@ const Register = () => {
       email: "",
       username: "",
       password: "",
+      phone: '',
+      CommercialRegister: null
     },
     validationSchema: Yup.object({
       email: Yup.string().required("Please Enter Email"),
@@ -70,6 +72,10 @@ const Register = () => {
           /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/,
           "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
         ),
+      phone: Yup.string().required("Please Enter Phone Number")
+                .matches(/^[0-9]+$/, "Phone number must only contain numbers")
+                .min(10, "Phone number must be at least 10 digits"),
+      CommercialRegister: Yup.mixed().required("Please upload the Commercial Register")
     }),
     onSubmit: (values: any) => {
       dispatch(registerUser(values));
@@ -135,9 +141,6 @@ const Register = () => {
                           <div className="p-lg-5 p-4">
                             <div className="text-center">
                               <h5 className="mb-0">Create New Account</h5>
-                              <p className="text-muted mt-2">
-                                Get your free Invoika account now
-                              </p>
                             </div>
 
                             <div className="mt-4">
@@ -237,6 +240,7 @@ const Register = () => {
                                           : false
                                       }
                                     />
+                                    
                                     <Button
                                       variant="link"
                                       className="position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
@@ -256,6 +260,38 @@ const Register = () => {
                                     ) : null}
                                   </InputGroup>
                                 </Form.Group>
+                                <Form.Group className="mb-3" controlId="phone">
+                                                                    <Form.Label>Phone Number <span className="text-danger">*</span></Form.Label>
+                                                                    <Form.Control
+                                                                        type="text"
+                                                                        name="phone"
+                                                                        className="form-control bg-light border-light"
+                                                                        placeholder="Enter phone number"
+                                                                        onChange={validation.handleChange}
+                                                                        onBlur={validation.handleBlur}
+                                                                        value={validation.values.phone || ""}
+                                                                        isInvalid={validation.touched.phone && !!validation.errors.phone}
+                                                                    />
+                                                                    <Form.Control.Feedback type="invalid">{validation.errors.phone}</Form.Control.Feedback>
+                                                                </Form.Group>
+                                {/* Legal Document Upload */}
+                                <Form.Group className="mb-3">
+                                                                    <Form.Label>Commercial Register <span className="text-danger">*</span></Form.Label>
+                                                                    <Form.Control
+                                                                        type="file"
+                                                                        name="CommercialRegister"
+                                                                        accept="application/pdf" // Restricts to PDF files only
+                                                                        onChange={(e) => {
+                                                                            const file = (e.currentTarget as HTMLInputElement).files?.[0];
+                                                                            validation.setFieldValue("CommercialRegister", file);
+                                                                        }}
+                                                                        onBlur={validation.handleBlur}
+                                                                        isInvalid={validation.touched.CommercialRegister && !!validation.errors.CommercialRegister}
+                                                                    />
+                                                                    {validation.touched.CommercialRegister && validation.errors.CommercialRegister ? (
+                                                                        <Form.Control.Feedback type="invalid">{validation.errors.CommercialRegister}</Form.Control.Feedback>
+                                                                    ) : null}
+                                                                </Form.Group>
 
                                 <div className="fs-16 pb-2">
                                   <p className="mb-0 fs-14 text-muted fst-italic">
