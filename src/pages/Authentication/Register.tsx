@@ -258,7 +258,7 @@ const Register = () => {
 
                                 <div className="fs-16 pb-2">
                                   <p className="mb-0 fs-14 text-muted fst-italic">
-                                    By registering you agree to the Invoika{" "}
+                                    By registering you agree to the PULSE{" "}
                                     <Link
                                       to="#"
                                       className="text-primary text-decoration-underline fst-normal fw-medium"
@@ -318,7 +318,7 @@ const Register = () => {
 
                                 <div className="mt-4 text-center">
                                   <p className="mb-0">
-                                    Don't have an account ?{" "}
+                                    Already Have an Account ?{" "}
                                     <Link
                                       to="/login"
                                       className="fw-medium text-primary text-decoration-underline"
@@ -337,17 +337,7 @@ const Register = () => {
                       </Row>
                     </Card>
 
-                    <div className="mt-5 text-center">
-                      <p className="mb-0 text-muted">
-                        ©
-                        <script>
-                          document.write(new Date().getFullYear())
-                        </script>{" "}
-                        Invoika. Crafted with{" "}
-                        <i className="mdi mdi-heart text-danger"></i> by
-                        Themesbrand
-                      </p>
-                    </div>
+                  
                   </div>
                 </div>
               </div>

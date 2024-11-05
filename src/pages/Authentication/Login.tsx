@@ -50,8 +50,8 @@ const Login = (props:any) => {
         enableReinitialize: true,
 
         initialValues: {
-            email: userLogin.email ||"admin@themesbrand.com" || '',
-            password: userLogin.password ||"123456" || '',
+            email: userLogin.email ||"" || '',
+            password: userLogin.password ||"" || '',
         },
         validationSchema: Yup.object({
             email: Yup.string().required("Please Enter Your Email"),
@@ -211,11 +211,7 @@ const Login = (props:any) => {
                                             </Row>
                                         </Card>
 
-                                        <div className="mt-5 text-center">
-                                            <p className="mb-0 text-muted">
-                                                &copy; {new Date().getFullYear()} Invoika. Crafted with <i className="mdi mdi-heart text-danger"></i> by Themesbrand
-                                            </p>
-                                        </div>
+                                       
                                     </div>
                                 </div>
                             </div>
