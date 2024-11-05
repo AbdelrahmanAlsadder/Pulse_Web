@@ -25,12 +25,16 @@ import {
 import { toast, Slide, ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
+import { getFirebaseBackend } from "../../helpers/firebase_helper";
 
 const Register = () => {
   document.title = "Register | Invoika Admin & Dashboard Template";
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  // initialize relavant method of both Auth
+  const fireBaseBackend = getFirebaseBackend();
 
   const [passwordShow, setPasswordShow] = useState<any>(false);
   const [timer, setTimer] = useState<number>(0);
@@ -60,8 +64,8 @@ const Register = () => {
       email: "",
       username: "",
       password: "",
-      phone: '',
-      CommercialRegister: null
+      phone: "",
+      CommercialRegister: null,
     },
     validationSchema: Yup.object({
       email: Yup.string().required("Please Enter Email"),
@@ -72,14 +76,34 @@ const Register = () => {
           /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/,
           "Must Contain 8 Characters, One Uppercase, One Lowercase, One Number and One Special Case Character"
         ),
-      phone: Yup.string().required("Please Enter Phone Number")
-                .matches(/^[0-9]+$/, "Phone number must only contain numbers")
-                .min(10, "Phone number must be at least 10 digits"),
-      CommercialRegister: Yup.mixed().required("Please upload the Commercial Register")
+      phone: Yup.string()
+        .required("Please Enter Phone Number")
+        .matches(/^[0-9]+$/, "Phone number must only contain numbers")
+        .min(10, "Phone number must be at least 10 digits"),
+      CommercialRegister: Yup.mixed().required(
+        "Please upload the Commercial Register"
+      ),
     }),
-    onSubmit: (values: any) => {
-      dispatch(registerUser(values));
+    onSubmit: async (values: any) => {
       setLoader(true);
+      try {
+        let response;
+
+        response = await fireBaseBackend.registerUser(
+          validation.values.email,
+          validation.values.password
+        );
+
+        if (response)
+          await fireBaseBackend.addNewUserToFirestore(validation.values);
+
+        successnotify();
+        setTimeout(() => navigate("/login"), 3000);
+      } catch (error) {
+        errornotify();
+      } finally {
+        setLoader(false);
+      }
     },
   });
   const selectAccount = createSelector(
@@ -92,32 +116,31 @@ const Register = () => {
 
   const { error, success } = useSelector(selectAccount);
 
-  useEffect(() => {
-    dispatch(apiError());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(apiError());
+  // }, [dispatch]);
 
-  useEffect(() => {
-    if (success) {
-      successnotify();
-      setTimeout(() => navigate("/login"), 3000);
-      setTimer(3);
-    }else 
-    if (error) {
-      console.log(error)
-      errornotify();
-    }
-    setTimeout(() => {
-      dispatch(resetRegisterFlag());
-    }, 3000);
+  // useEffect(() => {
+  //   if (success) {
+  //     successnotify();
+  //     setTimeout(() => navigate("/login"), 3000);
+  //     setTimer(3);
+  //   } else if (error) {
+  //     console.log(error);
+  //     errornotify();
+  //   }
+  //   setTimeout(() => {
+  //     dispatch(resetRegisterFlag());
+  //   }, 3000);
 
-    setLoader(false);
-  }, [dispatch, success, error, navigate]);
+  //   setLoader(false);
+  // }, [dispatch, success, error, navigate]);
 
-  useEffect(() => {
-    if (timer) {
-      setInterval(() => setTimer(timer - 1), 1000);
-    }
-  }, [timer]);
+  // useEffect(() => {
+  //   if (timer) {
+  //     setInterval(() => setTimer(timer - 1), 1000);
+  //   }
+  // }, [timer]);
   return (
     <React.Fragment>
       <div className="account-pages">
@@ -240,7 +263,7 @@ const Register = () => {
                                           : false
                                       }
                                     />
-                                    
+
                                     <Button
                                       variant="link"
                                       className="position-absolute end-0 top-0 text-decoration-none text-muted password-addon"
@@ -261,37 +284,59 @@ const Register = () => {
                                   </InputGroup>
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="phone">
-                                                                    <Form.Label>Phone Number <span className="text-danger">*</span></Form.Label>
-                                                                    <Form.Control
-                                                                        type="text"
-                                                                        name="phone"
-                                                                        className="form-control bg-light border-light"
-                                                                        placeholder="Enter phone number"
-                                                                        onChange={validation.handleChange}
-                                                                        onBlur={validation.handleBlur}
-                                                                        value={validation.values.phone || ""}
-                                                                        isInvalid={validation.touched.phone && !!validation.errors.phone}
-                                                                    />
-                                                                    <Form.Control.Feedback type="invalid">{validation.errors.phone}</Form.Control.Feedback>
-                                                                </Form.Group>
+                                  <Form.Label>
+                                    Phone Number{" "}
+                                    <span className="text-danger">*</span>
+                                  </Form.Label>
+                                  <Form.Control
+                                    type="text"
+                                    name="phone"
+                                    className="form-control bg-light border-light"
+                                    placeholder="Enter phone number"
+                                    onChange={validation.handleChange}
+                                    onBlur={validation.handleBlur}
+                                    value={validation.values.phone || ""}
+                                    isInvalid={
+                                      validation.touched.phone &&
+                                      !!validation.errors.phone
+                                    }
+                                  />
+                                  <Form.Control.Feedback type="invalid">
+                                    {validation.errors.phone}
+                                  </Form.Control.Feedback>
+                                </Form.Group>
                                 {/* Legal Document Upload */}
                                 <Form.Group className="mb-3">
-                                                                    <Form.Label>Commercial Register <span className="text-danger">*</span></Form.Label>
-                                                                    <Form.Control
-                                                                        type="file"
-                                                                        name="CommercialRegister"
-                                                                        accept="application/pdf" // Restricts to PDF files only
-                                                                        onChange={(e) => {
-                                                                            const file = (e.currentTarget as HTMLInputElement).files?.[0];
-                                                                            validation.setFieldValue("CommercialRegister", file);
-                                                                        }}
-                                                                        onBlur={validation.handleBlur}
-                                                                        isInvalid={validation.touched.CommercialRegister && !!validation.errors.CommercialRegister}
-                                                                    />
-                                                                    {validation.touched.CommercialRegister && validation.errors.CommercialRegister ? (
-                                                                        <Form.Control.Feedback type="invalid">{validation.errors.CommercialRegister}</Form.Control.Feedback>
-                                                                    ) : null}
-                                                                </Form.Group>
+                                  <Form.Label>
+                                    Commercial Register{" "}
+                                    <span className="text-danger">*</span>
+                                  </Form.Label>
+                                  <Form.Control
+                                    type="file"
+                                    name="CommercialRegister"
+                                    accept="application/pdf" // Restricts to PDF files only
+                                    onChange={(e) => {
+                                      const file = (
+                                        e.currentTarget as HTMLInputElement
+                                      ).files?.[0];
+                                      validation.setFieldValue(
+                                        "CommercialRegister",
+                                        file
+                                      );
+                                    }}
+                                    onBlur={validation.handleBlur}
+                                    isInvalid={
+                                      validation.touched.CommercialRegister &&
+                                      !!validation.errors.CommercialRegister
+                                    }
+                                  />
+                                  {validation.touched.CommercialRegister &&
+                                  validation.errors.CommercialRegister ? (
+                                    <Form.Control.Feedback type="invalid">
+                                      {validation.errors.CommercialRegister}
+                                    </Form.Control.Feedback>
+                                  ) : null}
+                                </Form.Group>
 
                                 <div className="fs-16 pb-2">
                                   <p className="mb-0 fs-14 text-muted fst-italic">
@@ -373,8 +418,6 @@ const Register = () => {
                         <AuthCarousel />
                       </Row>
                     </Card>
-
-                  
                   </div>
                 </div>
               </div>

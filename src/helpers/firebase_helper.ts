@@ -139,13 +139,21 @@ class FirebaseAuthBackend {
 
   addNewUserToFirestore = (user: any) => {
     const collection = firebase.firestore().collection("users");
-    const { profile } = user.additionalUserInfo;
+    // const { profile } = user.additionalUserInfo;
+    let commercial_register;
+    if (user.CommercialRegister) {
+      // commercial_register= await firebase.storage();
+    }
+
     const details = {
-      firstName: profile.given_name ? profile.given_name : profile.first_name,
-      lastName: profile.family_name ? profile.family_name : profile.last_name,
-      fullName: profile.name,
-      email: profile.email,
-      picture: profile.picture,
+      // firstName: profile.given_name ? profile.given_name : profile.first_name,
+      // lastName: profile.family_name ? profile.family_name : profile.last_name,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      picture: "",
+      commercial_register: commercial_register ?? "",
+      status: 0, // 1-admin 2-warehouse 3-pharmacy  (-1)- Disabled  0-pendding
       createdDtm: firebase.firestore.FieldValue.serverTimestamp(),
       lastLoginTime: firebase.firestore.FieldValue.serverTimestamp(),
     };
@@ -188,21 +196,17 @@ class FirebaseAuthBackend {
   //return fetched categories
   async fetchCategories(keyword = "") {
     try {
-     
-        let query = this.firestore
-          .collection("categories");
-          
+      let query = this.firestore.collection("categories");
 
-        // If a keyword is provided, filter products by name or description
-      
+      // If a keyword is provided, filter products by name or description
 
-        const querySnapshot = await query.get();
+      const querySnapshot = await query.get();
 
-        return querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-      
+      return querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
       // Return an empty array if uuid is undefined
       return [];
     } catch (error) {
