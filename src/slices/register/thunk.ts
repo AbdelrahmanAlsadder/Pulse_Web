@@ -22,7 +22,7 @@ export const registerUser = (user: any) => async (dispatch: any) => {
     let response;
 
     if (process.env.REACT_APP_DEFAULTAUTH === "firebase") {
-      response = fireBaseBackend.registerUser(user.email, user.password);
+      response = await fireBaseBackend.registerUser(user.email, user.password);
     } else if (process.env.REACT_APP_DEFAULTAUTH === "jwt") {
       response = postJwtRegister("/post-jwt-register", user);
     } else if (process.env.REACT_APP_DEFAULTAUTH) {

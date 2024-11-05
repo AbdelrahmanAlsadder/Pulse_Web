@@ -95,8 +95,9 @@ const Register = () => {
       successnotify();
       setTimeout(() => navigate("/login"), 3000);
       setTimer(3);
-    }
+    }else 
     if (error) {
+      console.log(error)
       errornotify();
     }
     setTimeout(() => {

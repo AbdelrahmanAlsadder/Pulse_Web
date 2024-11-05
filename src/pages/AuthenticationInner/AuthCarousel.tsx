@@ -12,36 +12,24 @@ const AuthCarousel = () => {
                                                                 <Carousel indicators={true} controls={false}>
                                                                         <Carousel.Item>
                                                                             <div className="testi-contain text-center">
-                                                                                <h5 className="fs-20 text-white mb-0">“I feel confident
-                                                                                    imposing
-                                                                                    on myself”
+                                                                                <h5 className="fs-20 text-white mb-0">Seamless Drug Distribution
                                                                                 </h5>
-                                                                                <p className="fs-15 text-white-50 mt-2 mb-0">Vestibulum auctor orci in risus iaculis consequat suscipit felis rutrum aliquet iaculis
-                                                                                    augue sed tempus In elementum ullamcorper lectus vitae pretium Nullam ultricies diam
-                                                                                    eu ultrices sagittis.</p>
+                                                                                <p className="fs-15 text-white-50 mt-2 mb-0">Empowering pharmacies with streamlined orders directly from trusted warehouses.</p>
                                                                             </div>
                                                                         </Carousel.Item>
                         
                                                                         <Carousel.Item>
                                                                             <div className="testi-contain text-center">
-                                                                                <h5 className="fs-20 text-white mb-0">“Our task must be to
-                                                                                    free widening circle”</h5>
-                                                                                <p className="fs-15 text-white-50 mt-2 mb-0">
-                                                                                    Curabitur eget nulla eget augue dignissim condintum Nunc imperdiet ligula porttitor commodo elementum
-                                                                                    Vivamus justo risus fringilla suscipit faucibus orci luctus
-                                                                                    ultrices posuere cubilia curae ultricies cursus.
+                                                                                <h5 className="fs-20 text-white mb-0">Streamlined Order Process</h5>
+                                                                                <p className="fs-15 text-white-50 mt-2 mb-0">Receive and fulfill orders swiftly to enhance customer satisfaction and reduce delays.
                                                                                 </p>
                                                                             </div>
                                                                         </Carousel.Item>
                         
                                                                         <Carousel.Item>
                                                                             <div className="testi-contain text-center">
-                                                                                <h5 className="fs-20 text-white mb-0">“I've learned that
-                                                                                    people forget what you”</h5>
-                                                                                <p className="fs-15 text-white-50 mt-2 mb-0">
-                                                                                    Pellentesque lacinia scelerisque arcu in aliquam augue molestie rutrum Fusce dignissim dolor id auctor accumsan
-                                                                                    vehicula dolor
-                                                                                    vivamus feugiat odio erat sed  quis Donec nec scelerisque magna
+                                                                                <h5 className="fs-20 text-white mb-0">Seamless Integration with Pharmacies</h5>
+                                                                                <p className="fs-15 text-white-50 mt-2 mb-0">Connect effortlessly with pharmacies to fulfill orders and manage deliveries. 
                                                                                 </p>
                                                                             </div>
                                                                         </Carousel.Item>
