@@ -480,6 +480,83 @@ class FirebaseAuthBackend {
     }
   };
 
+  /**
+   * Updates the status of the order by order ID.
+   * @param {string} orderId - The ID of the order to update.
+   * @param {string} newStatus - The new status to set for the order.
+   * @returns {Promise<any>} - A promise that resolves to the updated order data.
+   */
+  updateOrderStatus = async (
+    orderId: string,
+    newStatus: string
+  ): Promise<any> => {
+    try {
+      const orderRef = this.firestore.collection("orders").doc(orderId);
+
+      // Update the order status
+      await orderRef.update({
+        status: newStatus,
+        updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      // Fetch the updated order details
+      const updatedOrderDoc = await orderRef.get();
+      if (updatedOrderDoc.exists) {
+        return { id: updatedOrderDoc.id, ...updatedOrderDoc.data() };
+      } else {
+        throw new Error("Order not found");
+      }
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      throw error;
+    }
+  };
+
+  /**
+   * Updates the status of a specific item in the order.
+   * @param {string} orderId - The ID of the order containing the item.
+   * @param {string} productId - The ID of the product within the order.
+   * @param {string} newStatus - The new status to set for the item.
+   * @returns {Promise<any>} - A promise that resolves to the updated order data with the modified item status.
+   */
+  updateOrderItemStatus = async (
+    orderId: string,
+    productId: string,
+    newStatus: string
+  ): Promise<any> => {
+    try {
+      const orderRef = this.firestore.collection("orders").doc(orderId);
+      const orderDoc = await orderRef.get();
+
+      if (!orderDoc.exists) {
+        throw new Error("Order not found");
+      }
+
+      const orderData = orderDoc.data();
+
+      // Check if the order has the specific product
+      const updatedProducts = orderData?.products.map((item: any) => {
+        if (item.product === productId) {
+          return { ...item, status: newStatus };
+        }
+        return item;
+      });
+
+      // Update the order with the modified item status
+      await orderRef.update({
+        products: updatedProducts,
+        updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      // Fetch and return the updated order
+      const updatedOrderDoc = await orderRef.get();
+      return { id: updatedOrderDoc.id, ...updatedOrderDoc.data() };
+    } catch (error) {
+      console.error("Error updating order item status:", error);
+      throw error;
+    }
+  };
+
   setLoggeedInUser = (user: any) => {
     sessionStorage.setItem("authUser", JSON.stringify(user));
   };

@@ -153,28 +153,29 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
             case -1:
               return (
                 <span className="badge bg-danger-subtle text-danger p-2">
-                  {cell.row.original.status}
+                  Rejected
                 </span>
               );
             case 0:
               return (
                 <span className="badge bg-warning-subtle text-warning p-2">
-                  Pendding
+                  Order Placed
                 </span>
               );
             case 1:
               return (
                 <span className="badge bg-success-subtle text-success p-2">
-                  {cell.row.original.status}
+                  In Transit
                 </span>
               );
-
             case 2:
               return (
-                <span className="badge bg-success-subtle text-success p-2">
-                  {cell.row.original.status}
+                <span className="badge bg-info-subtle text-info p-2">
+                  Completed
                 </span>
               );
+            default:
+              return null; // Return null if the status is not recognized
           }
         },
       },
