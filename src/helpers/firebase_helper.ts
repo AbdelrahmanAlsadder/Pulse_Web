@@ -244,6 +244,28 @@ class FirebaseAuthBackend {
     }
   }
 
+  /**
+   * Fetches a product by its ID
+   * @param {string} id - The ID of the product document to fetch
+   * @returns {Promise<any>} - A promise that resolves to the product data if found
+   */
+  getProductById = async (id: string): Promise<any> => {
+    try {
+      const productRef = this.firestore.collection("products").doc(id);
+      const productDoc = await productRef.get();
+
+      if (productDoc.exists) {
+        return { id: productDoc.id, ...productDoc.data() }; // return product data if found
+      } else {
+        console.log("No product found with the given ID.");
+        return null; // return null if no product found
+      }
+    } catch (error) {
+      console.error("Error fetching product by ID:", error);
+      throw error;
+    }
+  };
+
   // Function to update a product by ID
   async updateProductById(id: string, updatedData: any) {
     try {
@@ -325,6 +347,137 @@ class FirebaseAuthBackend {
         reject("User is not authenticated.");
       }
     });
+  };
+
+  /**
+   * Retrieves all orders containing products from the specified store (by store ID).
+   * Replaces user ID with user details and calculates the total amount for each order.
+   * @param {string} uid - The store's user ID to filter orders by.
+   * @returns {Promise<any[]>} - A promise that resolves to an array of orders with user details and total amount.
+   */
+  getOrderByUID = async (): Promise<any[]> => {
+    try {
+      const ordersCollection = this.firestore.collection("orders");
+      const ordersSnapshot = await ordersCollection.get();
+      const orders = [];
+
+      for (const orderDoc of ordersSnapshot.docs) {
+        const orderData = orderDoc.data();
+        let totalAmount = 0;
+
+        // Filter products within the order based on store ID
+        const filteredProducts = await Promise.all(
+          orderData.products.map(async (productItem: any) => {
+            const productData = await this.getProductById(productItem.product);
+
+            if (productData && productData.store_id === this.uuid) {
+              const quantity = productItem.quantity;
+              const price = parseFloat(productData.price);
+
+              // Accumulate total amount for the order
+              totalAmount += quantity * price;
+
+              return {
+                ...productItem,
+                productDetails: productData,
+              };
+            }
+
+            return null;
+          })
+        );
+
+        const nonNullProducts = filteredProducts.filter(Boolean);
+
+        if (nonNullProducts.length > 0) {
+          // Fetch user details using getUserDetailsByUid method
+          const userDetails = await this.getUserDetailsByUid(orderData.user_id);
+
+          orders.push({
+            id: orderDoc.id,
+            ...orderData,
+            products: nonNullProducts,
+            user: userDetails,
+            totalAmount,
+          });
+        }
+      }
+
+      return orders;
+    } catch (error) {
+      console.error("Error fetching orders by store UID:", error);
+      throw error;
+    }
+  };
+
+  /**
+   * Retrieves a specific order by its ID, containing products from the specified store (by store ID).
+   * Replaces user ID with user details and calculates the total amount for the order.
+   * @param {string} orderId - The ID of the order to retrieve.
+   * @returns {Promise<any>} - A promise that resolves to the order with user details and total amount.
+   */
+  getOrderById = async (orderId: string): Promise<any> => {
+    try {
+      const orderDoc = await this.firestore
+        .collection("orders")
+        .doc(orderId)
+        .get();
+
+      if (!orderDoc.exists) {
+        throw new Error("Order not found");
+      }
+
+      const orderData = orderDoc.data(); // TypeScript will infer this as `any | undefined`
+
+      if (!orderData) {
+        throw new Error("Order data is undefined");
+      }
+
+      let totalAmount = 0;
+
+      // Filter products within the order based on store ID
+      const filteredProducts = await Promise.all(
+        orderData.products.map(async (productItem: any) => {
+          const productData = await this.getProductById(productItem.product);
+
+          if (productData && productData.store_id === this.uuid) {
+            const quantity = productItem.quantity;
+            const price = parseFloat(productData.price);
+
+            // Accumulate total amount for the order
+            totalAmount += quantity * price;
+
+            return {
+              ...productItem,
+              productDetails: productData,
+            };
+          }
+
+          return null;
+        })
+      );
+
+      const nonNullProducts = filteredProducts.filter(Boolean);
+
+      if (nonNullProducts.length > 0) {
+        // Fetch user details using getUserDetailsByUid method
+        const userDetails = await this.getUserDetailsByUid(orderData.user_id);
+
+        return {
+          orderId: orderDoc.id, // Include the order ID
+          ...orderData,
+          products: nonNullProducts,
+          user: userDetails,
+          totalAmount,
+        };
+      }
+
+      // If no valid products are found, return null or handle it as needed
+      return null;
+    } catch (error) {
+      console.error("Error fetching order by ID:", error);
+      throw error;
+    }
   };
 
   setLoggeedInUser = (user: any) => {

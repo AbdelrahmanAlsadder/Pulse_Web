@@ -13,6 +13,8 @@ import { handleSearchData } from "../../../Common/Tabledata/SorttingData";
 import EditPayment from "../../../Common/CrudModal/EditPayment";
 import Addpayment from "../../../Common/CrudModal/Addpayment";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
+import { getFirebaseBackend } from "../../../helpers/firebase_helper";
+import { Link } from "react-router-dom";
 
 interface paymentProps {
   isShow: any;
@@ -20,8 +22,6 @@ interface paymentProps {
 }
 
 const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
-  const dispatch = useDispatch();
-
   const selectPaymentsList = createSelector(
     (state: any) => state.Invoice,
     (invoices: any) => ({
@@ -32,17 +32,25 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
   const { paymentList } = useSelector(selectPaymentsList);
 
   const [payments, setPayments] = useState<any>([]);
-
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const firebaseBackend = getFirebaseBackend();
+  console.log("payments :>> ", payments);
+  const loadOrder = async (item?: undefined) => {
+    try {
+      setIsLoading(true);
+      const productsList = await firebaseBackend.getOrderByUID(item);
+      setPayments(productsList);
+    } catch (error) {
+      console.error("Error loading products:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
-    dispatch(onGetPayments());
-  }, [dispatch]);
-
-  useEffect(() => {
-    setPayments(paymentList);
-  }, [paymentList]);
+    loadOrder();
+  }, [firebaseBackend]);
 
   // Delete modal
-
   const [delet, setDelet] = useState<boolean>(false);
   const [deletid, setDeletid] = useState<any>();
 
@@ -55,7 +63,7 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
   );
 
   const handleDeleteId = () => {
-    dispatch(onDeletePayment(deletid.id));
+    // dispatch(onDeletePayment(deletid.id));
     setDelet(false);
   };
 
@@ -117,43 +125,22 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
         accessor: "member",
         Filter: false,
         isSortable: true,
+        Cell: (cell: any) => <>{cell.row.original.user.username}</>,
       },
       {
         Header: "DATE",
         accessor: "date",
         Filter: false,
         isSortable: true,
+        Cell: (cell: any) => <>{cell.row.original.date.seconds}</>,
       },
-      {
-        Header: "PAYMENT DETAILS",
-        accessor: "paymentDetails",
-        Filter: false,
-        isSortable: true,
-      },
-      {
-        Header: "PAYMENT TYPE",
-        accessor: "paymentType",
-        Filter: false,
-        isSortable: true,
-        Cell: (cell) => {
-          switch (cell.row.original.paymentType) {
-            case "Credit Card":
-              return <div>{cell.row.original.paymentType}</div>;
-            case "Google Pay":
-              return <div>{cell.row.original.paymentType}</div>;
-            case "Cash":
-              return <div>{cell.row.original.paymentType}</div>;
-            case "Bank Transfer":
-              return <div>{cell.row.original.paymentType}</div>;
-          }
-        },
-      },
+
       {
         Header: "AMOUNT",
-        accessor: "amount",
+        accessor: "totalAmount",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>${cell.row.original.amount}</>,
+        Cell: (cell: any) => <>${cell.row.original.totalAmount}</>,
       },
       {
         Header: "Status",
@@ -163,21 +150,28 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
         isSortable: true,
         Cell: (cell) => {
           switch (cell.row.original.status) {
-            case "Paid":
+            case -1:
+              return (
+                <span className="badge bg-danger-subtle text-danger p-2">
+                  {cell.row.original.status}
+                </span>
+              );
+            case 0:
+              return (
+                <span className="badge bg-warning-subtle text-warning p-2">
+                  Pendding
+                </span>
+              );
+            case 1:
               return (
                 <span className="badge bg-success-subtle text-success p-2">
                   {cell.row.original.status}
                 </span>
               );
-            case "Pending":
+
+            case 2:
               return (
-                <span className="badge bg-warning-subtle text-warning p-2">
-                  {cell.row.original.status}
-                </span>
-              );
-            case "Failed":
-              return (
-                <span className="badge bg-danger-subtle text-danger p-2">
+                <span className="badge bg-success-subtle text-success p-2">
                   {cell.row.original.status}
                 </span>
               );
@@ -192,52 +186,12 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
 
         isSortable: false,
         Cell: (cell: any) => (
-          <Dropdown>
-            <Dropdown.Toggle
-              as="button"
-              className="btn btn-soft-secondary btn-sm arrow-none"
-            >
-              <i className="las la-ellipsis-h align-middle fs-18"></i>
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="dropdown-menu-end">
-              <li>
-                <Dropdown.Item>
-                  <i className="las la-eye fs-18 align-middle me-2 text-muted"></i>
-                  View
-                </Dropdown.Item>
-              </li>
-              <li>
-                <Dropdown.Item
-                  onClick={() => {
-                    const item = cell.row.original;
-                    handleEditPayment(item);
-                  }}
-                >
-                  <i className="las la-pen fs-18 align-middle me-2 text-muted"></i>
-                  Edit
-                </Dropdown.Item>
-              </li>
-              <li>
-                <Dropdown.Item>
-                  <i className="las la-file-download fs-18 align-middle me-2 text-muted"></i>
-                  Download
-                </Dropdown.Item>
-              </li>
-              <li className="dropdown-divider"></li>
-              <li>
-                <Dropdown.Item
-                  className="remove-item-btn"
-                  onClick={() => {
-                    const item = cell.row.original;
-                    handleDeleteModal(item);
-                  }}
-                >
-                  <i className="las la-trash-alt fs-18 align-middle me-2 text-muted"></i>
-                  Delete
-                </Dropdown.Item>
-              </li>
-            </Dropdown.Menu>
-          </Dropdown>
+          <Link
+            to={`/OrderDetails/${cell.row.original.id}`}
+            className="btn btn-soft-secondary btn-sm arrow-none d-inline-flex align-items-center"
+          >
+            <i className="las la-eye fs-18 align-middle text-muted"></i>
+          </Link>
         ),
       },
     ],
