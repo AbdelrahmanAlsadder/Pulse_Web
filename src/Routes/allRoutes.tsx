@@ -72,7 +72,7 @@ import InvoiceDetails from "../pages/InvoiceManagement/InvoiceDetails/index";
 import AddProduct from "../pages/InvoiceManagement/AddProduct";
 import Invoice from "../pages/InvoiceManagement/Invoice/index";
 import ProductList from "../pages/InvoiceManagement/ProductList";
-import Payments from "../pages/InvoiceManagement/Payments";
+import Orders from "../pages/InvoiceManagement/Orders";
 import Login from "../pages/Authentication/Login";
 import Logout from "../pages/Authentication/Logout";
 import ForgotPassword from "../pages/Authentication/ForgotPassword";
@@ -102,7 +102,7 @@ const authProtectedRoutes: Array<RouteObject> = [
   { path: "/invoice-details", component: <InvoiceDetails /> },
   { path: "/product-add", component: <AddProduct /> },
   { path: "/product-list", component: <ProductList /> },
-  { path: "/payments", component: <Payments /> },
+  { path: "/orders", component: <Orders /> },
   { path: "/OrderDetails/:orderId", component: <OrderDetails /> },
 
   //   Bootstrap UI

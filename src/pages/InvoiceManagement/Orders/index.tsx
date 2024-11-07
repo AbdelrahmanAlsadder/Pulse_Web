@@ -3,8 +3,8 @@ import BreadCrumb from '../../../Common/BreadCrumb'
 import { Container } from 'react-bootstrap'
 import PaymentTable from './PaymentTable'
 
-const Payments = () => {
-  document.title="Payments | Invoika Admin & Dashboard Template";
+const Orders = () => {
+  document.title="Orders | Invoika Admin & Dashboard Template";
   
   const [isShow, setIsShow] = useState(false)
 
@@ -16,7 +16,7 @@ const Payments = () => {
     <React.Fragment>
         <div className="page-content">
             <Container fluid>
-                <BreadCrumb pageTitle="Payments" title="Payments" />
+                <BreadCrumb pageTitle="Orders" title="Orders" />
                 <PaymentTable isShow={isShow} hidePaymentModal={hidePaymentModal}/>
             </Container>
         </div>    
@@ -24,4 +24,4 @@ const Payments = () => {
   )
 }
 
-export default Payments
+export default Orders
