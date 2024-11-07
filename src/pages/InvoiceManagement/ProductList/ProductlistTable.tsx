@@ -7,13 +7,14 @@ import {
   getProductList as onGetProductList,
   deleteProductList as onDeleteProductList,
 } from "../../../slices/thunk";
-import { ToastContainer } from "react-toastify";
 import { createSelector } from "reselect";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
 import { DeleteModal } from "../../../Common/DeleteModal";
 import { handleSearchData } from "../../../Common/Tabledata/SorttingData";
 import EditProductList from "../../../Common/CrudModal/EditProductList";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
+import { toast, Slide, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ProductlistTable = () => {
   const dispatch = useDispatch();
@@ -68,6 +69,7 @@ const ProductlistTable = () => {
 
   const handleDeleteId = async () => {
     await firebaseBackend.deleteProductById(deletid.id);
+    toast.success("Product Deleted Successfully", { autoClose: 2000 });
     loadProducts();
     setDelet(false);
   };
@@ -91,6 +93,7 @@ const ProductlistTable = () => {
   const handleEditProduct = (item: any) => {
     setEditProduct(true);
     setEdit(item);
+   
   };
 
   interface columnsType {

@@ -196,7 +196,7 @@ const OrderDetails = () => {
                                 #
                               </th>
                               <th scope="col">Product Name</th>
-                              <th scope="col">Rate</th>
+                              <th scope="col">Price</th>
                               <th scope="col">Quantity</th>
                               <th scope="col" className="text-start">
                                 Amount

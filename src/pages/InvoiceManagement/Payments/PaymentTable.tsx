@@ -15,6 +15,7 @@ import Addpayment from "../../../Common/CrudModal/Addpayment";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
 import { Link } from "react-router-dom";
+import moment from "moment";
 
 interface paymentProps {
   isShow: any;
@@ -95,18 +96,10 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
   };
 
   // search
-  const handleSearch = (ele: any) => {
-    let item = ele.value;
+  const handleSearch = async (ele: any) => {
+    const item = ele.value.trim(); // Trim whitespace
 
-    if (item === "All Tasks") {
-      setPayments([...paymentList]);
-    } else {
-      handleSearchData({
-        data: paymentList,
-        item: item,
-        setState: setPayments,
-      });
-    }
+    loadOrder(item);
   };
 
   interface columnsType {
@@ -121,22 +114,25 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
   const columns: columnsType[] = useMemo(
     () => [
       {
-        Header: "MEMBER",
+        Header: "Pharmacy",
         accessor: "member",
         Filter: false,
         isSortable: true,
         Cell: (cell: any) => <>{cell.row.original.user.username}</>,
       },
       {
-        Header: "DATE",
+        Header: "Date",
         accessor: "date",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>{cell.row.original.date.seconds}</>,
+        Cell: (cell: any) => <>{moment(cell.row.original.date.toDate()).format(
+          "MMMM Do YYYY"
+        )}</>,
+        
       },
 
       {
-        Header: "AMOUNT",
+        Header: "Amount",
         accessor: "totalAmount",
         Filter: false,
         isSortable: true,
@@ -203,15 +199,15 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
     <React.Fragment>
       <Row className="pb-4 gy-3">
         <Col sm={4}>
-          <button
+          {/* <button
             className="btn btn-primary addPayment-modal"
             onClick={hidePaymentModal}
           >
             <i className="las la-plus me-1"></i> Add Payment
-          </button>
+          </button> */}
         </Col>
 
-        <div className="col-sm-auto ms-auto">
+        {/* <div className="col-sm-auto ms-auto">
           <div className="d-flex gap-3">
             <div className="search-box">
               <Form.Control
@@ -237,7 +233,7 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
               </Dropdown.Menu>
             </Dropdown>
           </div>
-        </div>
+        </div> */}
       </Row>
 
       <Row>
@@ -260,7 +256,7 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
                       All
                     </Nav.Link>
                   </Nav.Item>
-                  <Nav.Item as="li">
+                  {/* <Nav.Item as="li">
                     <Nav.Link
                       eventKey="paid"
                       onClick={() => {
@@ -279,7 +275,7 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
                     >
                       Pending
                     </Nav.Link>
-                  </Nav.Item>
+                  </Nav.Item> */}
                 </Nav>
 
                 <Card>
@@ -307,11 +303,11 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
         </Col>
       </Row>
 
-      <Addpayment
+      {/* <Addpayment
         isShow={isShow}
         handleClose={hidePaymentModal}
         handleShow={isShow}
-      />
+      /> */}
 
       <EditPayment
         isShow={editPayment}

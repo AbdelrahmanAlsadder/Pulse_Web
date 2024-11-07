@@ -31,6 +31,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
       try {
         const categoryCollection = await firebaseBackend.fetchCategories();
         setCategories(categoryCollection);
+       
       } catch (error) {
         toast.error("Failed to load categories.");
       }
@@ -76,7 +77,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
     onSubmit: async (values: any) => {
       await firebaseBackend.updateProductById(edit.id, values);
       formik.resetForm();
-
+      toast.success("Product Edited Successfully", { autoClose: 2000 });
       handleClose(true);
     },
   });

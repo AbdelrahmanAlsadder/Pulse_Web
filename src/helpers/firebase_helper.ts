@@ -333,6 +333,7 @@ class FirebaseAuthBackend {
           ...productData,
           store_id: this.uuid, // Ensure the product is associated with the user's store
           createdDtm: firebase.firestore.FieldValue.serverTimestamp(), // Automatically set the creation timestamp
+          
         };
 
         collection

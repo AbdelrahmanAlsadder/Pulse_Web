@@ -6,9 +6,9 @@ import { Link } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
-import { toast } from "react-toastify";
 import firebase from "firebase/compat/app";
-
+import { toast, Slide, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { collection, getDocs } from "firebase/firestore";
 
 const AddProduct = () => {
@@ -119,8 +119,10 @@ const AddProduct = () => {
       try {
         setIsLoading(true);
         await firebaseBackend.addProductToFirestore(newProduct);
+        toast.success("Product Added Successfully", { autoClose: 2000 });
       } catch (error) {
         console.error("Error loading products:", error);
+        toast.error("Invoice Deleted Successfully", { autoClose: 2000 });
       } finally {
         setIsLoading(false);
         formik.resetForm();

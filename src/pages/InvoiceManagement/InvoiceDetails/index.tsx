@@ -94,7 +94,7 @@ const InvoiceDetails = () => {
                                                             <tr className="table-active">
                                                                 <th scope="col" style={{width: "50px"}}>#</th>
                                                                 <th scope="col">Product Details</th>
-                                                                <th scope="col">Rate</th>
+                                                                <th scope="col">Price</th>
                                                                 <th scope="col">Quantity</th>
                                                                 <th scope="col" className="text-end">Amount</th>
                                                             </tr>

@@ -126,6 +126,28 @@ const Navdata = () => {
             isHeader: true,
         },
         {
+            id: "authentication",
+            label: "Order Management",
+            icon: "las la-cog",
+            link: "/#",
+            click: function (e: any) {
+                e.preventDefault();
+                setIsAuthentication(!isAuthentication);
+                setIscurrentState('Authentication');
+                updateIconSidebar(e);
+            },
+            stateVariables: isAuthentication,
+            subItems: [
+             
+                {
+                    id: "orders",
+                    label: "Orders",
+                    link: "/payments",
+                    parentId: "authentication"
+                },                 
+            ],
+        },
+        {
             id: "forms",
             label: "Product Management",
             icon: "lab la-wpforms",
@@ -145,7 +167,7 @@ const Navdata = () => {
         
         {
             id: "invoiceManagement",
-            label: "Invoices Management",
+            label: "Invoice Management",
             icon: "las la-file-invoice",
             link: "/#",
             click: function (e: any) {
@@ -159,7 +181,6 @@ const Navdata = () => {
                 { id: 1, label: "Invoice", link: "/invoice", parentId: "invoiceManagement" },
                 { id: 2, label: "Add Invoice", link: "/invoice-add", parentId: "invoiceManagement" },
                 { id: 2, label: "Invoice Details", link: "/invoice-details", parentId: "invoiceManagement" },
-                { id: 3, label: "Payments", link: "/payments", parentId: "invoiceManagement" },
                 
             
                
