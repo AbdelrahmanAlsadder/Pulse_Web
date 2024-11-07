@@ -12,7 +12,7 @@ import * as Yup from "yup";
 import { toast, Slide, ToastContainer } from "react-toastify";
 const Login = (props:any) => {
   document.title = "Login | Invoika Admin & Dashboard Template";
-
+  const [loader, setLoader] = useState<boolean>(false);
   const errornotify1 = () =>
     toast("Incorrect Email or Password.", {
       position: "top-center",
@@ -119,7 +119,7 @@ const Login = (props:any) => {
                                                     <Card.Body className="p-lg-5 p-4">
                                                         <div className="text-center">
                                                             <h5 className="mb-0">Welcome Back !</h5>
-                                                            <p className="text-muted mt-2">Sign in to continue to Invoika.</p>
+                                                            <p className="text-muted mt-2">Sign in to continue to PULSE.</p>
                                                         </div>
 
                                                         <div className="mt-4">
@@ -187,7 +187,14 @@ const Login = (props:any) => {
                                                             </Form.Check>
 
                                                                 <div className="mt-2">
-                                                                <Button className="btn btn-primary w-100" type="submit" disabled={loading}>{loading && <Spinner size='sm' /> } {" "}Sign In</Button>
+                                                                <Button 
+                                                                    className="btn btn-primary w-100 d-flex align-items-center justify-content-center" 
+                                                                    type="submit" 
+                                                                    disabled={loading}
+                                                                >
+                                                                    {loading && <Spinner animation="border" size="sm" role="status" className="me-2" />}
+                                                                    Sign In
+                                                                </Button>
                                                                 </div>
 
                                                                 <div className="mt-4 text-center">

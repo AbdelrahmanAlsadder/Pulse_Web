@@ -8,6 +8,8 @@ import {
   reset_login_flag,
 } from "./reducer";
 import { postFakeLogin, postJwtLogin } from "../../helpers/fakebackend_helper";
+import { toast, Slide, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const loginUser = (user: any, history: any) => async (dispatch: any) => {
   try {
@@ -24,9 +26,11 @@ export const loginUser = (user: any, history: any) => async (dispatch: any) => {
       if (user_details) {
         if (user_details.status == -1) {
           // disabled
+          toast.error("Sorry, But Your Account is Disabled", { autoClose: 2000 });
           console.log("disabled");
         } else if (user_details.status == 0) {
           // waiting for approval
+          toast.info("Please Wait, Your Account is Under Approval", { autoClose: 2000 });
           console.log("waiting for approval");
         } else {
           dispatch(loginSuccess(user_details));
