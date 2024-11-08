@@ -79,6 +79,7 @@ const AddProduct = () => {
   const formik = useFormik({
     initialValues: {
       productName: "",
+      productScientificName: "",
       productImage: "",
       category: "",
       price: "",
@@ -87,7 +88,8 @@ const AddProduct = () => {
       productDesc: "",
     },
     validationSchema: Yup.object({
-      productName: Yup.string().required("Please enter your product name"),
+      productName: Yup.string().required("Please enter your product commercial name"),
+      productScientificName: Yup.string().required("Please enter your product scientific name"),
       productImage: Yup.mixed().required("Please select an image"),
       category: Yup.string().required("Please enter your category"),
       price: Yup.number().required("Please enter price"),
@@ -97,6 +99,7 @@ const AddProduct = () => {
     }),
     onSubmit: async (values: {
       productName: any;
+      productScientificName: any;
       productImage: File;
       category: any;
       price: any;
@@ -106,6 +109,7 @@ const AddProduct = () => {
     }) => {
       const newProduct = {
         title: values.productName,
+        scientificTitle: values.productScientificName,
         images: values.productImage, // Handle image upload to Firestore
         category: values.category,
         price: values.price,
@@ -144,12 +148,12 @@ const AddProduct = () => {
                     <Form onSubmit={formik.handleSubmit}>
                       <div className="mb-3">
                         <Form.Label htmlFor="productname">
-                          Product Name
+                          Product Commercial Name
                         </Form.Label>
                         <Form.Control
                           id="productname"
                           name="productName"
-                          placeholder="Enter Product Name"
+                          placeholder="Enter Product Commercial Name"
                           type="text"
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
@@ -161,6 +165,28 @@ const AddProduct = () => {
                         />
                         <Form.Control.Feedback type="invalid">
                           {formik.errors.productName}
+                        </Form.Control.Feedback>
+                      </div>
+
+                      <div className="mb-3">
+                        <Form.Label htmlFor="productname">
+                          Product Scientific Name
+                        </Form.Label>
+                        <Form.Control
+                          id="productscientificname"
+                          name="productScientificName"
+                          placeholder="Enter Product Scientific Name"
+                          type="text"
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          value={formik.values.productScientificName}
+                          isInvalid={
+                            formik.touched.productScientificName &&
+                            !!formik.errors.productScientificName
+                          }
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {formik.errors.productScientificName}
                         </Form.Control.Feedback>
                       </div>
 
