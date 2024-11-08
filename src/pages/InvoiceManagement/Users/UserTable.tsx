@@ -13,6 +13,10 @@ import { handleSearchData } from '../../../Common/Tabledata/SorttingData';
 import EditUsers from '../../../Common/CrudModal/EditUsers';
 import AddUsers from '../../../Common/CrudModal/AddUsers';
 import NoSearchResult from '../../../Common/Tabledata/NoSearchResult';
+import { getFirebaseBackend } from "../../../helpers/firebase_helper";
+import moment from "moment";
+import firebase from "firebase/app";
+import "firebase/storage";
 
 interface userProps {
     isShow: any,
@@ -29,14 +33,56 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
             usersList: invoices.usersList
         })
     );
-
+    const [users, setUsers] = useState<any>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
     const {usersList} = useSelector(selectUsersList)
+    const firebaseBackend = getFirebaseBackend();
+  
 
-    const [users,setUsers] = useState<any>([])
 
-    useEffect(() => {
-        dispatch(onGetUsers())
-    }, [dispatch]);
+    //comment this out when you get the storage on your firebase
+    // don't forget to comment out the onClick inside the link tag that opens the pdf (line 251 approximately)
+
+    // const fetchCommercialRegister = async () => {
+    //     try {
+    //       const fileRef = storage.ref().child("commercial_register.pdf"); // Update the file path if needed
+    //       const fileUrl = await fileRef.getDownloadURL();
+    //       return fileUrl;
+    //     } catch (error) {
+    //       console.error("Error fetching file:", error);
+    //       return null;
+    //     }
+    //   };
+    // const CommercialRegisterLink = () => {
+    //     const handleOpenFile = async () => {
+    //       const fileUrl = await fetchCommercialRegister();
+    //       if (fileUrl) {
+    //         // Open the file in a new tab
+    //         window.open(fileUrl, "_blank");
+    //       } else {
+    //         alert("Failed to fetch the commercial register file.");
+    //       }
+    //     };
+
+
+
+
+    const loadUsers = async (item?: undefined) => {
+        try {
+          setIsLoading(true);
+          const usersList = await firebaseBackend.fetchUsers(item);
+          setUsers(usersList);
+        } catch (error) {
+          console.error("Error loading userss:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      useEffect(() => {
+        loadUsers();
+      }, [firebaseBackend]);
+
+
 
     useEffect(() => {
         setUsers(usersList)
@@ -52,37 +98,38 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
         setDeletid(id);
     }, [delet])
 
-    const handleDeleteId = () => {
-        dispatch(onDeleteUsers(deletid.id))
-        setDelet(false)
-    }
+    // const handleDeleteId = () => {
+    //     dispatch(onDeleteUsers(deletid.id))
+    //     setDelet(false)
+    // }
 
+    // // search
+    // const handleSearch = (ele: any) => {
+    //     let item = ele.value;
+
+    //     if (item === "All Tasks") {
+    //         setUsers([...usersList]);
+    //     } else {
+    //         handleSearchData({ data: usersList, item: item, setState: setUsers })
+    //     }
+    // }
     // search
-    const handleSearch = (ele: any) => {
-        let item = ele.value;
+  const handleSearch = async (ele: any) => {
+    const item = ele.value.trim(); // Trim whitespace
 
-        if (item === "All Tasks") {
-            setUsers([...usersList]);
-        } else {
-            handleSearchData({ data: usersList, item: item, setState: setUsers })
-        }
-    }
+    loadUsers(item);
+  };
 
     const [editUser, setEditUser] = useState<boolean>(false);
     const [edit, setEdit] = useState<any>();
     
-    const handleCloseEdit = () => setEditUser(false);
+    const handleCloseEdit = (reset: boolean) => {
+        if (reset) loadUsers();
+        setEditUser(false);
+      };
     const handleEditUser = (item: any) => {
-        setEditUser(true)
-        setEdit({
-            id: item.id,
-            memberName: item.memberName,
-            memberImage: item.memberImage,
-            email: item.email,
-            mobile: item.mobile,
-            registeredOn: item.registeredOn,
-            status: item.status
-        })
+        setEditUser(true);
+    setEdit(item);
         
     }
     
@@ -104,49 +151,72 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
             accessor: "memberName",
             Filter: false,
             isSortable: true,
-            Cell: (cell: any) => {
-    
-              return (     
-                <div>
-                    
-                    <Link to="#" className="text-body align-middle fw-medium">{cell.row.original.memberName}</Link>   
-                </div>                           
-              )
-            }
+            Cell: (cell: any) => <>{cell.row.original.username}</>,
           },          
           {
             Header: "EMAIL",
             accessor: "email",
             Filter: false,
-            isSortable: true
+            isSortable: true,
+            Cell: (cell: any) => <>{cell.row.original.email}</>,
           },
           {
             Header: "MOBILE",
             accessor: "mobile",
             Filter: false,
-            isSortable: true
+            isSortable: true,
+            Cell: (cell: any) => <>{cell.row.original.phone}</>,
           },
           {
             Header: "REQUEST SENT ON",
             accessor: "registeredOn",
             Filter: false,
             isSortable: true,
+            Cell: (cell: any) => <>{moment(cell.row.original.createdDtm.toDate()).format(
+                "MMMM Do YYYY"
+              )}</>,
           },          
           {
             Header: "STATUS",
             accessor: "status",
             Filter: false,
             isSortable: true,
-            Cell: (cell) => {         
+            Cell: (cell) => {
                 switch (cell.row.original.status) {
-                    case "Active":
-                        return <span className="badge bg-success-subtle text-success p-2">{cell.row.original.status}</span>                         
-                    case "Disabled":
-                        return <span className="badge bg-danger-subtle text-danger p-2">{cell.row.original.status}</span> 
-                    default:
-                        return <span className="badge bg-success-subtle text-success p-2">{cell.row.original.status}</span>
-                }                
-            }
+                  case -1:
+                    return (
+                      <span className="badge bg-danger-subtle text-danger p-2">
+                        Rejected
+                      </span>
+                    );
+                  case 0:
+                    return (
+                      <span className="badge bg-warning-subtle text-warning p-2">
+                        Pending
+                      </span>
+                    );
+                  case 1:
+                    return (
+                      <span className="badge bg-success-subtle text-success p-2">
+                        Admin
+                      </span>
+                    );
+                  case 2:
+                    return (
+                      <span className="badge bg-info-subtle text-primary p-2">
+                        Warehouse
+                      </span>
+                    );
+                    case 3:
+                    return (
+                      <span className="badge bg-info-subtle text-info p-2">
+                        Pharmacy
+                      </span>
+                    );
+                  default:
+                    return null; // Return null if the status is not recognized
+                }
+              },
           },             
           {
             Header: "ACTION",
@@ -173,8 +243,9 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
                                 <Link
                                     to="#"
                                     className="btn btn-soft-danger btn-sm d-inline-block"
-                                    title="Open Commercial Register" // This will show a tooltip on hover
-                                >
+                                    //onClick={handleOpenFile}
+                                    title="Open Commercial Register"
+                                    >
                                     <i className="las la-file-download fs-17 align-middle"></i>
                                 </Link>
                             </li>
@@ -224,7 +295,7 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
 
                     <EditUsers isShow={editUser} handleClose={handleCloseEdit} edit={edit} />
 
-                    <DeleteModal show={delet} handleClose={handleDeleteModal} deleteModalFunction={handleDeleteId} />
+                    {/* <DeleteModal show={delet} handleClose={handleDeleteModal} deleteModalFunction={handleDeleteId} /> */}
                     <ToastContainer />
     </React.Fragment>
   )

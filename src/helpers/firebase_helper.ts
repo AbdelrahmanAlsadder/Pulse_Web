@@ -180,6 +180,22 @@ class FirebaseAuthBackend {
       return null; // return null in case of error
     }
   };
+  // Function to update a user by ID
+  async updateUserById(id: string, updatedData: any) {
+    try {
+      const productRef = this.firestore.collection("user").doc(id);
+      await productRef.update({
+        username: updatedData.username || "",
+        phone: updatedData.phone || "",
+        email: updatedData.email || "",
+        status: updatedData.status || "",
+      });
+      console.log("User updated successfully");
+    } catch (error) {
+      console.error("Error updating User:", error);
+      throw error;
+    }
+  }
 
   /*
     add New User To Firestore
@@ -244,6 +260,32 @@ class FirebaseAuthBackend {
     }
   }
 
+  async fetchUsers(keyword = "") {
+    try {
+      // Use firebase.firestore.Query instead of CollectionReference
+      let query: firebase.firestore.Query<firebase.firestore.DocumentData> = 
+        this.firestore.collection("users");
+  
+      // If a keyword is provided, filter users by title
+      if (keyword) {
+        query = query
+          .where("title", ">=", keyword)
+          .where("title", "<=", keyword + "\uf8ff");
+      }
+  
+      const querySnapshot = await query.get();
+  
+      return querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      throw error;
+    }
+  }
+  
+  
 
   
 
