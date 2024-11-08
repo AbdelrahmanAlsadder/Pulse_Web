@@ -6,7 +6,7 @@ import logoLight from "../../../assets/images/logo-light.png"
 import { Link } from 'react-router-dom';
 
 const InvoiceDetails = () => {
-    document.title = "Invoice Details | Invoika Admin & Dashboard Template";
+    document.title = "Invoice Details ";
     return (
     <React.Fragment>
         <div className="page-content">

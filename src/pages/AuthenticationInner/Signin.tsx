@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 
 const Signin = () => {
-  document.title = "Login | Invoika Admin & Dashboard Template";
+  document.title = "Login ";
   const [passwordShow, setPasswordShow] = useState<boolean>(false);
   const navigate = useNavigate();
 

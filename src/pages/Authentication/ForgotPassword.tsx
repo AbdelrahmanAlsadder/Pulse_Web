@@ -36,7 +36,7 @@ const ForgotPassword = (props:any) => {
     );
 
     const { forgetError, forgetSuccessMsg } = useSelector(selectForgetPassword);
-    document.title = "Forgot Password | Invoika Admin & Dashboard Template";
+    document.title = "Forgot Password ";
 
   return (
     <React.Fragment>

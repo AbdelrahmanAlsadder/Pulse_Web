@@ -28,7 +28,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { getFirebaseBackend } from "../../helpers/firebase_helper";
 
 const Register = () => {
-  document.title = "Register | Invoika Admin & Dashboard Template";
+  document.title = "Register ";
 
   const navigate = useNavigate();
   const dispatch = useDispatch();

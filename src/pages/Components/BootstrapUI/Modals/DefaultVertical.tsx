@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 
 const DefaultVertical = () => {
 
-    document.title=" Modals | Invoika Admin & Dashboard Template";
+    document.title=" Modals";
 
 
     const [modal_standard, setmodal_standard] = useState<boolean>(false);

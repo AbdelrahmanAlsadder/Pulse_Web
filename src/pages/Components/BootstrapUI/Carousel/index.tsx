@@ -9,7 +9,7 @@ import { CrossfadeAnimation, IndividualInterval } from './CrossfadeIndividual'
 import { DisableTouch, DarkVariant } from './DisableDark'
 
 const Carousel = () => {
-    document.title=" Carousel | Invoika Admin & Dashboard Template";
+    document.title=" Carousel";
 
     return (
         <React.Fragment>

@@ -4,7 +4,7 @@ import { ProgressBar, Row, Col, Card } from 'react-bootstrap';
 import { DefaultProgressExample, BackgroundColorExample } from './UiProgressCode';
 
 const DefaultBgcolor = () => {
-    document.title=" Progress | Invoika Admin & Dashboard Template";
+    document.title=" Progress ";
 
     return (
         <React.Fragment>

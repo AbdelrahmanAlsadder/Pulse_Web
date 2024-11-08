@@ -204,7 +204,7 @@ class FirebaseAuthBackend {
       phone: user.phone,
       picture: "",
       commercial_register: commercial_register ?? "",
-      status: 0, // 1-admin 2-warehouse 3-pharmacy  (-1)- Disabled  0-pendding
+      status: 0, // 1-admin 2-warehouse 3-pharmacy  (-1)- Disabled  0-pending
       createdDtm: firebase.firestore.FieldValue.serverTimestamp(),
       lastLoginTime: firebase.firestore.FieldValue.serverTimestamp(),
     };
@@ -243,6 +243,9 @@ class FirebaseAuthBackend {
       throw error;
     }
   }
+
+
+  
 
   /**
    * Fetches a product by its ID
@@ -557,6 +560,8 @@ class FirebaseAuthBackend {
       throw error;
     }
   };
+
+  
 
   setLoggeedInUser = (user: any) => {
     sessionStorage.setItem("authUser", JSON.stringify(user));

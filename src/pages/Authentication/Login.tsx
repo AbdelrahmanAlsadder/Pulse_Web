@@ -11,7 +11,7 @@ import { loginUser, resetLoginFlag, socialLogin } from '../../slices/thunk';
 import * as Yup from "yup";
 import { toast, Slide, ToastContainer } from "react-toastify";
 const Login = (props:any) => {
-  document.title = "Login | Invoika Admin & Dashboard Template";
+  document.title = "Login ";
   const [loader, setLoader] = useState<boolean>(false);
   const errornotify1 = () =>
     toast("Incorrect Email or Password.", {

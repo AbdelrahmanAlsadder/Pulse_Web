@@ -7,7 +7,7 @@ import Dropzone from 'react-dropzone';
 
 
 const FormFileupload = () => {
-  document.title=" File Upload | Invoika Admin & Dashboard Template";
+  document.title=" File Upload ";
 
   const [selectedFiles, setselectedFiles] = useState([]);
 

@@ -9,7 +9,7 @@ import moment from "moment";
 import { toast } from "react-toastify";
 
 const OrderDetails = () => {
-  document.title = "Invoice Details | Invoika Admin & Dashboard Template";
+  document.title = "Invoice Details ";
   const { orderId } = useParams();
 
   const [order, setOrder] = useState<any>(null);

@@ -4,7 +4,7 @@ import Breadcrumb from '../../../../Common/BreadCrumb';
 
 const DefaultBadges = () => {
 
-    document.title=" Badges | Invoika -Admin & Dashboard Template";
+    document.title=" Badges";
 
     return (
         <React.Fragment>

@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import AuthCarousel from './AuthCarousel';
 
 const Lockscreen = () => {
-  document.title = "Lockscreen | Invoika Admin & Dashboard Template";
+  document.title = "Lockscreen ";
 
   return (
     <React.Fragment>

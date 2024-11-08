@@ -4,7 +4,7 @@ import { Container } from 'react-bootstrap'
 import PaymentTable from './PaymentTable'
 
 const Orders = () => {
-  document.title="Orders | Invoika Admin & Dashboard Template";
+  document.title="Orders ";
   
   const [isShow, setIsShow] = useState(false)
 

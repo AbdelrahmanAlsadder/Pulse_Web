@@ -19,7 +19,7 @@ import img3 from '../../../../assets/images/small/img-3.jpg'
 import img4 from '../../../../assets/images/small/img-4.jpg'
 
 const Default = () => {
-    document.title=" Offcanvas | Invoika Admin & Dashboard Template";
+    document.title=" Offcanvas ";
 
 
     const [show, setShow] = useState(false);

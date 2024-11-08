@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { HtmlHighlightExample, CssHighlightExample, JavaScriptExample } from './UiHighlightCode';
 
 const HtmlCssJs = () => {
-    document.title=" Highlight | Invoika Admin & Dashboard Template";
+    document.title=" Highlight";
 
     return (
         <React.Fragment>

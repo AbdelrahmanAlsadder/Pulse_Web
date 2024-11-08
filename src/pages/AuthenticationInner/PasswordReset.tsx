@@ -7,7 +7,7 @@ import { useFormik } from 'formik'
 import * as Yup from "yup";
 
 const PasswordReset = () => {
-  document.title = "Password reset | Invoika Admin & Dashboard Template";
+  document.title = "Password reset ";
 
   const navigate = useNavigate();
 

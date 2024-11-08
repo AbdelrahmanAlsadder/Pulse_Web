@@ -79,6 +79,7 @@ import ForgotPassword from "../pages/Authentication/ForgotPassword";
 import Register from "../pages/Authentication/Register";
 import UserProfile from "../pages/Authentication/UserProfile";
 import OrderDetails from "../pages/InvoiceManagement/OrderDetails";
+import Users from "../pages/InvoiceManagement/Users";
 
 interface RouteObject {
   path: string;
@@ -90,6 +91,7 @@ const authProtectedRoutes: Array<RouteObject> = [
   // Dashboard
   { path: "/index", component: <Dashboard /> },
   { path: "/dashboard", component: <Dashboard /> },
+  { path: "/user", component: <Users /> },
 
   { path: "/", exact: true, component: <Navigate to="/dashboard" /> },
   { path: "*", component: <Navigate to="/dashboard" /> },

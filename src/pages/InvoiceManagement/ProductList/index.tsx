@@ -4,7 +4,7 @@ import { Container } from 'react-bootstrap';
 import ProductlistTable from './ProductlistTable';
 
 const ProductList = () => {
-    document.title="Product List | Invoika Admin & Dashboard Template";
+    document.title="Product List ";
   return (
     <React.Fragment>
         <div className="page-content">

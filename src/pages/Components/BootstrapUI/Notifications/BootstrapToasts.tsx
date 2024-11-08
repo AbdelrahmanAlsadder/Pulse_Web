@@ -6,7 +6,7 @@ import { BootstrapToastsExample } from './UiNotificationCode';
 import logosm from "../../../../assets/images/logo-sm.png"
 
 const BootstrapToasts = () => {
-    document.title=" Notifications | Invoika Admin & Dashboard Template";
+    document.title=" Notifications";
 
     const [toast1, setToast1] = useState(true);
     const [toast2, setToast2] = useState(true);

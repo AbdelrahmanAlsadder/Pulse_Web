@@ -8,7 +8,7 @@ import AuthCarousel from './AuthCarousel';
 import logoDark from "../../assets/images/logo-dark.png"
 
 const Signup = () => {
-  document.title = "Signup | Invoika Admin & Dashboard Template";
+  document.title = "Signup ";
 
   const [passwordShow, setPasswordShow] = useState<boolean>(false);
     const navigate = useNavigate();

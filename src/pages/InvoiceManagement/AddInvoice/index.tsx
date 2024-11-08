@@ -11,7 +11,7 @@ import * as Yup from "yup";
 import Flatpickr from "react-flatpickr";
 
 const AddInvoice = () => {
-    document.title = "New Invoice | Invoika Admin & Dashboard Template";
+    document.title = "New Invoice ";
 
     const [ispaymentStatus, setispaymentStatus] = useState<any>();
 
