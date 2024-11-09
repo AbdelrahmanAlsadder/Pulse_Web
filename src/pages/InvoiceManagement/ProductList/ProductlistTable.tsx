@@ -93,7 +93,6 @@ const ProductlistTable = () => {
   const handleEditProduct = (item: any) => {
     setEditProduct(true);
     setEdit(item);
-   
   };
 
   interface columnsType {
@@ -279,7 +278,7 @@ const ProductlistTable = () => {
       <Row>
         <Col xl={12}>
           <Card>
-            <Card.Body>
+            <Card.Body className="table-responsive">
               {isLoading ? (
                 <Spinner animation="grow" role="status">
                   <span className="visually-hidden">Loading...</span>
@@ -290,7 +289,7 @@ const ProductlistTable = () => {
                   columns={columns}
                   data={products || []}
                   customPageSize={8}
-                  divClassName="table-card table-responsive"
+                  divClassName="table-card "
                   tableClass="table-hover table-nowrap align-middle mb-0"
                   isBordered={false}
                   PaginationClass="align-items-center mt-4 gy-3"

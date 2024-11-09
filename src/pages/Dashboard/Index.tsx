@@ -1,28 +1,21 @@
-import React from 'react'
-import { Container } from 'react-bootstrap';
-import BreadCrumb from '../../Common/BreadCrumb';
-import ProffesionalWidgets from './ProffesionalWidgets';
-import PaymentActivity from './PaymentActivity';
-import QuickInvoice from './QuickInvoice';
-import SalesRevenue from './SalesRevenue';
-
+import React from "react";
+import { Container } from "react-bootstrap";
+import PaymentActivity from "./PaymentActivity";
+import InvoiceList from "./InvoiceList";
 
 const Dashboard = () => {
-  document.title = "Dashboard ";
+  document.title = "Dashboard";
 
   return (
     <React.Fragment>
       <div className="page-content">
-            <Container fluid>
-                <BreadCrumb pageTitle="Dashboard" title="Dashboard" />
-                <ProffesionalWidgets/>
-                <PaymentActivity/>
-                <QuickInvoice/>
-                <SalesRevenue/>
-                </Container>
-                </div>
+        <Container fluid>
+          <PaymentActivity />
+          <InvoiceList />
+        </Container>
+      </div>
     </React.Fragment>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;

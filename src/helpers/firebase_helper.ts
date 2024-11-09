@@ -180,29 +180,51 @@ class FirebaseAuthBackend {
       return null; // return null in case of error
     }
   };
+
+  // Function to update a user in the 'users' collection by UID
+  async updateUserDetails(updatedData: any): Promise<void> {
+    try {
+      // Reference to the specific user's document
+      const userRef = this.firestore.collection("users").doc(String(this.uuid));
+
+      // Check if the document exists before attempting to update it
+      const docSnapshot = await userRef.get();
+      if (!docSnapshot.exists) {
+        console.error("User document not found.");
+        return; // User document not found, exit the function
+      }
+
+      // Update the user's document with the new data
+      await userRef.update(updatedData);
+      console.log("User updated successfully");
+    } catch (error) {
+      console.error("Error updating user:", error);
+      throw error;
+    }
+  }
+
   // Function to update a user by ID
   async updateUserById(id: string, updatedData: any) {
     try {
       console.log("Submitting form with values2:", updatedData);
       const productRef = this.firestore.collection("users").doc(id);
-  
+
       // Make sure the document exists
       const docSnapshot = await productRef.get();
       if (!docSnapshot.exists) {
         console.error("Document not found");
         return;
       }
-  
+
       await productRef.update({
-    
         status: updatedData.status,
       });
-  
+
       console.log("User updated successfully");
     } catch (error: any) {
-      if (error.code === 'permission-denied') {
+      if (error.code === "permission-denied") {
         console.error("Permission denied: Check Firestore rules.");
-      } else if (error.code === 'not-found') {
+      } else if (error.code === "not-found") {
         console.error("Document not found.");
       } else {
         console.error("Error updating user:", error.message);
@@ -210,7 +232,6 @@ class FirebaseAuthBackend {
       throw error;
     }
   }
-  
 
   /*
     add New User To Firestore
@@ -236,8 +257,8 @@ class FirebaseAuthBackend {
       picture: "",
       commercial_register: commercial_register ?? "",
       status: 0, // 1-admin 2-warehouse 3-pharmacy  (-1)- Disabled  0-pending
-      street:user.street,
-      city:user.city,
+      street: user.street,
+      city: user.city,
       createdDtm: firebase.firestore.FieldValue.serverTimestamp(),
       lastLoginTime: firebase.firestore.FieldValue.serverTimestamp(),
     };
@@ -280,18 +301,18 @@ class FirebaseAuthBackend {
   async fetchUsers(keyword = "") {
     try {
       // Use firebase.firestore.Query instead of CollectionReference
-      let query: firebase.firestore.Query<firebase.firestore.DocumentData> = 
+      let query: firebase.firestore.Query<firebase.firestore.DocumentData> =
         this.firestore.collection("users");
-  
+
       // If a keyword is provided, filter users by title
       if (keyword) {
         query = query
           .where("username", ">=", keyword)
           .where("username", "<=", keyword + "\uf8ff");
       }
-  
+
       const querySnapshot = await query.get();
-  
+
       return querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -301,34 +322,6 @@ class FirebaseAuthBackend {
       throw error;
     }
   }
-  
-  //fetch user info
-  
-  async fetchUserInfo(keyword = "") {
-    try {
-      if (this.uuid != undefined) {
-        let query = this.firestore
-          .collection("users")
-          .where("store_id", "==", this.uuid); 
-
-        
-
-
-        const querySnapshot = await query.get();
-
-        return querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-      }
-      // Return an empty array if uuid is undefined
-      return [];
-    } catch (error) {
-      console.error("Error fetching User Info:", error);
-      throw error;
-    }
-  }
-  
 
   /**
    * Fetches a product by its ID
@@ -419,7 +412,6 @@ class FirebaseAuthBackend {
           ...productData,
           store_id: this.uuid, // Ensure the product is associated with the user's store
           createdDtm: firebase.firestore.FieldValue.serverTimestamp(), // Automatically set the creation timestamp
-          
         };
 
         collection
@@ -643,8 +635,6 @@ class FirebaseAuthBackend {
       throw error;
     }
   };
-
-  
 
   setLoggeedInUser = (user: any) => {
     sessionStorage.setItem("authUser", JSON.stringify(user));

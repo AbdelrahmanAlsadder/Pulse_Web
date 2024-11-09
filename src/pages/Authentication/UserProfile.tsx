@@ -1,341 +1,235 @@
 import React, { useState, useEffect } from "react";
-import { Col, Container, Row,Card, Alert, Button, Form  } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import logoDark from "../../assets/images/logo-dark.png"
-import { getFirebaseBackend } from "../../helpers/firebase_helper";
-import { isEmpty } from "lodash";
+import {
+  Col,
+  Container,
+  Row,
+  Card,
+  Alert,
+  Button,
+  Form,
+} from "react-bootstrap";
+import { Link } from "react-router-dom";
+import logoDark from "../../assets/images/logo-dark.png";
 
-// Formik Validation
 import * as Yup from "yup";
 import { useFormik } from "formik";
 
-//redux
 import { useSelector, useDispatch } from "react-redux";
-
 import withRouter from "../../Common/withRouter";
 
 import avatar from "../../assets/images/users/avatar-1.jpg";
 
-// actions
 import { createSelector } from "reselect";
 import { editProfile, resetProfileFlag } from "../../slices/profile/thunk";
+import { getFirebaseBackend } from "../../helpers/firebase_helper";
+import { toast } from "react-toastify";
 
-const UserProfile = () => {
-  document.title = "User Profile ";
+interface ProfileState {
+  user: {
+    email: string;
+    idx: string;
+    userName: string;
+  };
+  success: boolean;
+  error: string | null;
+}
 
-  const dispatch: any = useDispatch();
+const UserProfile: React.FC = () => {
+  document.title = "User Profile";
 
-  const [email, setemail] = useState("admin@gmail.com");
-  const [idx, setidx] = useState("1");
-
-  const [userName, setUserName] = useState("Admin");
-  const [profileImage, setProfileImage] = useState(avatar);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const firebaseBackend = getFirebaseBackend();
-  const [info, setInfo] = useState<any>([]);
+
+  const [email, setEmail] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
+  const [city, setCity] = useState<string>("");
+  const [street, setStreet] = useState<string>("");
+
   const selectLayoutState = (state: any) => state.Profile;
-  const userprofileData = createSelector(
-    selectLayoutState,
-    (state:any) => ({
-      user: state.user,
-      success: state.success,
-      error: state.error
-    })
-  );
-  // Inside your component
-  const {
-    user, success, error
-  } = useSelector(userprofileData);
-  const loadUserInfo = async (item?: undefined) => {
+  const userprofileData = createSelector(selectLayoutState, (state: any) => ({
+    user: state.user,
+  }));
+
+  const { user } = useSelector(userprofileData);
+
+  const loadUserName = async (uid: String) => {
     try {
-      setIsLoading(true);
-      const productsList = await firebaseBackend.fetchUserInfo(item);
-      setInfo(productsList);
+      const data = await firebaseBackend.getUserDetailsByUid(uid);
+      if (data) {
+        setCity(data.address.city);
+        setStreet(data.address.street);
+        setUsername(data.username);
+        setEmail(data.email);
+        setPhone(data.phone);
+      }
     } catch (error) {
-      console.error("Error loading User Info:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Error loading products:", error);
     }
   };
-
   useEffect(() => {
-    if (sessionStorage.getItem("authUser")) {
-      const storedUser = sessionStorage.getItem("authUser");
-      if (storedUser) {
-        const obj = JSON.parse(storedUser || "{}");
-
-        // if (!isEmpty(user)) {
-        //   obj.data.first_name = user.first_name;
-        //   sessionStorage.removeItem("authUser");
-        //   sessionStorage.setItem("authUser", JSON.stringify(obj));
-        // }
-
-        //setUserName(obj.data.first_name || obj.displayName);
-       // setemail(obj.data.email || obj.email);
-       // setidx(obj.data._id || "1");
-
-        setTimeout(() => {
-          dispatch(resetProfileFlag());
-        }, 3000);
-      }
+    const authUser: any = sessionStorage.getItem("authUser");
+    if (authUser) {
+      const obj = JSON.parse(authUser);
+      if (obj.uid) loadUserName(obj.uid);
     }
-  }, [dispatch, user]);
-
-
+  }, [user]);
 
   const validation = useFormik({
-    // enableReinitialize : use this flag when initial values needs to be changed
     enableReinitialize: true,
-  
     initialValues: {
-      first_name:'',
-      email:'',
-      phone: '',
-      password: '',
-      city: '',
-      street: '',
-      idx: idx || "1",
+      city: city || "",
+      street: street || "",
+      avatar: null,
     },
     validationSchema: Yup.object({
-      first_name: Yup.string().required("Please Enter Your User Name"),
-      email: Yup.string().email("Invalid email address").required("Please Enter Your Email"),
-      phone: Yup.string()
-        .matches(/^[0-9]{10}$/, "Phone number must be 10 digits")
-        .required("Please Enter Your Phone Number"),
-      password: Yup.string().min(6, "Password must be at least 6 characters"),
-      city: Yup.string().required("Please Enter Your City"),
-      street: Yup.string().required("Please Enter Your Street"),
+      city: Yup.string().required("Please enter your city"),
+      street: Yup.string().required("Please enter your street"),
     }),
-    onSubmit: (values: any) => {
-      dispatch(editProfile(values));
+    onSubmit: async (values: any) => {
+      try {
+        await firebaseBackend.updateUserDetails({
+          ...((values.city || values.street) && {
+            address: {
+              ...(values.city && { city: values.city }),
+              ...(values.street && { street: values.street }),
+            },
+          }),
+
+          ...(values.avatar && { picture: values.avatar }),
+        });
+
+        toast.success("Info Updated Successfully", { autoClose: 2000 });
+      } catch (error) {
+        toast.error("Info Updated Failed", { autoClose: 2000 });
+      }
     },
   });
-  
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-  
-      reader.onloadend = () => {
-        if (reader.result) {
-          setProfileImage(reader.result.toString()); // Update the state with the selected image
-        }
-      };
-  
-      reader.readAsDataURL(file); // Convert the file to a base64 string
-    }
-  };
-  
 
   return (
     <React.Fragment>
       <div className="account-pages">
-                <Container>
-                    <Row className="justify-content-center">
-                        <Col md={11}>
-                            <div className="auth-full-page-content d-flex min-vh-100 py-sm-5 py-4">
-                                <div className="w-100">
-                                    <div className="d-flex flex-column h-100 py-0 py-xl-4">
+        <Container>
+          <Row className="justify-content-center">
+            <Col md={11}>
+              <div className="auth-full-page-content d-flex min-vh-100 py-sm-5 py-4">
+                <div className="w-100">
+                  <div className="d-flex flex-column h-100 py-0 py-xl-4">
+                    <div className=" mb-5" />
 
-                                        <div className="text-center mb-5">
-                                            <Link to="/">
-                                                <span className="logo-lg">
-                                                    <img src={logoDark} alt="" height="21" />
-                                                </span>
-                                            </Link>
-                                        </div>
+                    <Row>
+                      <Col lg="12">
+                        <Card>
+                          <Card.Body>
+                            <div className="d-flex">
+                              <div className="mx-3">
+                                <img
+                                  src={avatar}
+                                  alt=""
+                                  className="avatar-lg rounded-circle img-thumbnail"
+                                />
+                              </div>
+                              <div className="flex-grow-1 align-self-center">
+                                <div className="text-muted">
+                                  <h5 className="mb-0">{username}</h5>
 
-                                        <Row>
-                                            <Col lg="12">
-                                            {error && error ? <Alert variant="danger">{error}</Alert> : null}
-                                            {success ? <Alert variant="success">Username Updated To {userName}</Alert> : null}
-
-                                            <Card>
-                                                <Card.Body>
-                                                <div className="d-flex">
-                                                <div className="mx-3 position-relative">
-                                                  {/* Avatar Image */}
-                                                  <img
-                                                    src={profileImage}
-                                                    alt="Profile"
-                                                    className="avatar-md rounded-circle img-thumbnail"
-                                                    onClick={() => document.getElementById("profileImageInput")?.click()}
-                                                    style={{ cursor: "pointer" }}
-                                                  />
-
-                                                  {/* Hidden File Input */}
-                                                  <input
-                                                    type="file"
-                                                    id="profileImageInput"
-                                                    accept="image/*"
-                                                    onChange={handleImageChange}
-                                                    style={{ display: "none" }}
-                                                  />
-                                                </div>
-
-                                                    <div className="flex-grow-1 align-self-center">
-                                                    <div className="text-muted">
-                                                        <h5>{userName || "admin"}</h5>
-                                                        <p className="mb-1">{email}</p>
-                                                        <p className="mb-0">Id no: #{idx}</p>
-                                                    </div>
-                                                    </div>
-                                                </div>
-                                                </Card.Body>
-                                            </Card>
-                                            </Col>
-                                        </Row>
-
-                                        <h4 className="card-title mb-4">Change User Info</h4>
-
-                                        <Card>
-                                          <Card.Body>
-                                            <Form
-                                              className="form-horizontal"
-                                              onSubmit={(e) => {
-                                                e.preventDefault();
-                                                validation.handleSubmit();
-                                                return false;
-                                              }}
-                                            >
-                                              {/* User Name Field */}
-                                              <Form.Group className="mb-3">
-                                                <Form.Label>User Name</Form.Label>
-                                                <Form.Control
-                                                  name="first_name"
-                                                  placeholder="Enter User Name"
-                                                  type="text"
-                                                  onChange={validation.handleChange}
-                                                  onBlur={validation.handleBlur}
-                                                  value={validation.values.first_name || ""}
-                                                  isInvalid={validation.touched.first_name && validation.errors.first_name}
-                                                />
-                                                {validation.touched.first_name && validation.errors.first_name && (
-                                                  <Form.Control.Feedback type="invalid">
-                                                    {validation.errors.first_name}
-                                                  </Form.Control.Feedback>
-                                                )}
-                                              </Form.Group>
-
-                                              {/* Email Field */}
-                                              <Form.Group className="mb-3">
-                                                <Form.Label>Email</Form.Label>
-                                                <Form.Control
-                                                  name="email"
-                                                  placeholder="Enter Email"
-                                                  type="email"
-                                                  onChange={validation.handleChange}
-                                                  onBlur={validation.handleBlur}
-                                                  value={validation.values.email || ""}
-                                                  isInvalid={validation.touched.email && validation.errors.email}
-                                                />
-                                                {validation.touched.email && validation.errors.email && (
-                                                  <Form.Control.Feedback type="invalid">
-                                                    {validation.errors.email}
-                                                  </Form.Control.Feedback>
-                                                )}
-                                              </Form.Group>
-
-                                              {/* Phone Number Field */}
-                                              <Form.Group className="mb-3">
-                                                <Form.Label>Phone Number</Form.Label>
-                                                <Form.Control
-                                                  name="phone"
-                                                  placeholder="Enter Phone Number"
-                                                  type="text"
-                                                  onChange={validation.handleChange}
-                                                  onBlur={validation.handleBlur}
-                                                  value={validation.values.phone || ""}
-                                                  isInvalid={validation.touched.phone && validation.errors.phone}
-                                                />
-                                                {validation.touched.phone && validation.errors.phone && (
-                                                  <Form.Control.Feedback type="invalid">
-                                                    {validation.errors.phone}
-                                                  </Form.Control.Feedback>
-                                                )}
-                                              </Form.Group>
-
-                                              {/* Password Field */}
-                                              <Form.Group className="mb-3">
-                                                <Form.Label>Password</Form.Label>
-                                                <Form.Control
-                                                  name="password"
-                                                  placeholder="Enter Password"
-                                                  type="password"
-                                                  onChange={validation.handleChange}
-                                                  onBlur={validation.handleBlur}
-                                                  value={validation.values.password || ""}
-                                                  isInvalid={validation.touched.password && validation.errors.password}
-                                                />
-                                                {validation.touched.password && validation.errors.password && (
-                                                  <Form.Control.Feedback type="invalid">
-                                                    {validation.errors.password}
-                                                  </Form.Control.Feedback>
-                                                )}
-                                              </Form.Group>
-
-                                              {/* City Field */}
-                                              <Form.Group className="mb-3">
-                                                <Form.Label>City</Form.Label>
-                                                <Form.Control
-                                                  name="city"
-                                                  placeholder="Enter City"
-                                                  type="text"
-                                                  onChange={validation.handleChange}
-                                                  onBlur={validation.handleBlur}
-                                                  value={validation.values.city || ""}
-                                                  isInvalid={validation.touched.city && validation.errors.city}
-                                                />
-                                                {validation.touched.city && validation.errors.city && (
-                                                  <Form.Control.Feedback type="invalid">
-                                                    {validation.errors.city}
-                                                  </Form.Control.Feedback>
-                                                )}
-                                              </Form.Group>
-
-                                              {/* Street Field */}
-                                              <Form.Group className="mb-3">
-                                                <Form.Label>Street</Form.Label>
-                                                <Form.Control
-                                                  name="street"
-                                                  placeholder="Enter Street"
-                                                  type="text"
-                                                  onChange={validation.handleChange}
-                                                  onBlur={validation.handleBlur}
-                                                  value={validation.values.street || ""}
-                                                  isInvalid={validation.touched.street && validation.errors.street}
-                                                />
-                                                {validation.touched.street && validation.errors.street && (
-                                                  <Form.Control.Feedback type="invalid">
-                                                    {validation.errors.street}
-                                                  </Form.Control.Feedback>
-                                                )}
-                                              </Form.Group>
-
-                                              {/* Hidden ID Field */}
-                                              <Form.Control name="idx" value={idx} type="hidden" />
-
-                                              <div className="text-center mt-4">
-                                                <Button type="submit" variant="danger">
-                                                  Update Profile
-                                                </Button>
-                                              </div>
-                                            </Form>
-                                          </Card.Body>
-                                        </Card>
-
-
-                                        
-                                    </div>
+                                  <p className="mb-0">{email}</p>
+                                  <p className="mb-0">{phone}</p>
                                 </div>
+                              </div>
                             </div>
-                        </Col>
+                          </Card.Body>
+                        </Card>
+                      </Col>
                     </Row>
-                </Container>
-            </div>
+
+                    <h4 className="card-title mb-4">Edit Profile</h4>
+
+                    <Card>
+                      <Card.Body>
+                        <Form
+                          className="form-horizontal"
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            validation.handleSubmit();
+                            return false;
+                          }}
+                        >
+                          <div className="form-group">
+                            <Form.Label>City</Form.Label>
+                            <Form.Control
+                              name="city"
+                              className="form-control"
+                              placeholder="Enter City"
+                              type="text"
+                              onChange={validation.handleChange}
+                              onBlur={validation.handleBlur}
+                              value={validation.values.city || ""}
+                              isInvalid={
+                                validation.touched.city &&
+                                validation.errors.city
+                              }
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {validation.errors.city}
+                            </Form.Control.Feedback>
+                          </div>
+
+                          <div className="form-group mt-3">
+                            <Form.Label>Street</Form.Label>
+                            <Form.Control
+                              name="street"
+                              className="form-control"
+                              placeholder="Enter Street"
+                              type="text"
+                              onChange={validation.handleChange}
+                              onBlur={validation.handleBlur}
+                              value={validation.values.street || ""}
+                              isInvalid={
+                                validation.touched.street &&
+                                validation.errors.street
+                              }
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {validation.errors.street}
+                            </Form.Control.Feedback>
+                          </div>
+
+                          <div className="form-group mt-3">
+                            <Form.Label>Avatar</Form.Label>
+                            <Form.Control
+                              name="avatar"
+                              className="form-control"
+                              type="file"
+                              onChange={(
+                                event: React.ChangeEvent<HTMLInputElement>
+                              ) =>
+                                validation.setFieldValue(
+                                  "avatar",
+                                  event.currentTarget.files
+                                    ? event.currentTarget.files[0]
+                                    : null
+                                )
+                              }
+                            />
+                          </div>
+
+                          <div className="text-center mt-4">
+                            <Button type="submit" variant="danger">
+                              Update Profile
+                            </Button>
+                          </div>
+                        </Form>
+                      </Card.Body>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </div>
     </React.Fragment>
-  )
-}
+  );
+};
 
 export default withRouter(UserProfile);
