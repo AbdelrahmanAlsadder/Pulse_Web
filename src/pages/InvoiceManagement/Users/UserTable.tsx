@@ -98,10 +98,7 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
         setDeletid(id);
     }, [delet])
 
-    // const handleDeleteId = () => {
-    //     dispatch(onDeleteUsers(deletid.id))
-    //     setDelet(false)
-    // }
+
 
     // // search
     // const handleSearch = (ele: any) => {
@@ -114,11 +111,11 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
     //     }
     // }
     // search
-  const handleSearch = async (ele: any) => {
-    const item = ele.value.trim(); // Trim whitespace
-
-    loadUsers(item);
-  };
+    const handleSearch = async (ele: any) => {
+      const item = ele.value.trim(); // Trim whitespace
+  
+      loadUsers(item);
+    };
 
     const [editUser, setEditUser] = useState<boolean>(false);
     const [edit, setEdit] = useState<any>();
@@ -262,7 +259,7 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
                         <div className="col-sm-auto ms-auto">
                            <div className="d-flex gap-3">
                             <div className="search-box">
-                                <Form.Control type="text" id="searchMemberList" placeholder="Search for Result" onChange={(e: any) => handleSearch(e.target)} />
+                                <Form.Control type="text" id="searchMemberList" placeholder="Search by Member Name" onChange={(e: any) => handleSearch(e.target)} />
                                 <i className="las la-search search-icon"></i>
                             </div>
                            

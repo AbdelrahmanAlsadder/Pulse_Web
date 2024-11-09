@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Col, Container, Row,Card, Alert, Button, Form  } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import logoDark from "../../assets/images/logo-dark.png"
-
+import { getFirebaseBackend } from "../../helpers/firebase_helper";
 import { isEmpty } from "lodash";
 
 // Formik Validation
@@ -30,7 +30,9 @@ const UserProfile = () => {
 
   const [userName, setUserName] = useState("Admin");
   const [profileImage, setProfileImage] = useState(avatar);
-
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const firebaseBackend = getFirebaseBackend();
+  const [info, setInfo] = useState<any>([]);
   const selectLayoutState = (state: any) => state.Profile;
   const userprofileData = createSelector(
     selectLayoutState,
@@ -44,7 +46,17 @@ const UserProfile = () => {
   const {
     user, success, error
   } = useSelector(userprofileData);
-
+  const loadUserInfo = async (item?: undefined) => {
+    try {
+      setIsLoading(true);
+      const productsList = await firebaseBackend.fetchUserInfo(item);
+      setInfo(productsList);
+    } catch (error) {
+      console.error("Error loading User Info:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (sessionStorage.getItem("authUser")) {
@@ -76,8 +88,8 @@ const UserProfile = () => {
     enableReinitialize: true,
   
     initialValues: {
-      first_name: userName || 'Admin',
-      email: email || 'admin@gmail.com',
+      first_name:'',
+      email:'',
       phone: '',
       password: '',
       city: '',

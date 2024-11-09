@@ -236,6 +236,8 @@ class FirebaseAuthBackend {
       picture: "",
       commercial_register: commercial_register ?? "",
       status: 0, // 1-admin 2-warehouse 3-pharmacy  (-1)- Disabled  0-pending
+      street:user.street,
+      city:user.city,
       createdDtm: firebase.firestore.FieldValue.serverTimestamp(),
       lastLoginTime: firebase.firestore.FieldValue.serverTimestamp(),
     };
@@ -284,8 +286,8 @@ class FirebaseAuthBackend {
       // If a keyword is provided, filter users by title
       if (keyword) {
         query = query
-          .where("title", ">=", keyword)
-          .where("title", "<=", keyword + "\uf8ff");
+          .where("username", ">=", keyword)
+          .where("username", "<=", keyword + "\uf8ff");
       }
   
       const querySnapshot = await query.get();
@@ -300,8 +302,32 @@ class FirebaseAuthBackend {
     }
   }
   
+  //fetch user info
   
+  async fetchUserInfo(keyword = "") {
+    try {
+      if (this.uuid != undefined) {
+        let query = this.firestore
+          .collection("users")
+          .where("store_id", "==", this.uuid); 
 
+        
+
+
+        const querySnapshot = await query.get();
+
+        return querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+      }
+      // Return an empty array if uuid is undefined
+      return [];
+    } catch (error) {
+      console.error("Error fetching User Info:", error);
+      throw error;
+    }
+  }
   
 
   /**

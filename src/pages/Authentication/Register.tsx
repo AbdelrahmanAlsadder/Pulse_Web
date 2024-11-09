@@ -65,6 +65,8 @@ const Register = () => {
       username: String,
       password: String,
       phone: String,
+      city:String,
+      street:String,
       CommercialRegister: File,
     },
     validationSchema: Yup.object({
@@ -82,7 +84,8 @@ const Register = () => {
         .min(10, "Phone number must be at least 10 digits"),
       CommercialRegister: Yup.mixed().required(
         "Please upload the Commercial Register"
-      ),
+      ),city: Yup.string().required("Please Enter City"),
+      street: Yup.string().required("Please Enter Street"),
     }),
     onSubmit: async (values: any) => {
       setLoader(true);
@@ -305,6 +308,47 @@ const Register = () => {
                                     {validation.errors.phone}
                                   </Form.Control.Feedback>
                                 </Form.Group>
+                                <Form.Group className="mb-3" controlId="city">
+  <Form.Label>
+    City <span className="text-danger">*</span>
+  </Form.Label>
+  <Form.Control
+    type="text"
+    name="city"
+    className="form-control bg-light border-light"
+    placeholder="Enter city"
+    onChange={validation.handleChange}
+    onBlur={validation.handleBlur}
+    value={validation.values.city || ""}
+    isInvalid={validation.touched.city && !!validation.errors.city}
+  />
+  {validation.touched.city && validation.errors.city ? (
+    <Form.Control.Feedback type="invalid">
+      {validation.errors.city}
+    </Form.Control.Feedback>
+  ) : null}
+</Form.Group>
+
+<Form.Group className="mb-3" controlId="street">
+  <Form.Label>
+    Street <span className="text-danger">*</span>
+  </Form.Label>
+  <Form.Control
+    type="text"
+    name="street"
+    className="form-control bg-light border-light"
+    placeholder="Enter street"
+    onChange={validation.handleChange}
+    onBlur={validation.handleBlur}
+    value={validation.values.street || ""}
+    isInvalid={validation.touched.street && !!validation.errors.street}
+  />
+  {validation.touched.street && validation.errors.street ? (
+    <Form.Control.Feedback type="invalid">
+      {validation.errors.street}
+    </Form.Control.Feedback>
+  ) : null}
+</Form.Group>
                                 {/* Legal Document Upload */}
                                 <Form.Group className="mb-3">
                                   <Form.Label>
