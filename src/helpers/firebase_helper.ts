@@ -183,19 +183,34 @@ class FirebaseAuthBackend {
   // Function to update a user by ID
   async updateUserById(id: string, updatedData: any) {
     try {
-      const productRef = this.firestore.collection("user").doc(id);
+      console.log("Submitting form with values2:", updatedData);
+      const productRef = this.firestore.collection("users").doc(id);
+  
+      // Make sure the document exists
+      const docSnapshot = await productRef.get();
+      if (!docSnapshot.exists) {
+        console.error("Document not found");
+        return;
+      }
+  
       await productRef.update({
-        username: updatedData.username || "",
-        phone: updatedData.phone || "",
-        email: updatedData.email || "",
-        status: updatedData.status || "",
+    
+        status: updatedData.status,
       });
+  
       console.log("User updated successfully");
-    } catch (error) {
-      console.error("Error updating User:", error);
+    } catch (error: any) {
+      if (error.code === 'permission-denied') {
+        console.error("Permission denied: Check Firestore rules.");
+      } else if (error.code === 'not-found') {
+        console.error("Document not found.");
+      } else {
+        console.error("Error updating user:", error.message);
+      }
       throw error;
     }
   }
+  
 
   /*
     add New User To Firestore
