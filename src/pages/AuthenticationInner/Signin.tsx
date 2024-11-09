@@ -53,7 +53,7 @@ const Signin = () => {
                                                     <Card.Body className="p-lg-5 p-4">
                                                         <div className="text-center">
                                                             <h5 className="mb-0">Welcome Back !</h5>
-                                                            <p className="text-muted mt-2">Sign in to continue to Invoika.</p>
+                                                            <p className="text-muted mt-2">Sign in to continue to PULSE.</p>
                                                         </div>
 
                                                         <div className="mt-4">
@@ -154,11 +154,7 @@ const Signin = () => {
                                             </Row>
                                         </Card>
 
-                                        <div className="mt-5 text-center">
-                                            <p className="mb-0 text-muted">
-                                                &copy; {new Date().getFullYear()} Invoika. Crafted with <i className="mdi mdi-heart text-danger"></i> by Themesbrand
-                                            </p>
-                                        </div>
+                                        
                                     </div>
                                 </div>
                             </div>

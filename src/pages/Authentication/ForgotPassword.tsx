@@ -62,7 +62,7 @@ const ForgotPassword = (props:any) => {
                                                     <div className="p-lg-5 p-4">
                                                         <div className="text-center">
                                                             <h5 className="mb-0">Forgot Password?</h5>
-                                                            <p className="text-muted mt-2">Reset password with Invoika</p>
+                                                            <p className="text-muted mt-2">Reset password with PULSE</p>
                                                         </div>
 
                                                         <div className="text-center my-5">
@@ -153,11 +153,6 @@ const ForgotPassword = (props:any) => {
                                     </Card>
                                     
                                     
-                                    <div className="mt-5 text-center">
-                                        <p className="mb-0 text-muted">©
-                                            <script>document.write(new Date().getFullYear())</script> Invoika. Crafted with <i className="mdi mdi-heart text-danger"></i> by Themesbrand
-                                        </p>
-                                    </div>
                                 </div>
                             </div>
                         </div>

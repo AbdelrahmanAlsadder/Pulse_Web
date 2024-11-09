@@ -5,7 +5,7 @@ import Simple from './Simple'
 import ThreeDBubble from './ThreeDBubble'
 
 const BubbleChart = () => {
-    document.title = "Apex Bubble Charts | Invoika - Admin & Dashboard Template"
+    document.title = "Apex Bubble Charts "
     return (
         <React.Fragment>
             <div className="page-content">

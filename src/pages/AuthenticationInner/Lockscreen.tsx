@@ -66,11 +66,7 @@ const Lockscreen = () => {
                                 </Card>
                                 
                                 
-                                <div className="mt-5 text-center">
-                                    <p className="mb-0 text-muted">©
-                                        <script>document.write(new Date().getFullYear())</script> Invoika. Crafted with <i className="mdi mdi-heart text-danger"></i> by Themesbrand
-                                    </p>
-                                </div>
+                               
                             </div>
                         </div>
                     </div>

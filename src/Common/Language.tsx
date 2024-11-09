@@ -46,7 +46,7 @@ const Language = () => {
                         >
                             <img
                                 src={get(languages, `${key}.flag`) || flagus}
-                                alt="Invoika"
+                                alt="PULSE"
                                 className="me-2 rounded"
                                 height="18"
                             />

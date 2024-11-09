@@ -57,7 +57,7 @@ const Signup = () => {
                                                     <div className="p-lg-5 p-4">
                                                         <div className="text-center">
                                                             <h5 className="mb-0">Create New Account</h5>
-                                                            <p className="text-muted mt-2">Get your free Invoika account now</p>
+                                                            <p className="text-muted mt-2">Get your free PULSE account now</p>
                                                         </div>
                                                     
                                                         <div className="mt-4">
@@ -125,7 +125,7 @@ const Signup = () => {
                                                                 </div>
                     
                                                                 <div className="fs-16 pb-2">
-                                                                    <p className="mb-0 fs-14 text-muted fst-italic">By registering you agree to the Invoika <Link to="#" className="text-primary text-decoration-underline fst-normal fw-medium">Terms of Use</Link></p>
+                                                                    <p className="mb-0 fs-14 text-muted fst-italic">By registering you agree to the PULSE <Link to="#" className="text-primary text-decoration-underline fst-normal fw-medium">Terms of Use</Link></p>
                                                                 </div>
                     
                                                                 <div className="mt-2">
@@ -171,11 +171,7 @@ const Signup = () => {
                                     </Card>
                                     
                                     
-                                    <div className="mt-5 text-center">
-                                        <p className="mb-0 text-muted">©
-                                            <script>document.write(new Date().getFullYear())</script> Invoika. Crafted with <i className="mdi mdi-heart text-danger"></i> by Themesbrand
-                                        </p>
-                                    </div>
+                                   
                                 </div>
                             </div>
                         </div>

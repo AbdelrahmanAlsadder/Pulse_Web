@@ -6,7 +6,7 @@ import MultipleRadar from './MultipleRadar'
 import PolygonRadar from './PolygonRadar'
 
 const RadarChart = () => {
-    document.title = "Apex Radar Charts | Invoika - Admin & Dashboard Template"
+    document.title = "Apex Radar Charts "
     return (
         <React.Fragment>
             <div className="page-content">
