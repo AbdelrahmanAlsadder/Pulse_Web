@@ -1,11 +1,4 @@
 //country images
-import USflag from "../../assets/images/flags/us.svg"
-import Italyflag from "../../assets/images/flags/italy.svg"
-import Spainflag from "../../assets/images/flags/spain.svg"
-import Russiaflag from "../../assets/images/flags/russia.svg"
-import Arabicflag from "../../assets/images/flags/ae.svg"
-import Frenchflag from "../../assets/images/flags/french.svg"
-
 import userImg1 from "../../assets/images/users/avatar-1.jpg";
 import userImg2 from "../../assets/images/users/avatar-2.jpg";
 import userImg3 from "../../assets/images/users/avatar-3.jpg";
@@ -77,51 +70,7 @@ const recentTrasaction =[
     }
 ]
 
-const salesRevenue =[
-    {
-        id:1,
-        countryImg: USflag,
-        country: "US",
-        order:6253,
-        earning:"$26,524"
-    },
-    {
-        id:2,
-        countryImg: Italyflag,
-        country: "Italy",
-        order:5563,
-        earning:"$32,562"
-    },
-    {
-        id:3,
-        countryImg: Spainflag,
-        country: "Spain",
-        order:3258,
-        earning:"$65,214"
-    },
-    {
-        id:4,
-        countryImg: Frenchflag,
-        country: "French",
-        order:6325,
-        earning:"$63,254"
-    },
-    {
-        id:5,
-        countryImg: Russiaflag,
-        country: "Russia",
-        order:8652,
-        earning:"$53,621"
-    },
-    {
-        id:6,
-        countryImg: Arabicflag,
-        country: "Arabic",
-        order:4256,
-        earning:"$86,526"
-    }
 
-]
 
 const invoiceList = [
     {
@@ -182,4 +131,4 @@ const invoiceList = [
 
 ]
 
-export {recentTrasaction,salesRevenue,invoiceList}
+export {recentTrasaction,invoiceList}

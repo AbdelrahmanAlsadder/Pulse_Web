@@ -1,4 +1,4 @@
-import { recentTrasaction, salesRevenue, invoiceList } from "./dashboard";
+import { recentTrasaction, invoiceList } from "./dashboard";
 
 import {
   transactionList,
@@ -19,7 +19,6 @@ import { payments } from "./payments";
 
 export {
   recentTrasaction,
-  salesRevenue,
   invoiceList,
   transactionList,
   taxesList,
