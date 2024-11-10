@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useEffect, useState } from "react";
 
 const Navdata = () => {
@@ -13,13 +9,8 @@ const Navdata = () => {
 
     
     // Components
-    const [isBootstrapUi, setIsBootstrapUi] = useState(false);
-    const [isAdvanceUi, setIsAdvanceUi] = useState(false);
+
     const [isForms, setIsForms] = useState(false);
-    const [isTables, setIsTables] = useState(false);
-    const [isCharts, setIsCharts] = useState(false);
-    const [isIcons, setIsIcons] = useState(false);
-    const [isMaps, setIsMaps] = useState(false);
 
 
 
@@ -60,31 +51,6 @@ const Navdata = () => {
         if (iscurrentState !== 'Pages') {
             setIsPages(false);
         }
-        if (iscurrentState !== 'Bootstrap UI') {
-            setIsBootstrapUi(false);
-        }
-        if (iscurrentState !== 'AdvanceUi') {
-            setIsAdvanceUi(false);
-        }
-        // if (iscurrentState !== 'Products') {
-        //     setIsProducts(false);
-        // }
-        if (iscurrentState !== 'Forms') {
-            setIsForms(false);
-        }
-        if (iscurrentState !== 'Tables') {
-            setIsTables(false);
-        }
-        if (iscurrentState !== 'Charts') {
-            setIsCharts(false);
-        }
-        if (iscurrentState !== 'Icons') {
-            setIsIcons(false);
-        }
-        if (iscurrentState !== 'Maps') {
-            setIsMaps(false);
-        }
-
 
         if (iscurrentState !== 'Orders') {
             setIsOrder(false);
@@ -99,14 +65,8 @@ const Navdata = () => {
         isOrder,        
         isAuth,
         isAuthentication,
-        isPages,
-        isBootstrapUi,
-        isAdvanceUi,        
+        isPages,  
         isForms,
-        isTables,
-        isCharts,
-        isIcons,
-        isMaps
     ]);
 
     const menuItems: any = [
@@ -180,9 +140,6 @@ const Navdata = () => {
             subItems: [
                 { id: 1, label: "Invoice", link: "/invoice", parentId: "invoiceManagement" },
                 { id: 2, label: "Add Invoice", link: "/invoice-add", parentId: "invoiceManagement" },
-                { id: 2, label: "Invoice Details", link: "/invoice-details", parentId: "invoiceManagement" },
-                
-            
                
             ],
         },
