@@ -1,7 +1,7 @@
 
 import React,{useState} from 'react'
 import UserTable from './UserTable'
-import BreadCrumb from '../../../Common/BreadCrumb'
+
 
 import { Container } from 'react-bootstrap'
 
@@ -18,7 +18,7 @@ const Users = () => {
     <React.Fragment>
               <div className="page-content">
                 <Container fluid>
-                    <BreadCrumb pageTitle="User" title="User" />
+             
                     <UserTable isShow={isShow} hideUserModal={hideUserModal}/>
                 </Container>   
                 </div> 

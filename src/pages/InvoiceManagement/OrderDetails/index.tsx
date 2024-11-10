@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import BreadCrumb from "../../../Common/BreadCrumb";
+
 import { Card, Container, Row, Col, Table, Dropdown } from "react-bootstrap";
 import logoDark from "../../../assets/images/logo-dark.png";
 import logoLight from "../../../assets/images/logo-light.png";
@@ -41,7 +41,7 @@ const OrderDetails = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <BreadCrumb pageTitle="Invoice" title="Invoices Details" />
+       
           <Row className="justify-content-center">
             <Col xxl={9}>
               <Card id="demo">

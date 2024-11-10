@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react'
-import BreadCrumb from '../../../Common/BreadCrumb'
+
 import { Alert, Button, Card, Col, Container, Form, Row, Table } from 'react-bootstrap';
 
 import logoDark from "../../../assets/images/logo-dark.png";
@@ -127,7 +127,7 @@ const AddInvoice = () => {
     <React.Fragment>
         <div className="page-content">
             <Container fluid>
-                <BreadCrumb pageTitle="Invoice" title="New Invoice" />
+                
                 <Row className="justify-content-center">
                         <Col xxl={9}>
                             <Card>
