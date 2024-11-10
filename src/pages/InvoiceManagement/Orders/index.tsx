@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 
 import { Container } from 'react-bootstrap'
-import PaymentTable from './PaymentTable'
+import PaymentTable from './OrderTable'
 
 const Orders = () => {
   document.title="Orders ";

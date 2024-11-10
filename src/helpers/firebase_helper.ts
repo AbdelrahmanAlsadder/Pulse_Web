@@ -548,6 +548,67 @@ class FirebaseAuthBackend {
       throw error;
     }
   };
+// to return the top 6 recent invoices only
+getOrderByUID3 = async (): Promise<any[]> => {
+  try {
+    const ordersCollection = this.firestore.collection("orders")
+      .where("status", "in", [2, -1])  // Filter orders based on status
+      .orderBy("date", "desc")  // Order by the 'date' field which is a Timestamp
+      .limit(6);  // Limit to the top 6 latest orders
+
+    const ordersSnapshot = await ordersCollection.get();
+    const orders = [];
+
+    for (const orderDoc of ordersSnapshot.docs) {
+      const orderData = orderDoc.data();
+      let totalAmount = 0;
+
+      // Filter products within the order based on store ID
+      const filteredProducts = await Promise.all(
+        orderData.products.map(async (productItem: any) => {
+          const productData = await this.getProductById(productItem.product);
+
+          if (productData && productData.store_id === this.uuid) {
+            const quantity = productItem.quantity;
+            const price = parseFloat(productData.price);
+
+            // Accumulate total amount for the order
+            totalAmount += quantity * price;
+
+            return {
+              ...productItem,
+              productDetails: productData,
+            };
+          }
+
+          return null;
+        })
+      );
+
+      const nonNullProducts = filteredProducts.filter(Boolean);
+
+      if (nonNullProducts.length > 0) {
+        // Fetch user details using getUserDetailsByUid method
+        const userDetails = await this.getUserDetailsByUid(orderData.user_id);
+
+        orders.push({
+          id: orderDoc.id,
+          ...orderData,
+          products: nonNullProducts,
+          user: userDetails,
+          totalAmount,
+        });
+      }
+    }
+
+    return orders;
+  } catch (error) {
+    console.error("Error fetching orders by store UID:", error);
+    throw error;
+  }
+};
+
+
 
   /**
    * Retrieves a specific order by its ID, containing products from the specified store (by store ID).
