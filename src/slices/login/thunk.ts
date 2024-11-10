@@ -7,7 +7,6 @@ import {
   apiError,
   reset_login_flag,
 } from "./reducer";
-import { postFakeLogin, postJwtLogin } from "../../helpers/fakebackend_helper";
 import { toast, Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
