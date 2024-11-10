@@ -9,14 +9,11 @@ import {
   deleteUsers as onDeleteUsers,
 } from "../../../slices/thunk";
 import TableContainer from "../../../Common/Tabledata/TableContainer";
-import { DeleteModal } from "../../../Common/DeleteModal";
-import { handleSearchData } from "../../../Common/Tabledata/SorttingData";
 import EditUsers from "../../../Common/CrudModal/EditUsers";
 import AddUsers from "../../../Common/CrudModal/AddUsers";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
 import moment from "moment";
-import firebase from "firebase/app";
 import "firebase/storage";
 
 interface userProps {
