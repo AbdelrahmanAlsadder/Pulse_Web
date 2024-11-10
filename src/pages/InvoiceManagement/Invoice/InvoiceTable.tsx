@@ -1,46 +1,60 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import TableContainer from "../../../Common/Tabledata/TableContainer";
-import { DeleteModal } from "../../../Common/DeleteModal";
-import { Link } from "react-router-dom";
-import { Card, Col, Dropdown, Form, Row } from "react-bootstrap";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { Card, Col, Dropdown, Form, Nav, Row, Tab } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { createSelector } from "reselect";
 import {
-  getClientInvoices as onGetClientInvoices,
-  deleteClientInvoices as onDeleteClientInvoices,
+  getPayments as onGetPayments,
+  deletePayment as onDeletePayment,
 } from "../../../slices/thunk";
+import TableContainer from "../../../Common/Tabledata/TableContainer";
+import { DeleteModal } from "../../../Common/DeleteModal";
 import { handleSearchData } from "../../../Common/Tabledata/SorttingData";
+import EditPayment from "../../../Common/CrudModal/EditPayment";
+import Addpayment from "../../../Common/CrudModal/Addpayment";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
-import EditInvoice from "../../../Common/CrudModal/EditInvoice";
-import InvoiceWidget from "./InvoiceWidget";
+import { getFirebaseBackend } from "../../../helpers/firebase_helper";
+import { Link } from "react-router-dom";
+import moment from "moment";
 
-const InvoiceTable = () => {
-  const dispatch = useDispatch();
+interface paymentProps {
+  isShow: any;
+  hidePaymentModal: any;
+}
 
-  const selectClientInvoiceList = createSelector(
+const InvoiceTable = ({ isShow, hidePaymentModal }: paymentProps) => {
+  const selectPaymentsList = createSelector(
     (state: any) => state.Invoice,
     (invoices: any) => ({
-      clientInvoicesList: invoices.clientInvoicesList,
+      paymentList: invoices.paymentList,
     })
   );
 
-  const { clientInvoicesList } = useSelector(selectClientInvoiceList);
+  const { paymentList } = useSelector(selectPaymentsList);
 
-  const [invoices, setInvoices] = useState<any>([]);
-
+  const [payments, setPayments] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const firebaseBackend = getFirebaseBackend();
+  console.log("payments :>> ", payments);
+  const loadOrder = async (item?: undefined) => {
+    try {
+      setIsLoading(true);
+      const productsList = await firebaseBackend.getOrderByUID2(item);
+      setPayments(productsList);
+    } catch (error) {
+      console.error("Error loading products:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
-    dispatch(onGetClientInvoices());
-  }, [dispatch]);
-
-  useEffect(() => {
-    setInvoices(clientInvoicesList);
-  }, [clientInvoicesList]);
+    loadOrder();
+  }, [firebaseBackend]);
 
   // Delete modal
-
   const [delet, setDelet] = useState<boolean>(false);
   const [deletid, setDeletid] = useState<any>();
+
   const handleDeleteModal = useCallback(
     (id: any) => {
       setDelet(!delet);
@@ -50,43 +64,42 @@ const InvoiceTable = () => {
   );
 
   const handleDeleteId = () => {
-    dispatch(onDeleteClientInvoices(deletid.id));
+    // dispatch(onDeletePayment(deletid.id));
     setDelet(false);
   };
 
-  // search
-  const handleSearch = (ele: any) => {
-    let item = ele.value.toLowerCase();
-
-    if (item === "All Tasks") {
-      setInvoices([...clientInvoicesList]);
+  const toggleTab = (type: any) => {
+    if (type !== "all") {
+      setPayments(
+        paymentList.filter((payment: any) => payment.status === type)
+      );
     } else {
-      handleSearchData({
-        data: clientInvoicesList,
-        item: item,
-        setState: setInvoices,
-      });
+      setPayments(paymentList);
     }
   };
 
-  // edit data
-
-  const [editInvoices, setEditInvoices] = useState<boolean>(false);
+  const [editPayment, setEditPayment] = useState<boolean>(false);
   const [edit, setEdit] = useState<any>();
 
-  const handleCloseEdit = () => setEditInvoices(false);
-  const handleEditInvoices = (item: any) => {
-    setEditInvoices(true);
+  const handleCloseEdit = () => setEditPayment(false);
+  const handleEditPayment = (item: any) => {
+    setEditPayment(true);
     setEdit({
       id: item.id,
-      invoiceId: item.invoiceId,
-      clientImage: item.clientImage,
-      clientName: item.clientName,
-      email: item.email,
+      member: item.member,
       date: item.date,
-      billed: item.billed,
+      paymentDetails: item.paymentDetails,
+      paymentType: item.paymentType,
+      amount: item.amount,
       status: item.status,
     });
+  };
+
+  // search
+  const handleSearch = async (ele: any) => {
+    const item = ele.value.trim(); // Trim whitespace
+
+    loadOrder(item);
   };
 
   interface columnsType {
@@ -101,103 +114,64 @@ const InvoiceTable = () => {
   const columns: columnsType[] = useMemo(
     () => [
       {
-        Header: () => (
-          <Form>
-            <Form.Check type="checkbox" />
-          </Form>
-        ),
-        accessor: "id",
-        key: "id",
-        Filter: false,
-        isSortable: false,
-        width: 50,
-        Cell: () => (
-          <Form>
-            <Form.Check type="checkbox" />
-          </Form>
-        ),
-      },
-      {
-        Header: "INVOICE ID",
-        accessor: "invoiceId",
+        Header: "Pharmacy",
+        accessor: "member",
         Filter: false,
         isSortable: true,
+        Cell: (cell: any) => <>{cell.row.original.user.username}</>,
       },
       {
-        Header: "CLIENT",
-        accessor: "clientName",
-        Filter: false,
-        isSortable: true,
-        Cell: (cell: any) => {
-          return (
-            <div>
-              <img
-                src={cell.row.original.clientImage}
-                alt=""
-                className="avatar-xs rounded-circle me-2"
-              />
-              <Link to="#" className="text-body align-middle fw-medium">
-                {cell.row.original.clientName}
-              </Link>
-            </div>
-          );
-        },
-      },
-      {
-        Header: "EMAIL",
-        accessor: "email",
-        Filter: false,
-        isSortable: true,
-      },
-      {
-        Header: "DATE",
+        Header: "Date",
         accessor: "date",
         Filter: false,
         isSortable: true,
+        Cell: (cell: any) => <>{moment(cell.row.original.date.toDate()).format(
+          "MMMM Do YYYY"
+        )}</>,
+        
       },
+
       {
-        Header: "BILLED",
-        accessor: "billed",
+        Header: "Amount",
+        accessor: "totalAmount",
         Filter: false,
         isSortable: true,
+        Cell: (cell: any) => <>${cell.row.original.totalAmount}</>,
       },
       {
-        Header: "STATUS",
+        Header: "Status",
         accessor: "status",
+        key: "status",
         Filter: false,
         isSortable: true,
         Cell: (cell) => {
           switch (cell.row.original.status) {
-            case "Paid":
-              return (
-                <span className="badge bg-success-subtle text-success p-2">
-                  {cell.row.original.status}
-                </span>
-              );
-            case "Unpaid":
-              return (
-                <span className="badge bg-warning-subtle text-warning p-2">
-                  {cell.row.original.status}
-                </span>
-              );
-            case "Cancel":
+            case -1:
               return (
                 <span className="badge bg-danger-subtle text-danger p-2">
-                  {cell.row.original.status}
+                  Rejected
                 </span>
               );
-            case "Refund":
+            case 0:
+              return (
+                <span className="badge bg-warning-subtle text-warning p-2">
+                  Order Placed
+                </span>
+              );
+            case 1:
+              return (
+                <span className="badge bg-success-subtle text-success p-2">
+                  In Transit
+                </span>
+              );
+            case 2:
               return (
                 <span className="badge bg-info-subtle text-info p-2">
-                  {cell.row.original.status}
+                  Completed
                 </span>
               );
             default:
-              return (
-                <span className="badge bg-success-subtle text-success p-2">
-                  {cell.row.original.status}
-                </span>
-              );
+              return null; // Return null if the status is not recognized
           }
         },
       },
@@ -205,74 +179,41 @@ const InvoiceTable = () => {
         Header: "Action",
         accessor: "action",
         Filter: false,
+        style: { width: "12%" },
+
         isSortable: false,
         Cell: (cell: any) => (
-          <Dropdown>
-            <Dropdown.Toggle
-              as="button"
-              className="btn btn-soft-secondary btn-sm arrow-none"
-            >
-              <i className="las la-ellipsis-h align-middle fs-18"></i>
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="dropdown-menu-end">
-              <li>
-                <Dropdown.Item>
-                  <i className="las la-eye fs-18 align-middle me-2 text-muted"></i>
-                  View
-                </Dropdown.Item>
-              </li>
-              <li>
-                <Dropdown.Item
-                  onClick={() => {
-                    const item = cell.row.original;
-                    handleEditInvoices(item);
-                  }}
-                >
-                  <i className="las la-pen fs-18 align-middle me-2 text-muted"></i>
-                  Edit
-                </Dropdown.Item>
-              </li>
-              <li>
-                <Dropdown.Item>
-                  <i className="las la-file-download fs-18 align-middle me-2 text-muted"></i>
-                  Download
-                </Dropdown.Item>
-              </li>
-              <li className="dropdown-divider"></li>
-              <li>
-                <Dropdown.Item
-                  className="remove-item-btn"
-                  onClick={() => {
-                    const item = cell.row.original;
-                    handleDeleteModal(item);
-                  }}
-                >
-                  <i className="las la-trash-alt fs-18 align-middle me-2 text-muted"></i>
-                  Delete
-                </Dropdown.Item>
-              </li>
-            </Dropdown.Menu>
-          </Dropdown>
+          <Link
+            to={`/invoice-details/${cell.row.original.id}`}
+            className="btn btn-soft-secondary btn-sm arrow-none d-inline-flex align-items-center"
+          >
+            <i className="las la-eye fs-18 align-middle text-muted"></i>
+          </Link>
         ),
       },
     ],
     [handleDeleteModal]
   );
+
   return (
     <React.Fragment>
       <Row className="pb-4 gy-3">
         <Col sm={4}>
-          <Link to="/invoice-add" className="btn btn-primary addMembers-modal">
-            <i className="las la-plus me-1"></i> Add Invoices
-          </Link>
+          {/* <button
+            className="btn btn-primary addPayment-modal"
+            onClick={hidePaymentModal}
+          >
+            <i className="las la-plus me-1"></i> Add Payment
+          </button> */}
         </Col>
 
-        <div className="col-sm-auto ms-auto">
+        {/* <div className="col-sm-auto ms-auto">
           <div className="d-flex gap-3">
             <div className="search-box">
               <Form.Control
                 type="text"
-                placeholder="Search for name or designation..."
+                id="searchMemberList"
+                placeholder="Search for Result"
                 onChange={(e: any) => handleSearch(e.target)}
               />
               <i className="las la-search search-icon"></i>
@@ -285,40 +226,94 @@ const InvoiceTable = () => {
                 <i className="las la-ellipsis-v fs-18"></i>
               </Dropdown.Toggle>
               <Dropdown.Menu>
-                <Dropdown.Item>Print</Dropdown.Item>
-                <Dropdown.Item>Export to Excel</Dropdown.Item>
+                <Dropdown.Item>All</Dropdown.Item>
+                <Dropdown.Item>Last Week</Dropdown.Item>
+                <Dropdown.Item>Last Month</Dropdown.Item>
+                <Dropdown.Item>Last Year</Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </div>
-        </div>
+        </div> */}
       </Row>
-
-      <InvoiceWidget />
 
       <Row>
         <Col xl={12}>
           <Card>
             <Card.Body>
-              {invoices && invoices.length > 0 ? (
-                <TableContainer
-                  isPagination={true}
-                  columns={columns}
-                  data={invoices || []}
-                  customPageSize={9}
-                  divClassName="table-card table-responsive"
-                  tableClass="table-hover table-nowrap align-middle mb-0"
-                  isBordered={false}
-                  PaginationClass="align-items-center mt-4 gy-3"
-                />
-              ) : (
-                <NoSearchResult />
-              )}
+              <Tab.Container defaultActiveKey="all">
+                <Nav
+                  as="ul"
+                  variant="tabs"
+                  className="nav-tabs nav-tabs-custom nav-success mb-3"
+                >   {/* 
+                  <Nav.Item as="li">
+                    <Nav.Link
+                      eventKey="all"
+                      onClick={() => {
+                        toggleTab("all");
+                      }}
+                    >
+                      All
+                    </Nav.Link>
+                  </Nav.Item>
+               <Nav.Item as="li">
+                    <Nav.Link
+                      eventKey="paid"
+                      onClick={() => {
+                        toggleTab("Paid");
+                      }}
+                    >
+                      Paid
+                    </Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item as="li">
+                    <Nav.Link
+                      eventKey="pending"
+                      onClick={() => {
+                        toggleTab("Pending");
+                      }}
+                    >
+                      Pending
+                    </Nav.Link>
+                  </Nav.Item> */}
+                </Nav>
+
+                <Card>
+                  <Card.Body>
+                    {payments && payments.length > 0 ? (
+                      <TableContainer
+                        isPagination={true}
+                        columns={columns}
+                        data={payments || []}
+                        customPageSize={9}
+                        divClassName="table-card table-responsive"
+                        tableClass="table-hover table-nowrap align-middle mb-0"
+                        isBordered={false}
+                        theadClass="table-light"
+                        PaginationClass="align-items-center mt-4 gy-3"
+                      />
+                    ) : (
+                      <NoSearchResult />
+                    )}
+                  </Card.Body>
+                </Card>
+              </Tab.Container>
             </Card.Body>
           </Card>
         </Col>
       </Row>
 
-      {/* Delete */}
+      {/* <Addpayment
+        isShow={isShow}
+        handleClose={hidePaymentModal}
+        handleShow={isShow}
+      /> */}
+
+      <EditPayment
+        isShow={editPayment}
+        handleClose={handleCloseEdit}
+        edit={edit}
+      />
 
       <DeleteModal
         show={delet}
@@ -326,14 +321,10 @@ const InvoiceTable = () => {
         deleteModalFunction={handleDeleteId}
       />
       <ToastContainer />
-
-      <EditInvoice
-        isShow={editInvoices}
-        handleClose={handleCloseEdit}
-        edit={edit}
-      />
     </React.Fragment>
   );
 };
+
+
 
 export default InvoiceTable;

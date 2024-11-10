@@ -41,7 +41,7 @@ const authProtectedRoutes: Array<RouteObject> = [
 
   { path: "/invoice", component: <Invoice /> },
   { path: "/invoice-add", component: <AddInvoice /> },
-  { path: "/invoice-details", component: <InvoiceDetails /> },
+  { path: "/invoice-details/:orderId", component: <InvoiceDetails /> },
   { path: "/product-add", component: <AddProduct /> },
   { path: "/product-list", component: <ProductList /> },
   { path: "/orders", component: <Orders /> },

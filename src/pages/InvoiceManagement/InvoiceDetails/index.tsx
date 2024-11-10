@@ -1,209 +1,428 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
 
-import { Card, Container, Row, Col, Table } from 'react-bootstrap';
+import { Card, Container, Row, Col, Table, Dropdown } from "react-bootstrap";
 import logoDark from "../../../assets/images/logo-dark.png";
-import logoLight from "../../../assets/images/logo-light.png"
-import { Link } from 'react-router-dom';
+import logoLight from "../../../assets/images/logo-light.png";
+import { Link, useParams } from "react-router-dom";
+import { getFirebaseBackend } from "../../../helpers/firebase_helper";
+import moment from "moment";
+import { toast } from "react-toastify";
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+//jspdf and html are downloaded dependencies so we can download the invoice
+// i want it to be downloaded as pdf so i chose jspdf
+//html2canvas basicaaly takes a screen shot of the page and then we turn it into pdf
+const handleDownload = async () => {
+    const element = document.getElementById("demo"); // Target the specific div with id="demo" because i don't want to download the entire screen
+  
+    if (!element) {
+      toast.error("Invoice content not found!");
+      return;
+    }
+  
+    // Temporarily hide the buttons by setting inline styles
+    //so when we take the screen shot of the page the buttons are not showing
+    //which means they will not be showing in the downloaded pdf
+    const buttons = element.querySelectorAll(".d-print-none");
+    buttons.forEach((btn) => {
+      (btn as HTMLElement).style.display = "none";
+    });
+  
+    // Capture the content as a PDF
+    const canvas = await html2canvas(element, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+  
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+  
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`document.pdf`);
+  
+    // Restore the buttons after generating the PDF
+    buttons.forEach((btn) => {
+      (btn as HTMLElement).style.display = ""; // Restore original display style
+    });
+  };
+  
 
 const InvoiceDetails = () => {
-    document.title = "Invoice Details ";
-    return (
+  document.title = "Invoice Details ";
+  const { orderId } = useParams();
+
+  const [order, setOrder] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const firebaseBackend = getFirebaseBackend();
+  console.log("order :>> ", order);
+
+  const loadOrder = async (orderId: string) => {
+    try {
+      setIsLoading(true);
+      const OrderDetails = await firebaseBackend.getOrderById(orderId);
+      setOrder(OrderDetails);
+    } catch (error) {
+      console.error("Error fetching order:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (orderId) loadOrder(orderId);
+  }, [orderId]);
+
+  if (isLoading) return <div>Loading...</div>;
+
+  if (!order) return <div>Order not found!</div>;
+
+  return (
     <React.Fragment>
-        <div className="page-content">
-            <Container fluid>
-               
-                <Row className="justify-content-center">
-                        <Col xxl={9}>
-                            <Card id="demo">
-                                <Card.Body>
-                                    <Row className="p-4">
-                                        <Col lg={9}>
-                                            <h3 className="fw-bold mb-4">Invoice: Lezeco-00335 </h3>
-                                            <Row className="g-4">
-                                                <Col lg={6} className="col-6">
-                                                    <p className="text-muted mb-1 text-uppercase fw-medium fs-14">Invoice No</p>
-                                                    <h5 className="fs-16 mb-0">#VL<span id="invoice-no">25000355</span></h5>
-                                                </Col>
-                                                
-                                                <Col lg={6} className="col-6">
-                                                    <p className="text-muted mb-1 text-uppercase fw-medium fs-14">Date</p>
-                                                    <h5 className="fs-16 mb-0"><span id="invoice-date">23 Nov, 2021</span> <small className="text-muted" id="invoice-time">02:36PM</small></h5>
-                                                </Col>
-                                                
-                                                <Col lg={6} className="col-6">
-                                                    <p className="text-muted mb-1 text-uppercase fw-medium fs-14">Payment Status</p>
-                                                    <span className="badge bg-success-subtle text-success fs-11" id="payment-status">Paid</span>
-                                                </Col>
-                                                
-                                                <Col lg={6} className="col-6">
-                                                    <p className="text-muted mb-1 text-uppercase fw-medium fs-14">Total Amount</p>
-                                                    <h5 className="fs-16 mb-0">$<span id="total-amount">755.96</span></h5>
-                                                </Col>                                                
-                                            </Row>
-                                        </Col>
-                                        <Col lg={3}>
-                                            <div className="mt-sm-0 mt-3">
-                                                <div className="mb-4">
-                                                    <img src={logoDark} className="card-logo card-logo-dark" alt="logo dark" height="17" />
-                                                    <img src={logoLight} className="card-logo card-logo-light" alt="logo light" height="17" />
-                                                </div>
-                                                <h6 className="text-muted text-uppercase fw-semibold">Address</h6>
-                                                <p className="text-muted mb-1" id="address-details">California, United States</p>
-                                                <p className="text-muted mb-1" id="zip-code"><span>Zip-code:</span> 90201</p>
-                                                <h6><span className="text-muted fw-normal">Email:</span><span id="email">Invoika@themesbrand.com</span></h6>
-                                                <h6><span className="text-muted fw-normal">Website:</span> <a href="https://themesbrand.com/" className="link-primary" target="_blank" rel="noreferrer" id="website">www.themesbrand.com</a></h6>
-                                                <h6 className="mb-0"><span className="text-muted fw-normal">Contact No: </span><span id="contact-no"> +(01) 234 6789</span></h6>
-                                            </div>
-                                        </Col>
-                                    </Row>
+      <div className="page-content">
+        <Container fluid>
+       
+          <Row className="justify-content-center">
+            <Col xxl={9}>
+              <Card id="demo">
+                <Card.Body>
+                  <Row className="p-4">
+                    <Col lg={9}>
+                      <h3 className="fw-bold mb-4">
+                        Invoice: {order.user.username}-{orderId?.slice(0, 5)}
+                      </h3>
+                      <Row className="g-4">
+                        <Col lg={6} className="col-6">
+                          <p className="text-muted mb-1 text-uppercase fw-medium fs-14">
+                            Invoice No
+                          </p>
+                          <h5 className="fs-16 mb-0">
+                            #PULSE-{orderId?.slice(0, 5)}
+                          </h5>
+                        </Col>
 
-                                    <Row className="p-4 border-top border-top-dashed">
-                                        <Col lg={9}>
-                                            <Row className="g-3">
-                                                <div className="col-6">
-                                                    <h6 className="text-muted text-uppercase fw-semibold mb-3">Billing Address</h6>
-                                                    <p className="fw-medium mb-2" id="billing-name">David Nichols</p>
-                                                    <p className="text-muted mb-1" id="billing-address-line-1">305 S San Gabriel Blvd</p>
-                                                    <p className="text-muted mb-1"><span>Phone: +</span><span id="billing-phone-no">(123) 456-7890</span></p>
-                                                    <p className="text-muted mb-0"><span>Tax: </span><span id="billing-tax-no">12-3456789</span> </p>
-                                                </div>
-                                                
-                                                <div className="col-6">
-                                                    <h6 className="text-muted text-uppercase fw-semibold mb-3">Shipping Address</h6>
-                                                    <p className="fw-medium mb-2" id="shipping-name">David Nichols</p>
-                                                    <p className="text-muted mb-1" id="shipping-address-line-1">305 S San Gabriel Blvd</p>
-                                                    <p className="text-muted mb-1"><span>Phone: +</span><span id="shipping-phone-no">(123) 456-7890</span></p>
-                                                </div>                                                
-                                            </Row>                                            
-                                        </Col>
+                        <Col lg={6} className="col-6">
+                          <p className="text-muted mb-1 text-uppercase fw-medium fs-14">
+                            Date
+                          </p>
+                          <h5 className="fs-16 mb-0">
+                            <span>
+                              {moment(order.date.toDate()).format(
+                                "MMMM Do YYYY"
+                              )}
+                            </span>{" "}
+                            <small className="text-muted">
+                              {moment(order.date.toDate()).format("h:mm A")}
+                            </small>
+                          </h5>
+                        </Col>
 
-                                        <Col lg={3}>
-                                                <h6 className="text-muted text-uppercase fw-semibold mb-3">Total Amount</h6>
-                                                <h3 className="fw-bold mb-2">$755.96</h3>
-                                                <span className="badge bg-success-subtle text-success fs-12">Due Date: 23 Des, 2022</span>
-                                        </Col>
+                        <Col lg={6} className="col-6">
+                          <p className="text-muted mb-1 fw-medium fs-14">
+                            Order Status
+                          </p>
+                          {(() => {
+                            switch (order.status) {
+                              case -1:
+                                return (
+                                  <span className="badge bg-danger-subtle text-danger p-2">
+                                    Rejected
+                                  </span>
+                                );
+                              case 0:
+                                return (
+                                  <span className="badge bg-warning-subtle text-warning p-2">
+                                    Order Placed
+                                  </span>
+                                );
+                              case 1:
+                                return (
+                                  <span className="badge bg-success-subtle text-success p-2">
+                                    In Transit
+                                  </span>
+                                );
+                              case 2:
+                                return (
+                                  <span className="badge bg-info-subtle text-info p-2">
+                                    Completed
+                                  </span>
+                                );
+                              default:
+                                return null; // Return null if the status is not recognized
+                            }
+                          })()}
+                        </Col>
 
-                                    </Row>
+                        <Col lg={6} className="col-6">
+                          <p className="text-muted mb-1 text-uppercase fw-medium fs-14">
+                            Total Amount
+                          </p>
+                          <h5 className="fs-16 mb-0">
+                            ${order.totalAmount.toFixed(2)}
+                          </h5>
+                        </Col>
+                      </Row>
+                    </Col>
+                    <Col lg={3}>
+                      <div className="mt-sm-0 mt-3">
+                        <div className="mb-4">
+                          <img
+                            src={logoDark}
+                            className="card-logo card-logo-dark"
+                            alt="logo dark"
+                            height="17"
+                          />
+                          <img
+                            src={logoLight}
+                            className="card-logo card-logo-light"
+                            alt="logo light"
+                            height="17"
+                          />
+                        </div>
+                      </div>
+                    </Col>
+                  </Row>
 
-                                    <Row>
-                                        <Col lg={12}>
-                                            <Card.Body className="card-body p-4">
-                                                <div className="table-responsive">
-                                                    <Table className="table-borderless text-center table-nowrap align-middle mb-0">
-                                                        <thead>
-                                                            <tr className="table-active">
-                                                                <th scope="col" style={{width: "50px"}}>#</th>
-                                                                <th scope="col">Product Details</th>
-                                                                <th scope="col">Price</th>
-                                                                <th scope="col">Quantity</th>
-                                                                <th scope="col" className="text-end">Amount</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody id="products-list">
-                                                            <tr>
-                                                                <th scope="row">01</th>
-                                                                <td className="text-start">
-                                                                    <span className="fw-medium">Sweatshirt for Men (Pink)</span>
-                                                                    <p className="text-muted mb-0">Graphic Print Men &amp; Women Sweatshirt</p>
-                                                                </td>
-                                                                <td>$119.99</td>
-                                                                <td>02</td>
-                                                                <td className="text-end">$239.98</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th scope="row">02</th>
-                                                                <td className="text-start">
-                                                                    <span className="fw-medium">Noise NoiseFit Endure Smart Watch</span>
-                                                                    <p className="text-muted mb-0">32.5mm (1.28 Inch) TFT Color Touch Display</p>
-                                                                </td>
-                                                                <td>$94.99</td>
-                                                                <td>01</td>
-                                                                <td className="text-end">$94.99</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th scope="row">03</th>
-                                                                <td className="text-start">
-                                                                    <span className="fw-medium">350 ml Glass Grocery Container</span>
-                                                                    <p className="text-muted mb-0">Glass Grocery Container (Pack of 3, White)</p>
-                                                                </td>
-                                                                <td>$24.99</td>
-                                                                <td>01</td>
-                                                                <td className="text-end">$24.99</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <th scope="row">04</th>
-                                                                <td className="text-start">
-                                                                    <span className="fw-medium">Fabric Dual Tone Living Room Chair</span>
-                                                                    <p className="text-muted mb-0">Chair (White)</p>
-                                                                </td>
-                                                                <td>$340.00</td>
-                                                                <td>01</td>
-                                                                <td className="text-end">$340.00</td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </Table>
-                                                </div>
-                                                <div className="border-top border-top-dashed mt-2">
-                                                    <Table className="table-borderless table-nowrap align-middle mb-0 ms-auto" style={{width:"250px"}}>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td>Sub Total</td>
-                                                                <td className="text-end">$699.96</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>Estimated Tax (12.5%)</td>
-                                                                <td className="text-end">$44.99</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>Discount <small className="text-muted">(Invoika15)</small></td>
-                                                                <td className="text-end">- $53.99</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>Shipping Charge</td>
-                                                                <td className="text-end">$65.00</td>
-                                                            </tr>
-                                                            <tr className="border-top border-top-dashed fs-15">
-                                                                <th scope="row">Total Amount</th>
-                                                                <th className="text-end">$755.96</th>
-                                                            </tr>
-                                                        </tbody>
-                                                    </Table>
-                                                    
-                                                </div>
-                                                <div className="mt-3">
-                                                    <h6 className="text-muted text-uppercase fw-semibold mb-3">Payment Details:</h6>
-                                                    <p className="text-muted mb-1">Payment Method: <span className="fw-medium" id="payment-method">Mastercard</span></p>
-                                                    <p className="text-muted mb-1">Card Holder: <span className="fw-medium" id="card-holder-name">David Nichols</span></p>
-                                                    <p className="text-muted mb-1">Card Number: <span className="fw-medium" id="card-number">xxx xxxx xxxx 1234</span></p>
-                                                    <p className="text-muted">Total Amount: <span className="fw-medium" id="">$ </span><span id="card-total-amount">755.96</span></p>
-                                                </div>
-                                                <div className="mt-4">
-                                                    <div className="alert alert-info">
-                                                        <p className="mb-0"><span className="fw-semibold">NOTES:</span>
-                                                            <span id="note">All accounts are to be paid within 7 days from receipt of invoice. To be paid by cheque or
-                                                                credit card or direct payment online. If account is not paid within 7
-                                                                days the credits details supplied as confirmation of work undertaken
-                                                                will be charged the agreed quoted fee noted above.
-                                                            </span>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="hstack gap-2 justify-content-end d-print-none mt-4">
-                                                    <Link to="#" className="btn btn-info"><i className="ri-printer-line align-bottom me-1"></i> Print</Link>
-                                                    <Link to="#" className="btn btn-primary"><i className="ri-download-2-line align-bottom me-1"></i> Download</Link>
-                                                </div>
-                                            </Card.Body>
-                                            
-                                        </Col>
-                                    </Row>
-                                </Card.Body>
-                            </Card>
-                        </Col>                        
-                    </Row>
-            </Container>                
-            </div>
+                  <Row className="p-4 border-top border-top-dashed">
+                    <Col lg={9}>
+                      <Row className="g-3">
+                        <div className="col-6">
+                          <h6 className="text-muted text-uppercase fw-semibold mb-3">
+                            Warehouse Address
+                          </h6>
+                          {/* <p className="fw-medium mb-2">
+                            {order.billingAddress.name}
+                          </p>
+                          <p className="text-muted mb-1">
+                            {order.billingAddress.line1}
+                          </p>
+                          <p className="text-muted mb-1">
+                            <span>Phone: </span>
+                            <span>{order.billingAddress.phone}</span>
+                          </p>
+                          <p className="text-muted mb-0">
+                            <span>Tax: </span>
+                            <span>{order.billingAddress.tax}</span>
+                          </p> */}
+                        </div>
+
+                        <div className="col-6">
+                          <h6 className="text-muted text-uppercase fw-semibold mb-3">
+                            Shipping Address
+                          </h6>
+                          {/* <p className="fw-medium mb-2">
+                            {order.shippingAddress.name}
+                          </p>
+                          <p className="text-muted mb-1">
+                            {order.shippingAddress.line1}
+                          </p>
+                          <p className="text-muted mb-1">
+                            <span>Phone: </span>
+                            <span>{order.shippingAddress.phone}</span>
+                          </p> */}
+                        </div>
+                      </Row>
+                    </Col>
+                    <Col lg={3}></Col>
+                  </Row>
+
+                  <Row>
+                    <Col lg={12}>
+                      <Card.Body className="card-body table-responsive p-4">
+                        <Table className="table-borderless  text-start table-nowrap align-middle mb-0">
+                          <thead>
+                            <tr className="table-active">
+                              <th scope="col" style={{ width: "50px" }}>
+                                #
+                              </th>
+                              <th scope="col">Product Name</th>
+                              <th scope="col">Price</th>
+                              <th scope="col">Quantity</th>
+                              <th scope="col" className="text-start">
+                                Amount
+                              </th>
+                              <th scope="col">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {order.products.map(
+                              (product: any, index: number) => (
+                                <tr key={index}>
+                                  <th scope="row">{index + 1}</th>
+                                  <td className="text-start">
+                                    <span className="fw-medium">
+                                      {product.productDetails.title}
+                                    </span>
+                                    <p className="text-muted mb-0">
+                                      {product.productDetails.description}
+                                    </p>
+                                  </td>
+                                  <td>${product.productDetails.price}</td>
+                                  <td>{product.quantity}</td>
+                                  <td className="text-start">
+                                    $
+                                    {(
+                                      product.productDetails.price *
+                                      product.quantity
+                                    ).toFixed(2)}
+                                  </td>
+
+                                  <td className="text-start">
+                                    <Dropdown>
+                                      <Dropdown.Toggle
+                                        disabled={order.status == 2}
+                                        as="button"
+                                        className="btn btn-sm border-0 arrow-none"
+                                      >
+                                        {(() => {
+                                          switch (product.status) {
+                                            case -1:
+                                              return (
+                                                <span className="badge bg-danger-subtle text-danger p-2">
+                                                  Rejected
+                                                  <i className="las la-chevron-down align-middle ms-2 text-black"></i>
+                                                  ;
+                                                </span>
+                                              );
+                                            case 0:
+                                              return (
+                                                <span className="badge bg-warning-subtle text-warning p-2">
+                                                  Pending
+                                                  <i className="las la-chevron-down align-middle ms-2 text-black"></i>
+                                                  ;
+                                                </span>
+                                              );
+                                            case 1:
+                                              return (
+                                                <span className="badge bg-success-subtle text-success p-2">
+                                                  Approved
+                                                  <i className="las la-chevron-down align-middle ms-2 text-black"></i>
+                                                </span>
+                                              );
+
+                                            default:
+                                              return null; // Return null if the status is not recognized
+                                          }
+                                        })()}
+                                      </Dropdown.Toggle>
+                                      <Dropdown.Menu className="dropdown-menu-end">
+                                        {[
+                                          {
+                                            name: "Pending",
+                                            status: 0,
+                                            icon: "las la-clock text-warning",
+                                          },
+                                          {
+                                            name: "Rejected",
+                                            status: -1,
+                                            icon: "las la-times-circle text-danger",
+                                          },
+                                          {
+                                            name: "Approved",
+                                            status: 1,
+                                            icon: "las la-check-circle text-success",
+                                          },
+                                        ].map((item, index) => {
+                                          console.log(
+                                            "product.id :>> ",
+                                            product
+                                          );
+                                          return (
+                                            <li key={index}>
+                                              <Dropdown.Item
+                                                onClick={async () => {
+                                                  if (
+                                                    product.status !=
+                                                    item.status
+                                                  ) {
+                                                    try {
+                                                      await firebaseBackend.updateOrderItemStatus(
+                                                        orderId,
+                                                        product.product,
+                                                        item.status
+                                                      );
+                                                      await firebaseBackend.updateOrderStatus(
+                                                        orderId,
+                                                        1
+                                                      );
+                                                      toast.success(
+                                                        "StatuS ipdated Successfully",
+                                                        { autoClose: 2000 }
+                                                      );
+                                                      loadOrder(
+                                                        String(orderId)
+                                                      );
+                                                    } catch (error) {
+                                                      toast.error(
+                                                        "Status ipdated Failed",
+                                                        { autoClose: 2000 }
+                                                      );
+                                                    }
+                                                  } else {
+                                                    toast.error(
+                                                      "You cannot change same status",
+                                                      { autoClose: 2000 }
+                                                    );
+                                                  }
+                                                }}
+                                              >
+                                                <i
+                                                  className={`${item.icon} fs-18 align-middle me-2 text-muted`}
+                                                ></i>
+                                                {item.name}
+                                              </Dropdown.Item>
+                                            </li>
+                                          );
+                                        })}
+                                      </Dropdown.Menu>
+                                    </Dropdown>
+                                  </td>
+                                </tr>
+                              )
+                            )}
+                          </tbody>
+                        </Table>
+                        <div className="border-top border-top-dashed mt-2">
+                          <Table
+                            className="table-borderless table-nowrap align-middle mb-0 ms-auto"
+                            style={{ width: "250px" }}
+                          >
+                            <tbody>
+                              <tr className="border-top border-top-dashed fs-15">
+                                <th scope="row">Total Amount</th>
+                                <th className="text-end">
+                                  ${order.totalAmount.toFixed(2)}
+                                </th>
+                              </tr>
+                            </tbody>
+                          </Table>
+                        </div>
+
+                       
+                        <div className="hstack gap-2 justify-content-end d-print-none mt-4">
+                        <button 
+                                className="btn btn-info" 
+                                onClick={() => window.print()}
+                            >
+                                <i className="ri-printer-line align-bottom me-1"></i> Print
+                            </button>
+                            <button className="btn btn-primary" onClick={handleDownload}>
+                                <i className="ri-download-2-line align-bottom me-1"></i> Download
+                            </button>
+                            </div>
+
+                        
+                      </Card.Body>
+                    </Col>
+                  </Row>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </div>
     </React.Fragment>
-  )
-}
+  );
+};
+
+
 
 export default InvoiceDetails

@@ -245,7 +245,7 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
                   as="ul"
                   variant="tabs"
                   className="nav-tabs nav-tabs-custom nav-success mb-3"
-                >
+                >   {/* 
                   <Nav.Item as="li">
                     <Nav.Link
                       eventKey="all"
@@ -256,7 +256,7 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
                       All
                     </Nav.Link>
                   </Nav.Item>
-                  {/* <Nav.Item as="li">
+               <Nav.Item as="li">
                     <Nav.Link
                       eventKey="paid"
                       onClick={() => {

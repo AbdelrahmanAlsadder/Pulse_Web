@@ -434,9 +434,69 @@ class FirebaseAuthBackend {
    * @param {string} uid - The store's user ID to filter orders by.
    * @returns {Promise<any[]>} - A promise that resolves to an array of orders with user details and total amount.
    */
+  // to list the orders when their id is 0 or 1 the other status will be displayed in the 
+  // invoice page
   getOrderByUID = async (): Promise<any[]> => {
     try {
-      const ordersCollection = this.firestore.collection("orders");
+      const ordersCollection = this.firestore.collection("orders")
+      .where("status", "in", [1, 0]); // Filter orders based on status;;
+      const ordersSnapshot = await ordersCollection.get();
+      const orders = [];
+
+      for (const orderDoc of ordersSnapshot.docs) {
+        const orderData = orderDoc.data();
+        let totalAmount = 0;
+
+        // Filter products within the order based on store ID
+        const filteredProducts = await Promise.all(
+          orderData.products.map(async (productItem: any) => {
+            const productData = await this.getProductById(productItem.product);
+
+            if (productData && productData.store_id === this.uuid) {
+              const quantity = productItem.quantity;
+              const price = parseFloat(productData.price);
+
+              // Accumulate total amount for the order
+              totalAmount += quantity * price;
+
+              return {
+                ...productItem,
+                productDetails: productData,
+              };
+            }
+
+            return null;
+          })
+        );
+
+        const nonNullProducts = filteredProducts.filter(Boolean);
+
+        if (nonNullProducts.length > 0) {
+          // Fetch user details using getUserDetailsByUid method
+          const userDetails = await this.getUserDetailsByUid(orderData.user_id);
+
+          orders.push({
+            id: orderDoc.id,
+            ...orderData,
+            products: nonNullProducts,
+            user: userDetails,
+            totalAmount,
+          });
+        }
+      }
+
+      return orders;
+    } catch (error) {
+      console.error("Error fetching orders by store UID:", error);
+      throw error;
+    }
+  };
+  
+  //to list the orders invoice which status is -1 or 2 
+  getOrderByUID2 = async (): Promise<any[]> => {
+    try {
+      const ordersCollection = this.firestore.collection("orders")
+      .where("status", "in", [2, -1]); // Filter orders based on status;
       const ordersSnapshot = await ordersCollection.get();
       const orders = [];
 
