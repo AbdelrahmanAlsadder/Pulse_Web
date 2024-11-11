@@ -12,8 +12,7 @@ export const SOCIAL_LOGIN = "/social-login";
 export const POST_EDIT_JWT_PROFILE = "/post-jwt-profile";
 export const POST_EDIT_PROFILE = "/user";
 
-//sellers
-export const GET_TRANSACTIONS = "/get-transactions";
+
 
 //Invoices
 export const GET_CLIENT_INVOICES = "/get-client-invoices";

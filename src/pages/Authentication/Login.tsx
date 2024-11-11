@@ -10,6 +10,7 @@ import { createSelector } from 'reselect';
 import { loginUser, resetLoginFlag, socialLogin } from '../../slices/thunk';
 import * as Yup from "yup";
 import { toast, Slide, ToastContainer } from "react-toastify";
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 const Login = (props:any) => {
   document.title = "Login ";
   const [loader, setLoader] = useState<boolean>(false);
@@ -34,6 +35,8 @@ const Login = (props:any) => {
         })
       );
       
+
+
     const { user, error, loading, errorMsg } = useSelector(selectAccountAndLogin);
 
     const [userLogin, setUserLogin] = useState<any>([]);
@@ -41,8 +44,8 @@ const Login = (props:any) => {
 
     useEffect(() => {
         if (user && user) {
-            const updatedUserData = process.env.REACT_APP_DEFAULTAUTH === "firebase" ? user.multiFactor.user.email : user.email;
-            const updatedUserPassword = process.env.REACT_APP_DEFAULTAUTH === "firebase" ? "" : user.password;
+            const updatedUserData = "";
+            const updatedUserPassword = "";
             setUserLogin({
                 email: updatedUserData,
                 password: updatedUserPassword
@@ -59,8 +62,8 @@ const Login = (props:any) => {
         enableReinitialize: true,
 
         initialValues: {
-            email: userLogin.email ||"" || '',
-            password: userLogin.password ||"" || '',
+            email:"",
+            password:"",
         },
         validationSchema: Yup.object({
             email: Yup.string().required("Please Enter Your Email"),
@@ -138,6 +141,7 @@ const Login = (props:any) => {
                                                                     <Form.Control
                                                                         type="email"
                                                                         name='email'
+                                                                        id='email'
                                                                         className="form-control bg-light border-light password-input"
                                                                         placeholder="Enter username"
                                                                         onChange={validation.handleChange}
@@ -156,7 +160,7 @@ const Login = (props:any) => {
 
                                                                 <Form.Group className="mb-3" controlId="password-input">
                                                                 <div className="float-end">
-                                                                    <Link to="/forgot-password" className="text-muted">Forgot password?</Link>
+                                                                    <Link to="/forgot-password" className="text-muted" >Forgot password?</Link>
                                                                 </div>
                                                                 <Form.Label>Password <span className="text-danger">*</span></Form.Label>
                                                                 <div className="position-relative auth-pass-inputgroup mb-3">

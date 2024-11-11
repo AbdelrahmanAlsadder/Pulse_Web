@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 // Dashboard
 
 import Dashboard from "../pages/Dashboard/Index";
-import Signin from "../pages/AuthenticationInner/Signin";
+import Signin from "../pages/Authentication/Login";
 import Signup from "../pages/AuthenticationInner/Signup";
 import PasswordReset from "../pages/AuthenticationInner/PasswordReset";
 import Lockscreen from "../pages/AuthenticationInner/Lockscreen";
@@ -60,7 +60,7 @@ const publicRoutes: Array<RouteObject> = [
   { path: "/forgot-password", component: <ForgotPassword /> },
   { path: "/register", component: <Register /> },
 
-  { path: "/auth-signin", component: <Signin /> },
+  { path: "/login", component: <Signin /> },
   { path: "/auth-signup", component: <Signup /> },
   { path: "/auth-pass-reset", component: <PasswordReset /> },
   { path: "/auth-lockscreen", component: <Lockscreen /> },

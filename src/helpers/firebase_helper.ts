@@ -5,6 +5,8 @@ import "firebase/compat/auth";
 import "firebase/compat/firestore";
 import "firebase/compat/storage";
 
+
+
 class FirebaseAuthBackend {
   firestore: firebase.firestore.Firestore;
   storage: firebase.storage.Storage;
@@ -124,6 +126,8 @@ class FirebaseAuthBackend {
         });
     });
   };
+
+
 
   /**
    * Logout the user
