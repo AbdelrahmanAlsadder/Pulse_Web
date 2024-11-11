@@ -306,7 +306,7 @@ const OrderDetails = () => {
                                                         1
                                                       );
                                                       toast.success(
-                                                        "StatuS ipdated Successfully",
+                                                        "Status Updated Successfully",
                                                         { autoClose: 2000 }
                                                       );
                                                       loadOrder(
@@ -314,7 +314,7 @@ const OrderDetails = () => {
                                                       );
                                                     } catch (error) {
                                                       toast.error(
-                                                        "Status ipdated Failed",
+                                                        "Status Updated Failed",
                                                         { autoClose: 2000 }
                                                       );
                                                     }
@@ -368,12 +368,12 @@ const OrderDetails = () => {
                                     orderId,
                                     2
                                   );
-                                  toast.success("StatuS ipdated Successfully", {
+                                  toast.success("Status Updated Successfully", {
                                     autoClose: 2000,
                                   });
                                   loadOrder(String(orderId));
                                 } catch (error) {
-                                  toast.error("Status ipdated Failed", {
+                                  toast.error("Status Updated Failed", {
                                     autoClose: 2000,
                                   });
                                 }

@@ -344,7 +344,7 @@ const InvoiceDetails = () => {
                                                         1
                                                       );
                                                       toast.success(
-                                                        "StatuS ipdated Successfully",
+                                                        "Status Updated Successfully",
                                                         { autoClose: 2000 }
                                                       );
                                                       loadOrder(
@@ -352,7 +352,7 @@ const InvoiceDetails = () => {
                                                       );
                                                     } catch (error) {
                                                       toast.error(
-                                                        "Status ipdated Failed",
+                                                        "Status Updated Failed",
                                                         { autoClose: 2000 }
                                                       );
                                                     }
