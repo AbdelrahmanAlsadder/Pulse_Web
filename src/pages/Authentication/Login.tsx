@@ -83,10 +83,7 @@ const Login = (props:any) => {
         dispatch(socialLogin(type, props.router.navigate));
     };
 
-    //for facebook and google authentication
-    const socialResponse = (type: any) => {
-        signIn(type);
-    };
+
 
     useEffect(() => {
         if (errorMsg) {
@@ -203,23 +200,7 @@ const Login = (props:any) => {
                                                                         <h5 className="fs-15 mb-3 title">Sign in with</h5>
                                                                     </div>
 
-                                                                    <ul className="list-inline">
-                                                                        <li className="list-inline-item">
-                                                                            <Link to="#" className="social-list-item bg-primary text-white border-primary" onClick={e => { e.preventDefault(); socialResponse("facebook"); }}>
-                                                                                <i className="mdi mdi-facebook"></i>
-                                                                            </Link>
-                                                                        </li>
-                                                                        <li className="list-inline-item">
-                                                                            <Link to="#" className="social-list-item bg-info text-white border-info" >
-                                                                                <i className="mdi mdi-twitter"></i>
-                                                                            </Link>
-                                                                        </li>
-                                                                        <li className="list-inline-item">
-                                                                            <Link to="#" className="social-list-item bg-danger text-white border-danger" onClick={e => { e.preventDefault(); socialResponse("google"); }}>
-                                                                                <i className="mdi mdi-google"></i>
-                                                                            </Link>
-                                                                        </li>
-                                                                    </ul>
+                                                               
                                                                 </div>
 
                                                                 <div className="mt-4 text-center">
