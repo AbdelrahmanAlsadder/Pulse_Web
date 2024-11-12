@@ -154,25 +154,9 @@ export const deleteProductList = createAsyncThunk("invoice/deleteProductList", a
   }
 });
 
-export const getPayments = createAsyncThunk("invoice/getPayments", async () => {
-  try {
-  
-  } catch (error) {
-      return error;
-  }
-});
 
-export const addPayment = createAsyncThunk("invoice/addPayment", async (user: any) => {
-  try {
-    
-   
-      toast.success("Payment added Successfully", { autoClose: 2000 });
-     
-  } catch (error) {
-      toast.error("Payment added Failed", { autoClose: 2000 });
-      return error;
-  }
-});
+
+
 
 export const editPayment = createAsyncThunk("invoice/editPayment", async (payment: any) => {
   try {
@@ -186,13 +170,3 @@ export const editPayment = createAsyncThunk("invoice/editPayment", async (paymen
   }
 });
 
-export const deletePayment = createAsyncThunk("invoice/deletePayment", async (id: any) => {
-  try {
-    
-      toast.success("Payment deleted Successfully", { autoClose: 1000 });
-    
-  } catch (error) {
-      toast.error("Payment deleted Failed", { autoClose: 1000 });
-      return error;
-  }
-});

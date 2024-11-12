@@ -3,15 +3,11 @@ import { Card, Col, Dropdown, Form, Nav, Row, Tab } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { createSelector } from "reselect";
-import {
-  getPayments as onGetPayments,
-  deletePayment as onDeletePayment,
-} from "../../slices/thunk";
+
 import TableContainer from "../../Common/Tabledata/TableContainer";
 import { DeleteModal } from "../../Common/DeleteModal";
-import { handleSearchData } from "../../Common/Tabledata/SorttingData";
 import EditPayment from "../../Common/CrudModal/EditPayment";
-import Addpayment from "../../Common/CrudModal/Addpayment";
+
 import NoSearchResult from "../../Common/Tabledata/NoSearchResult";
 import { getFirebaseBackend } from "../../helpers/firebase_helper";
 import { Link } from "react-router-dom";

@@ -5,7 +5,6 @@ import { Navigate } from "react-router-dom";
 import Dashboard from "../pages/Dashboard/Index";
 import Signin from "../pages/Authentication/Login";
 import PasswordReset from "../pages/AuthenticationInner/PasswordReset";
-import AddInvoice from "../pages/InvoiceManagement/AddInvoice/index";
 import InvoiceDetails from "../pages/InvoiceManagement/InvoiceDetails/index";
 import AddProduct from "../pages/InvoiceManagement/AddProduct";
 import Invoice from "../pages/InvoiceManagement/Invoice/index";
@@ -38,7 +37,6 @@ const authProtectedRoutes: Array<RouteObject> = [
   { path: "*", component: <Navigate to="/dashboard" /> },
 
   { path: "/invoice", component: <Invoice /> },
-  { path: "/invoice-add", component: <AddInvoice /> },
   { path: "/invoice-details/:orderId", component: <InvoiceDetails /> },
   { path: "/product-add", component: <AddProduct /> },
   { path: "/product-list", component: <ProductList /> },

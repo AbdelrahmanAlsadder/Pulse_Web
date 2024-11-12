@@ -139,7 +139,7 @@ const Navdata = () => {
             stateVariables: isInvoiceManagement,
             subItems: [
                 { id: 1, label: "Invoice", link: "/invoice", parentId: "invoiceManagement" },
-                { id: 2, label: "Add Invoice", link: "/invoice-add", parentId: "invoiceManagement" },
+              
                
             ],
         },
