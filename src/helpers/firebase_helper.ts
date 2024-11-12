@@ -4,7 +4,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
 import "firebase/compat/storage";
-
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 
 class FirebaseAuthBackend {
@@ -326,6 +326,44 @@ class FirebaseAuthBackend {
       throw error;
     }
   }
+
+
+/**
+ * Check if all products in the specified order have a status other than 0.
+ * @param orderId - The ID of the order to check.
+ * @returns A promise that resolves to `true` if all products are not pending, `false` otherwise.
+ */
+  checkOrderProductsStatus = async (orderId: string): Promise<boolean> => {
+  try {
+    // Reference to the specific order document
+    const orderRef = doc(this.firestore, 'orders', orderId);
+    const orderSnapshot = await getDoc(orderRef);
+
+    if (!orderSnapshot.exists()) {
+      console.error('Order not found');
+      return false;
+    }
+
+    const orderData = orderSnapshot.data();
+
+    if (!orderData || !Array.isArray(orderData.product)) {
+      console.error('Invalid order data');
+      return false;
+    }
+
+    // Check if all products have a status different from 0
+    const allProductsNotPending = orderData.product.every(
+      (product: { status: number }) => product.status !== 0
+    );
+
+    return allProductsNotPending;
+  } catch (error) {
+    console.error('Error checking product statuses:', error);
+    return false;
+  }
+};
+
+
 
   /**
    * Fetches a product by its ID
@@ -683,6 +721,10 @@ getOrderByUID3 = async (): Promise<any[]> => {
       throw error;
     }
   };
+
+
+    
+  
 
   /**
    * Updates the status of the order by order ID.

@@ -19,6 +19,8 @@ const OrderDetails = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const firebaseBackend = getFirebaseBackend();
   console.log("order :>> ", order);
+  let notPending: boolean = false;
+  console.log("Pending? :>> ", notPending);
 
   const loadOrder = async (orderId: string) => {
     try {
@@ -362,52 +364,59 @@ const OrderDetails = () => {
                         </div>
 
                        
-                        <div className="hstack gap-2 justify-content-end d-print-none mt-4">
-  {showSaveButton && (
-    <Link
-      to=""
-      onClick={(e) => {
-        e.preventDefault();
-        setShowModal(true);
-      }}
-      className="btn btn-primary"
-    >
-      <i className="ri-save-2-line align-bottom me-1"></i> Save
-    </Link>
-  )}
+                         <div className="hstack gap-2 justify-content-end d-print-none mt-4">
+                          {showSaveButton && (
+                            <Link
+                              to=""
+                              onClick={(e) => {
+                                e.preventDefault();
 
-  {/* Modal Popup */}
-  <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-    <Modal.Header closeButton>
-      <Modal.Title>Warning!</Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-      If you press "Save Anyway," you will not be able to edit the order again.
-      You will find it in the invoice details page.
-    </Modal.Body>
-    <Modal.Footer>
-      <Button variant="secondary" onClick={() => setShowModal(false)}>
-        Close
-      </Button>
-      <Button
-        variant="danger"
-        onClick={async () => {
-          try {
-            await firebaseBackend.updateOrderStatus(orderId, 2);
-            toast.success("Status Updated Successfully", { autoClose: 2000 });
-            loadOrder(String(orderId));
-            setShowSaveButton(false); // Hide the main Save button
-          } catch (error) {
-            toast.error("Status Update Failed", { autoClose: 2000 });
-          }
-          setShowModal(false);
-        }}
-      >
-        Save Anyway
-      </Button>
-    </Modal.Footer>
-  </Modal>
-</div>
+                                // Check if notPending is false
+                                if (notPending) {
+                                  toast.error("Can't save the order while it has a pending item.", { autoClose: 2000 });
+                                } else {
+                                  // If notPending is true, show the modal
+                                  setShowModal(true);
+                                }
+                              }}
+                              className="btn btn-primary"
+                            >
+                              <i className="ri-save-2-line align-bottom me-1"></i> Save
+                            </Link>
+                          )}
+
+                          {/* Modal Popup */}
+                          <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+                            <Modal.Header closeButton>
+                              <Modal.Title>Warning!</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                              If you press "Save Anyway," you will not be able to edit the order again.
+                              You will find it in the invoice details page.
+                            </Modal.Body>
+                            <Modal.Footer>
+                              <Button variant="secondary" onClick={() => setShowModal(false)}>
+                                Close
+                              </Button>
+                              <Button
+                                variant="danger"
+                                onClick={async () => {
+                                  try {
+                                    await firebaseBackend.updateOrderStatus(orderId, 2);
+                                    toast.success("Status Updated Successfully", { autoClose: 2000 });
+                                    loadOrder(String(orderId));
+                                    setShowSaveButton(false); // Hide the main Save button
+                                  } catch (error) {
+                                    toast.error("Status Update Failed", { autoClose: 2000 });
+                                  }
+                                  setShowModal(false);
+                                }}
+                              >
+                                Save Anyway
+                              </Button>
+                            </Modal.Footer>
+                          </Modal>
+                        </div>
                         
                       </Card.Body>
                     </Col>
