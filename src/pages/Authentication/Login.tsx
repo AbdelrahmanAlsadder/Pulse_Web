@@ -197,7 +197,7 @@ const Login = (props:any) => {
 
                                                                 <div className="mt-4 text-center">
                                                                     <div className="signin-other-title">
-                                                                        <h5 className="fs-15 mb-3 title">Sign in with</h5>
+                                                                        <h5 className="fs-15 mb-3 title"></h5>
                                                                     </div>
 
                                                                
