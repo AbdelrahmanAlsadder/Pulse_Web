@@ -185,10 +185,7 @@ const Login = (props:any) => {
                                                                 </div>
                                                             </Form.Group>
 
-                                                            <Form.Check className="mb-3" id="auth-remember-check">
-                                                                <Form.Check.Input type="checkbox" />
-                                                                <Form.Check.Label>Remember me</Form.Check.Label>
-                                                            </Form.Check>
+                                                       
 
                                                                 <div className="mt-2">
                                                                 <Button 

@@ -31,9 +31,17 @@ export const loginUser = (user: any, history: any) => async (dispatch: any) => {
           // waiting for approval
           toast.info("Please Wait, Your Account is Under Approval", { autoClose: 2000 });
           console.log("waiting for approval");
-        } else {
+        } else if (user_details.status == 1){//admin user go to the user page
+          dispatch(loginSuccess(user_details));
+          history("/user");
+        }
+        else if (user_details.status == 2){//warehouse user go to dashboard
           dispatch(loginSuccess(user_details));
           history("/dashboard");
+        }
+        else if (user_details.status == 3){//pharmacy user, he shouldn't be here
+          toast.error("This page is only for warehouse,\ndownload our app", { autoClose: 2000 });
+        
         }
       }
     }
