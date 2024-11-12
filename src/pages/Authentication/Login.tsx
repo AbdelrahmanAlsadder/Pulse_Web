@@ -10,7 +10,7 @@ import { createSelector } from 'reselect';
 import { loginUser, resetLoginFlag, socialLogin } from '../../slices/thunk';
 import * as Yup from "yup";
 import { toast, Slide, ToastContainer } from "react-toastify";
-import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+
 const Login = (props:any) => {
   document.title = "Login ";
   const [loader, setLoader] = useState<boolean>(false);

@@ -4,9 +4,7 @@ import { Navigate } from "react-router-dom";
 
 import Dashboard from "../pages/Dashboard/Index";
 import Signin from "../pages/Authentication/Login";
-import Signup from "../pages/AuthenticationInner/Signup";
 import PasswordReset from "../pages/AuthenticationInner/PasswordReset";
-import Lockscreen from "../pages/AuthenticationInner/Lockscreen";
 import AddInvoice from "../pages/InvoiceManagement/AddInvoice/index";
 import InvoiceDetails from "../pages/InvoiceManagement/InvoiceDetails/index";
 import AddProduct from "../pages/InvoiceManagement/AddProduct";
@@ -61,9 +59,7 @@ const publicRoutes: Array<RouteObject> = [
   { path: "/register", component: <Register /> },
 
   { path: "/login", component: <Signin /> },
-  { path: "/auth-signup", component: <Signup /> },
   { path: "/auth-pass-reset", component: <PasswordReset /> },
-  { path: "/auth-lockscreen", component: <Lockscreen /> },
 ];
 
 export { authProtectedRoutes, publicRoutes };
