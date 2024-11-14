@@ -18,8 +18,9 @@ const OrderDetails = () => {
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const firebaseBackend = getFirebaseBackend();
+  const [notPending, setNotPending] = useState<boolean>(true);
   console.log("order :>> ", order);
-  let notPending: boolean = false;
+
   console.log("Pending? :>> ", notPending);
 
   const loadOrder = async (orderId: string) => {
@@ -27,12 +28,53 @@ const OrderDetails = () => {
       setIsLoading(true);
       const OrderDetails = await firebaseBackend.getOrderById(orderId);
       setOrder(OrderDetails);
+
+      // Check if any product has status === 0
+      if (OrderDetails?.products?.some((product: any) => product.status === 0)) {
+        setNotPending(false);
+      }
     } catch (error) {
       console.error("Error fetching order:", error);
     } finally {
       setIsLoading(false);
     }
   };
+  const checkOrderStatusOnSave = async (orderId: string) => {
+    try {
+      if (!orderId) {
+        console.error("Order ID is missing or invalid:", orderId);
+        toast.error("Invalid order. Please refresh the page and try again.", { autoClose: 2000 });
+        return;
+      }
+  
+      setIsLoading(true);
+      console.log("Fetching order details for order ID:", orderId);
+  
+      const OrderDetails = await firebaseBackend.getOrderById(orderId);
+  
+      if (!OrderDetails) {
+        console.error("Order not found for ID:", orderId);
+        toast.error("Order not found. Please refresh and try again.", { autoClose: 2000 });
+        return;
+      }
+  
+      console.log("Fetched Order Details:", OrderDetails);
+  
+      if (OrderDetails?.products?.some((product: any) => product.status === 0)) {
+        setNotPending(false);
+        toast.error("Can't save the order while it has a pending item.", { autoClose: 2000 });
+      } else {
+        setNotPending(true);
+        setShowModal(true);
+      }
+    } catch (error) {
+      console.error("Error checking order status:", error);
+      toast.error("Failed to check order status. Please try again.", { autoClose: 2000 });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
 
   useEffect(() => {
     if (orderId) loadOrder(orderId);
@@ -365,26 +407,28 @@ const OrderDetails = () => {
 
                        
                          <div className="hstack gap-2 justify-content-end d-print-none mt-4">
-                          {showSaveButton && (
-                            <Link
-                              to=""
-                              onClick={(e) => {
-                                e.preventDefault();
+                         {showSaveButton && order && (
+  <Link
+    to=""
+    onClick={async (e) => {
+      e.preventDefault();
 
-                                // Check if notPending is false
-                                if (notPending) {
-                                  toast.error("Can't save the order while it has a pending item.", { autoClose: 2000 });
-                                } else {
-                                  // If notPending is true, show the modal
-                                  setShowModal(true);
-                                }
-                              }}
-                              className="btn btn-primary"
-                            >
-                              <i className="ri-save-2-line align-bottom me-1"></i> Save
-                            </Link>
-                          )}
+      // Check if the orderId exists
+      if (order?.orderId) {
+        console.log("Order ID found:", order.orderId);
 
+        // Call the function to check the order status
+        await checkOrderStatusOnSave(order.orderId);
+      } else {
+        console.error("Order ID is missing");
+        toast.error("Invalid order. Please refresh and try again.", { autoClose: 2000 });
+      }
+    }}
+    className="btn btn-primary"
+  >
+    <i className="ri-save-2-line align-bottom me-1"></i> Save
+  </Link>
+)}
                           {/* Modal Popup */}
                           <Modal show={showModal} onHide={() => setShowModal(false)} centered>
                             <Modal.Header closeButton>
