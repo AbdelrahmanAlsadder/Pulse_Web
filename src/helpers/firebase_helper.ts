@@ -5,7 +5,7 @@ import "firebase/compat/auth";
 import "firebase/compat/firestore";
 import "firebase/compat/storage";
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
-
+import { toast } from "react-toastify";
 
 class FirebaseAuthBackend {
   firestore: firebase.firestore.Firestore;
@@ -785,11 +785,32 @@ getOrderByUID3 = async (): Promise<any[]> => {
    * @param {string} newStatus - The new status to set for the item.
    * @returns {Promise<any>} - A promise that resolves to the updated order data with the modified item status.
    */
-  updateOrderItemStatus = async (
+
+  adjustStockBasedOnStatus = (
+    status: number,
+    currentStock: number,
+    quantityToUpdate: number
+  ) => {
+    let updatedStock = currentStock;
+  
+    console.log("New Status:", status);
+    if (status === 1) {
+      // Decrease stock when changing to active
+      updatedStock = currentStock - quantityToUpdate;
+      console.log("The updated stock (set to active) is:", updatedStock);
+    } else if (status === 0 || status === -1) {
+      // Increase stock when changing to inactive (0 or -1)
+      updatedStock = currentStock + quantityToUpdate;
+      console.log("The updated stock (set to inactive) is:", updatedStock);
+    }
+  
+    return updatedStock;
+  };
+  async updateOrderItemStatus(
     orderId: string,
     productId: string,
-    newStatus: string
-  ): Promise<{ id: string; [key: string]: any }> => {
+    newStatus: number
+  ): Promise<any> {
     try {
       const orderRef = this.firestore.collection("orders").doc(orderId);
       const orderDoc = await orderRef.get();
@@ -799,6 +820,19 @@ getOrderByUID3 = async (): Promise<any[]> => {
       }
   
       const orderData = orderDoc.data();
+  
+      // Find the existing product in the order
+      const existingProduct = orderData?.products.find(
+        (item: any) => item.product === productId
+      );
+  
+      if (!existingProduct) {
+        throw new Error("Product not found in the order");
+      }
+  
+      const previousStatus = existingProduct.status; // Get the previous status
+  
+      // Update the product's status in the order
       const updatedProducts = orderData?.products.map((item: any) => {
         if (item.product === productId) {
           return { ...item, status: newStatus };
@@ -806,27 +840,78 @@ getOrderByUID3 = async (): Promise<any[]> => {
         return item;
       });
   
-      // Update the order item status
+      // Step 3: Fetch the product details from the "products" collection
+      const productRef = this.firestore.collection("products").doc(productId);
+      const productDoc = await productRef.get();
+  
+      if (!productDoc.exists) {
+        throw new Error("Product not found in the products collection");
+      }
+  
+      const productData = productDoc.data();
+      const currentStock = productData?.quantity || 0;
+      const quantityToUpdate = existingProduct.quantity || 0;
+  
+      let updatedStock = currentStock;
+  
+      // Step 4: Adjust stock based on status changes
+      if (previousStatus !== newStatus) {
+        if (previousStatus === 1 && (newStatus === 0 || newStatus === -1)) {
+          // If moving from Approved (1) to Pending (0) or Rejected (-1) -> Increase Stock
+          updatedStock = currentStock + quantityToUpdate;
+          console.log(
+            `Stock increased due to status change from 1 to ${newStatus}, new stock: ${updatedStock}`
+          );
+        } else if ((previousStatus === 0 || previousStatus === -1) && newStatus === 1) {
+          // If moving from Pending (0) or Rejected (-1) to Approved (1) -> Decrease Stock
+          updatedStock = currentStock - quantityToUpdate;
+  
+          // **New Check**: Prevent stock from going negative
+          if (updatedStock < 0) {
+            console.error(
+              `Insufficient stock to approve the order. Current stock: ${currentStock}, Requested quantity: ${quantityToUpdate}`
+              
+            );
+            toast.error("UnderStock, Please Check the Product Stock.", { autoClose: 2000 });
+            throw new Error(
+              "Cannot approve order. Not enough stock available."
+            );
+          }
+  
+          console.log(
+            `Stock decreased due to status change to active, new stock: ${updatedStock}`
+          );
+        } else {
+          // If the status changes between 0 and -1, do nothing to the stock
+          updatedStock = currentStock;
+          console.log(
+            `No stock change for status change from ${previousStatus} to ${newStatus}`
+          );
+        }
+      }
+  
+      // Step 5: Update the product's stock in Firestore if it changed
+      if (updatedStock !== currentStock) {
+        await productRef.update({ quantity: updatedStock });
+        console.log(`Product quantity updated for ${productId}, new stock: ${updatedStock}`);
+      }
+  
+      // Step 6: Update the order with the modified item status
       await orderRef.update({
         products: updatedProducts,
         updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
       });
   
-      // Update the product quantity based on status change
-      const product = orderData?.products.find((item: any) => item.product === productId);
-      if (product) {
-        await this.updateProductQuantity(productId, product.quantity, newStatus); // Update stock quantity
-      }
-  
-      // Fetch the updated order details (to refresh the UI)
+      // Fetch and return the updated order
       const updatedOrderDoc = await orderRef.get();
       return { id: updatedOrderDoc.id, ...updatedOrderDoc.data() };
-  
     } catch (error) {
       console.error("Error updating order item status:", error);
       throw error;
     }
-  };
+  }
+  
+  
   
   
   updateProductQuantity = async (productId: string, quantityToUpdate: number, status: string): Promise<void> => {
