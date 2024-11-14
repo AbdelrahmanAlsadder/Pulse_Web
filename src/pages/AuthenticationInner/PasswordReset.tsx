@@ -16,7 +16,7 @@ const PasswordReset = () => {
         enableReinitialize: true,
 
         initialValues: {
-            email: "admin@themesbrand.com" || '',
+            email: '',
         },
         validationSchema: Yup.object({
             email: Yup.string().required("Please Enter Your Email"),
