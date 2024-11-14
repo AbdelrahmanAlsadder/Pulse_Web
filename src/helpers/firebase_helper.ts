@@ -789,39 +789,90 @@ getOrderByUID3 = async (): Promise<any[]> => {
     orderId: string,
     productId: string,
     newStatus: string
-  ): Promise<any> => {
+  ): Promise<{ id: string; [key: string]: any }> => {
     try {
       const orderRef = this.firestore.collection("orders").doc(orderId);
       const orderDoc = await orderRef.get();
-
+  
       if (!orderDoc.exists) {
         throw new Error("Order not found");
       }
-
+  
       const orderData = orderDoc.data();
-
-      // Check if the order has the specific product
       const updatedProducts = orderData?.products.map((item: any) => {
         if (item.product === productId) {
           return { ...item, status: newStatus };
         }
         return item;
       });
-
-      // Update the order with the modified item status
+  
+      // Update the order item status
       await orderRef.update({
         products: updatedProducts,
         updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
       });
-
-      // Fetch and return the updated order
+  
+      // Update the product quantity based on status change
+      const product = orderData?.products.find((item: any) => item.product === productId);
+      if (product) {
+        await this.updateProductQuantity(productId, product.quantity, newStatus); // Update stock quantity
+      }
+  
+      // Fetch the updated order details (to refresh the UI)
       const updatedOrderDoc = await orderRef.get();
       return { id: updatedOrderDoc.id, ...updatedOrderDoc.data() };
+  
     } catch (error) {
       console.error("Error updating order item status:", error);
       throw error;
     }
   };
+  
+  
+  updateProductQuantity = async (productId: string, quantityToUpdate: number, status: string): Promise<void> => {
+   
+    try {
+      // Get the product document
+      const productRef = this.firestore.collection("products").doc(productId);
+      const productDoc = await productRef.get();
+  
+      if (!productDoc.exists) {
+        throw new Error("Product not found");
+      }
+  
+      const productData = productDoc.data();
+      const currentStock = productData?.quantity || 0; // Get the current stock quantity
+  
+      let updatedStock = currentStock;
+      
+      const statusString = String(status); // Ensure it's a string
+console.log("Status after conversion:", statusString);
+
+        if (statusString === '1') {
+          updatedStock = currentStock - quantityToUpdate;
+          console.log("The updated stock (status 1) is:", updatedStock);
+        }
+
+        if (statusString === '0' || statusString === '-1') {
+          updatedStock = currentStock + quantityToUpdate;
+          console.log("The updated stock (status 0 or -1) is:", updatedStock);
+        }
+
+  
+      // Update the product quantity in the Firestore database
+      console.log("the updated stock is"+updatedStock)
+      await productRef.update({
+       
+        quantity: updatedStock,
+      });
+  
+      console.log(`Product quantity updated for ${productId}, new stock: ${updatedStock}`);
+    } catch (error) {
+      console.error("Error updating product quantity:", error);
+    }
+  };
+    
+  
 
   setLoggeedInUser = (user: any) => {
     sessionStorage.setItem("authUser", JSON.stringify(user));

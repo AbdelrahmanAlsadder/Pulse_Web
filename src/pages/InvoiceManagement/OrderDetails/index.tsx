@@ -19,9 +19,7 @@ const OrderDetails = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const firebaseBackend = getFirebaseBackend();
   const [notPending, setNotPending] = useState<boolean>(true);
-  console.log("order :>> ", order);
 
-  console.log("Pending? :>> ", notPending);
 
   const loadOrder = async (orderId: string) => {
     try {
@@ -69,7 +67,7 @@ const OrderDetails = () => {
       }
   
       setIsLoading(true);
-      console.log("Fetching order details for order ID:", orderId);
+      
   
       const OrderDetails = await firebaseBackend.getOrderById(orderId);
   
@@ -79,7 +77,6 @@ const OrderDetails = () => {
         return;
       }
   
-      console.log("Fetched Order Details:", OrderDetails);
   
       if (OrderDetails?.products?.some((product: any) => product.status === 0)) {
         setNotPending(false);
@@ -351,10 +348,7 @@ const OrderDetails = () => {
                                             icon: "las la-check-circle text-success",
                                           },
                                         ].map((item, index) => {
-                                          console.log(
-                                            "product.id :>> ",
-                                            product
-                                          );
+                                       
                                           return (
                                             <li key={index}>
                                               <Dropdown.Item
@@ -427,7 +421,7 @@ const OrderDetails = () => {
 
       // Check if the orderId exists
       if (order?.orderId) {
-        console.log("Order ID found:", order.orderId);
+     
 
         // Call the function to check the order status
         await checkOrderStatusOnSave(order.orderId);
