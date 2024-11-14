@@ -481,42 +481,46 @@ class FirebaseAuthBackend {
   getOrderByUID = async (): Promise<any[]> => {
     try {
       const ordersCollection = this.firestore.collection("orders")
-      .where("status", "in", [1, 0]); // Filter orders based on status;;
+        .where("status", "in", [1, 0]); // Filter orders based on order status (0 and 1)
       const ordersSnapshot = await ordersCollection.get();
       const orders = [];
-
+  
       for (const orderDoc of ordersSnapshot.docs) {
         const orderData = orderDoc.data();
         let totalAmount = 0;
-
+  
         // Filter products within the order based on store ID
         const filteredProducts = await Promise.all(
           orderData.products.map(async (productItem: any) => {
             const productData = await this.getProductById(productItem.product);
-
+  
             if (productData && productData.store_id === this.uuid) {
-              const quantity = productItem.quantity;
-              const price = parseFloat(productData.price);
-
-              // Accumulate total amount for the order
-              totalAmount += quantity * price;
-
+              // Only calculate the total amount if the product's status is 0 or 1
+              if (productItem.status === 0 || productItem.status === 1) {
+                const quantity = productItem.quantity;
+                const price = parseFloat(productData.price);
+  
+                // Accumulate total amount for the order
+                totalAmount += quantity * price;
+              }
+  
               return {
                 ...productItem,
                 productDetails: productData,
+                
               };
             }
-
+  
             return null;
           })
         );
-
+  
         const nonNullProducts = filteredProducts.filter(Boolean);
-
+  
         if (nonNullProducts.length > 0) {
           // Fetch user details using getUserDetailsByUid method
           const userDetails = await this.getUserDetailsByUid(orderData.user_id);
-
+  
           orders.push({
             id: orderDoc.id,
             ...orderData,
@@ -526,13 +530,14 @@ class FirebaseAuthBackend {
           });
         }
       }
-
+  
       return orders;
     } catch (error) {
       console.error("Error fetching orders by store UID:", error);
       throw error;
     }
   };
+  
   
   //to list the orders invoice which status is -1 or 2 
   getOrderByUID2 = async (): Promise<any[]> => {
@@ -555,8 +560,13 @@ class FirebaseAuthBackend {
               const quantity = productItem.quantity;
               const price = parseFloat(productData.price);
 
-              // Accumulate total amount for the order
-              totalAmount += quantity * price;
+              if (productItem.status === 0 || productItem.status === 1) {
+                const quantity = productItem.quantity;
+                const price = parseFloat(productData.price);
+  
+                // Accumulate total amount for the order
+                totalAmount += quantity * price;
+              }
 
               return {
                 ...productItem,
@@ -614,8 +624,13 @@ getOrderByUID3 = async (): Promise<any[]> => {
             const quantity = productItem.quantity;
             const price = parseFloat(productData.price);
 
-            // Accumulate total amount for the order
-            totalAmount += quantity * price;
+            if (productItem.status === 0 || productItem.status === 1) {
+              const quantity = productItem.quantity;
+              const price = parseFloat(productData.price);
+
+              // Accumulate total amount for the order
+              totalAmount += quantity * price;
+            }
 
             return {
               ...productItem,
@@ -686,8 +701,13 @@ getOrderByUID3 = async (): Promise<any[]> => {
             const quantity = productItem.quantity;
             const price = parseFloat(productData.price);
 
-            // Accumulate total amount for the order
-            totalAmount += quantity * price;
+            if (productItem.status === 0 || productItem.status === 1) {
+              const quantity = productItem.quantity;
+              const price = parseFloat(productData.price);
+
+              // Accumulate total amount for the order
+              totalAmount += quantity * price;
+            }
 
             return {
               ...productItem,

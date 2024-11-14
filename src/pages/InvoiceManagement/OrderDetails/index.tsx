@@ -25,20 +25,41 @@ const OrderDetails = () => {
 
   const loadOrder = async (orderId: string) => {
     try {
-      setIsLoading(true);
+      setIsLoading(true); // Set loading state to true
+  
+      // Fetch the order details from the backend
       const OrderDetails = await firebaseBackend.getOrderById(orderId);
-      setOrder(OrderDetails);
-
-      // Check if any product has status === 0
+      setOrder(OrderDetails); // Set the order state with fetched order details
+  
+      // Recalculate the total amount excluding rejected products (status === -1)
+      let totalAmount = 0;
+      const updatedProducts = OrderDetails?.products?.map((product: any) => {
+        if (product.status !== -1) { // Exclude rejected products (status === -1)
+          const quantity = product.quantity;
+          const price = parseFloat(product.productDetails.price);
+          totalAmount += quantity * price; // Accumulate total amount
+        }
+        return product;
+      });
+  
+      // Update the order state with the recalculated total amount
+      setOrder({
+        ...OrderDetails,
+        totalAmount: totalAmount, // Set the updated total amount
+        products: updatedProducts, // Optionally, update the products array if needed
+      });
+  
+      // Check if any product has status === 0 (pending)
       if (OrderDetails?.products?.some((product: any) => product.status === 0)) {
-        setNotPending(false);
+        setNotPending(false); // Set notPending state accordingly
       }
     } catch (error) {
       console.error("Error fetching order:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Set loading state to false once fetching is complete
     }
   };
+  
   const checkOrderStatusOnSave = async (orderId: string) => {
     try {
       if (!orderId) {
@@ -337,39 +358,29 @@ const OrderDetails = () => {
                                           return (
                                             <li key={index}>
                                               <Dropdown.Item
-                                                onClick={async () => {
-                                                  if (
-                                                    product.status !=
-                                                    item.status
-                                                  ) {
+                                                 onClick={async () => {
+                                                  if (product.status !== item.status) {
                                                     try {
-                                                      await firebaseBackend.updateOrderItemStatus(
-                                                        orderId,
-                                                        product.product,
-                                                        item.status
-                                                      );
-                                                      await firebaseBackend.updateOrderStatus(
-                                                        orderId,
-                                                        1
-                                                      );
-                                                      toast.success(
-                                                        "Status Updated Successfully",
-                                                        { autoClose: 2000 }
-                                                      );
-                                                      loadOrder(
-                                                        String(orderId)
-                                                      );
+                                                      // Step 1: Update the product status to the new one
+                                                      await firebaseBackend.updateOrderItemStatus(orderId, product.product, item.status);
+                                                      
+                                                      // Step 2: Optionally update the overall order status to 1 (if needed)
+                                                      await firebaseBackend.updateOrderStatus(orderId, 1);
+                                                      
+                                                      // Step 3: Provide feedback to the user
+                                                      toast.success("Status Updated Successfully", { autoClose: 2000 });
+                                                      
+                                                      // Step 4: Reload the order to recalculate the total amount and update the UI
+                                                      loadOrder(String(orderId)); // Refresh the order data
+                                                      
                                                     } catch (error) {
-                                                      toast.error(
-                                                        "Status Updated Failed",
-                                                        { autoClose: 2000 }
-                                                      );
+                                                      // Step 5: Handle errors during the update process
+                                                      console.error("Error updating product status:", error);
+                                                      toast.error("Status Update Failed", { autoClose: 2000 });
                                                     }
                                                   } else {
-                                                    toast.error(
-                                                      "You cannot change same status",
-                                                      { autoClose: 2000 }
-                                                    );
+                                                    // Step 6: Handle the case where the user tries to set the same status
+                                                    toast.error("You cannot change to the same status", { autoClose: 2000 });
                                                   }
                                                 }}
                                               >
@@ -398,6 +409,7 @@ const OrderDetails = () => {
                               <tr className="border-top border-top-dashed fs-15">
                                 <th scope="row">Total Amount</th>
                                 <th className="text-end">
+                                
                                   ${order.totalAmount.toFixed(2)}
                                 </th>
                               </tr>
