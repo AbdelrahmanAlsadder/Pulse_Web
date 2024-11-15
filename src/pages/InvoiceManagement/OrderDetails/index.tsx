@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import BreadCrumb from "../../../Common/BreadCrumb";
+
 import { Card, Container, Row, Col, Table, Dropdown } from "react-bootstrap";
 import logoDark from "../../../assets/images/logo-dark.png";
 import logoLight from "../../../assets/images/logo-light.png";
@@ -7,27 +7,92 @@ import { Link, useParams } from "react-router-dom";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
 import moment from "moment";
 import { toast } from "react-toastify";
+import { Modal, Button } from 'react-bootstrap';
+
 
 const OrderDetails = () => {
   document.title = "Invoice Details ";
   const { orderId } = useParams();
-
+  const [showSaveButton, setShowSaveButton] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const firebaseBackend = getFirebaseBackend();
-  console.log("order :>> ", order);
+  const [notPending, setNotPending] = useState<boolean>(true);
+
 
   const loadOrder = async (orderId: string) => {
     try {
-      setIsLoading(true);
+      setIsLoading(true); // Set loading state to true
+  
+      // Fetch the order details from the backend
       const OrderDetails = await firebaseBackend.getOrderById(orderId);
-      setOrder(OrderDetails);
+      setOrder(OrderDetails); // Set the order state with fetched order details
+  
+      // Recalculate the total amount excluding rejected products (status === -1)
+      let totalAmount = 0;
+      const updatedProducts = OrderDetails?.products?.map((product: any) => {
+        if (product.status !== -1) { // Exclude rejected products (status === -1)
+          const quantity = product.quantity;
+          const price = parseFloat(product.productDetails.price);
+          totalAmount += quantity * price; // Accumulate total amount
+        }
+        return product;
+      });
+  
+      // Update the order state with the recalculated total amount
+      setOrder({
+        ...OrderDetails,
+        totalAmount: totalAmount, // Set the updated total amount
+        products: updatedProducts, // Optionally, update the products array if needed
+      });
+  
+      // Check if any product has status === 0 (pending)
+      if (OrderDetails?.products?.some((product: any) => product.status === 0)) {
+        setNotPending(false); // Set notPending state accordingly
+      }
     } catch (error) {
       console.error("Error fetching order:", error);
+    } finally {
+      setIsLoading(false); // Set loading state to false once fetching is complete
+    }
+  };
+  
+  const checkOrderStatusOnSave = async (orderId: string) => {
+    try {
+      if (!orderId) {
+        console.error("Order ID is missing or invalid:", orderId);
+        toast.error("Invalid order. Please refresh the page and try again.", { autoClose: 2000 });
+        return;
+      }
+  
+      setIsLoading(true);
+      
+  
+      const OrderDetails = await firebaseBackend.getOrderById(orderId);
+  
+      if (!OrderDetails) {
+        console.error("Order not found for ID:", orderId);
+        toast.error("Order not found. Please refresh and try again.", { autoClose: 2000 });
+        return;
+      }
+  
+  
+      if (OrderDetails?.products?.some((product: any) => product.status === 0)) {
+        setNotPending(false);
+        toast.error("Can't save the order while it has a pending item.", { autoClose: 2000 });
+      } else {
+        setNotPending(true);
+        setShowModal(true);
+      }
+    } catch (error) {
+      console.error("Error checking order status:", error);
+      toast.error("Failed to check order status. Please try again.", { autoClose: 2000 });
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   useEffect(() => {
     if (orderId) loadOrder(orderId);
@@ -41,7 +106,7 @@ const OrderDetails = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <BreadCrumb pageTitle="Invoice" title="Invoices Details" />
+       
           <Row className="justify-content-center">
             <Col xxl={9}>
               <Card id="demo">
@@ -283,46 +348,33 @@ const OrderDetails = () => {
                                             icon: "las la-check-circle text-success",
                                           },
                                         ].map((item, index) => {
-                                          console.log(
-                                            "product.id :>> ",
-                                            product
-                                          );
+                                       
                                           return (
                                             <li key={index}>
                                               <Dropdown.Item
-                                                onClick={async () => {
-                                                  if (
-                                                    product.status !=
-                                                    item.status
-                                                  ) {
+                                                 onClick={async () => {
+                                                  if (product.status !== item.status) {
                                                     try {
-                                                      await firebaseBackend.updateOrderItemStatus(
-                                                        orderId,
-                                                        product.product,
-                                                        item.status
-                                                      );
-                                                      await firebaseBackend.updateOrderStatus(
-                                                        orderId,
-                                                        1
-                                                      );
-                                                      toast.success(
-                                                        "StatuS ipdated Successfully",
-                                                        { autoClose: 2000 }
-                                                      );
-                                                      loadOrder(
-                                                        String(orderId)
-                                                      );
+                                                      // Step 1: Update the product status to the new one
+                                                      await firebaseBackend.updateOrderItemStatus(orderId, product.product, item.status);
+                                                      
+                                                      // Step 2: Optionally update the overall order status to 1 (if needed)
+                                                      await firebaseBackend.updateOrderStatus(orderId, 1);
+                                                      
+                                                      // Step 3: Provide feedback to the user
+                                                      toast.success("Status Updated Successfully", { autoClose: 2000 });
+                                                      
+                                                      // Step 4: Reload the order to recalculate the total amount and update the UI
+                                                      loadOrder(String(orderId)); // Refresh the order data
+                                                      
                                                     } catch (error) {
-                                                      toast.error(
-                                                        "Status ipdated Failed",
-                                                        { autoClose: 2000 }
-                                                      );
+                                                      // Step 5: Handle errors during the update process
+                                                      console.error("Error updating product status:", error);
+                                                      toast.error("Status Update Failed", { autoClose: 2000 });
                                                     }
                                                   } else {
-                                                    toast.error(
-                                                      "You cannot change same status",
-                                                      { autoClose: 2000 }
-                                                    );
+                                                    // Step 6: Handle the case where the user tries to set the same status
+                                                    toast.error("You cannot change to the same status", { autoClose: 2000 });
                                                   }
                                                 }}
                                               >
@@ -351,6 +403,7 @@ const OrderDetails = () => {
                               <tr className="border-top border-top-dashed fs-15">
                                 <th scope="row">Total Amount</th>
                                 <th className="text-end">
+                                
                                   ${order.totalAmount.toFixed(2)}
                                 </th>
                               </tr>
@@ -358,37 +411,63 @@ const OrderDetails = () => {
                           </Table>
                         </div>
 
-                        {order.status != 2 && (
-                          <div className="hstack gap-2 justify-content-end d-print-none mt-4">
-                            <Link
-                              to=""
-                              onClick={async () => {
-                                try {
-                                  await firebaseBackend.updateOrderStatus(
-                                    orderId,
-                                    2
-                                  );
-                                  toast.success("StatuS ipdated Successfully", {
-                                    autoClose: 2000,
-                                  });
-                                  loadOrder(String(orderId));
-                                } catch (error) {
-                                  toast.error("Status ipdated Failed", {
-                                    autoClose: 2000,
-                                  });
-                                }
-                                await firebaseBackend.updateOrderStatus(
-                                  orderId,
-                                  2
-                                );
-                              }}
-                              className="btn btn-primary"
-                            >
-                              <i className="ri-save-2-line align-bottom me-1"></i>{" "}
-                              Save
-                            </Link>
-                          </div>
-                        )}
+                       
+                         <div className="hstack gap-2 justify-content-end d-print-none mt-4">
+                         {showSaveButton && order && (
+  <Link
+    to=""
+    onClick={async (e) => {
+      e.preventDefault();
+
+      // Check if the orderId exists
+      if (order?.orderId) {
+     
+
+        // Call the function to check the order status
+        await checkOrderStatusOnSave(order.orderId);
+      } else {
+        console.error("Order ID is missing");
+        toast.error("Invalid order. Please refresh and try again.", { autoClose: 2000 });
+      }
+    }}
+    className="btn btn-primary"
+  >
+    <i className="ri-save-2-line align-bottom me-1"></i> Save
+  </Link>
+)}
+                          {/* Modal Popup */}
+                          <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+                            <Modal.Header closeButton>
+                              <Modal.Title>Warning!</Modal.Title>
+                            </Modal.Header>
+                            <Modal.Body>
+                              If you press "Save Anyway," you will not be able to edit the order again.
+                              You will find it in the invoice details page.
+                            </Modal.Body>
+                            <Modal.Footer>
+                              <Button variant="secondary" onClick={() => setShowModal(false)}>
+                                Close
+                              </Button>
+                              <Button
+                                variant="danger"
+                                onClick={async () => {
+                                  try {
+                                    await firebaseBackend.updateOrderStatus(orderId, 2);
+                                    toast.success("Status Updated Successfully", { autoClose: 2000 });
+                                    loadOrder(String(orderId));
+                                    setShowSaveButton(false); // Hide the main Save button
+                                  } catch (error) {
+                                    toast.error("Status Update Failed", { autoClose: 2000 });
+                                  }
+                                  setShowModal(false);
+                                }}
+                              >
+                                Save Anyway
+                              </Button>
+                            </Modal.Footer>
+                          </Modal>
+                        </div>
+                        
                       </Card.Body>
                     </Col>
                   </Row>

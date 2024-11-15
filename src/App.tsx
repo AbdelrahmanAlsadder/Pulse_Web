@@ -3,7 +3,6 @@ import React from "react";
 import "./App.css";
 //import Scss
 import "./assets/scss/themes.scss";
-import fakeBackend from "./helpers/AuthType/fakeBackend";
 import { getFirestore } from "firebase/firestore";
 // routes
 import Route from "./Routes/Index";
@@ -30,8 +29,6 @@ const db = getFirestore(app);
 
 // Export the database to use it in other files
 export { db };
-
-fakeBackend();
 
 function App() {
   return (

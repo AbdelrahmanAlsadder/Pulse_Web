@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
-import BreadCrumb from '../../../Common/BreadCrumb'
+
 import { Container } from 'react-bootstrap'
-import PaymentTable from './PaymentTable'
+import PaymentTable from './OrderTable'
 
 const Orders = () => {
   document.title="Orders ";
@@ -16,7 +16,7 @@ const Orders = () => {
     <React.Fragment>
         <div className="page-content">
             <Container fluid>
-                <BreadCrumb pageTitle="Orders" title="Orders" />
+         
                 <PaymentTable isShow={isShow} hidePaymentModal={hidePaymentModal}/>
             </Container>
         </div>    

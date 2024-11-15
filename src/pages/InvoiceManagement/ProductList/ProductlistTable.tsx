@@ -10,7 +10,6 @@ import {
 import { createSelector } from "reselect";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
 import { DeleteModal } from "../../../Common/DeleteModal";
-import { handleSearchData } from "../../../Common/Tabledata/SorttingData";
 import EditProductList from "../../../Common/CrudModal/EditProductList";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
 import { toast, Slide, ToastContainer } from "react-toastify";

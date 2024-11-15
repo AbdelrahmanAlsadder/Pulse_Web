@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, Container, Form, Row } from "react-bootstrap";
-import BreadCrumb from "../../../Common/BreadCrumb";
+
 import Dropzone from "react-dropzone";
 import { Link } from "react-router-dom";
 import { useFormik } from "formik";
@@ -139,7 +139,7 @@ const AddProduct = () => {
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <BreadCrumb pageTitle="Product" title="Add Product" />
+          
           <Row>
             <Col xl={12}>
               <div className="card">

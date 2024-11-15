@@ -10,7 +10,7 @@ import { createSelector } from "reselect";
 
 const Logout = () => {
 
-    document.title = "Log Out | Judia - Admin & Dashboard Template";
+    document.title = "Log Out";
 
     const dispatch = useDispatch();
 

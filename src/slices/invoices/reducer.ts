@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 import { getTransactionData ,getClientInvoices, editClientInvoices,deleteClientInvoices ,getPaymentSummary,
-        editPaymentSummary,deletePaymentSummary,getUsers,addUsers,editUsers, deleteUsers , getProductList ,deleteProductList, getPayments ,
-        editProductList, addPayment, editPayment, deletePayment} from "./thunk";
+        editPaymentSummary,deletePaymentSummary,getUsers,addUsers,editUsers, deleteUsers , getProductList ,deleteProductList ,
+        editProductList, editPayment} from "./thunk";
 
 export const initialState = {
     transactionList: [],
@@ -145,22 +145,13 @@ const InvoiceSlice:any = createSlice({
             state.error = action.payload.error || null;
         });
 
-        builder.addCase(getPayments.fulfilled, (state: any, action: any) => {
-            state.paymentList = action.payload;
-        });
+      
 
         
-        builder.addCase(getPayments.rejected, (state: any, action: any) => {
-            state.error = action.payload.error || null;
-        });
+     
         
         // add
-        builder.addCase(addPayment.fulfilled, (state: any, action: any) => {
-            state.paymentList.push(action.payload);
-        });
-        builder.addCase(addPayment.rejected, (state: any, action: any) => {
-            state.error = action.payload.error || null;
-        });
+      
 
         builder.addCase(editPayment.fulfilled, (state: any, action: any) => {
             state.paymentList = state.paymentList.map((payment: any) =>
@@ -174,12 +165,7 @@ const InvoiceSlice:any = createSlice({
             state.error = action.payload.error || null;
         });
 
-        builder.addCase(deletePayment.fulfilled, (state: any, action: any) => {
-            state.paymentList = (state.paymentList || []).filter((payment: any) => payment.id !== action.payload.id);
-        });
-        builder.addCase(deletePayment.rejected, (state: any, action: any) => {
-            state.error = action.payload.error || null;
-        });
+
     }
 })
 

@@ -17,11 +17,6 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { createSelector } from "reselect";
-import {
-  apiError,
-  registerUser,
-  resetRegisterFlag,
-} from "../../slices/register/thunk";
 import { toast, Slide, ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -61,14 +56,15 @@ const Register = () => {
     enableReinitialize: true,
 
     initialValues: {
-      email: String,
-      username: String,
-      password: String,
-      phone: String,
-      city:String,
-      street:String,
-      CommercialRegister: File,
+      email: "",
+      username: "",
+      password: "",
+      phone: "",
+      city: "",
+      street: "",
+      CommercialRegister: null,
     },
+    
     validationSchema: Yup.object({
       email: Yup.string().required("Please Enter Email"),
       username: Yup.string().required("Please Enter Username"),
@@ -153,13 +149,7 @@ const Register = () => {
               <div className="auth-full-page-content d-flex min-vh-100 py-sm-5 py-4">
                 <div className="w-100">
                   <div className="d-flex flex-column h-100 py-0 py-xl-4">
-                    <div className="text-center mb-5">
-                      <Link to="/">
-                        <span className="logo-lg">
-                          <img src={logoDark} alt="" height="21" />
-                        </span>
-                      </Link>
-                    </div>
+                   
 
                     <Card className="my-auto overflow-hidden">
                       <Row className="g-0">
@@ -382,17 +372,7 @@ const Register = () => {
                                   ) : null}
                                 </Form.Group>
 
-                                <div className="fs-16 pb-2">
-                                  <p className="mb-0 fs-14 text-muted fst-italic">
-                                    By registering you agree to the PULSE{" "}
-                                    <Link
-                                      to="#"
-                                      className="text-primary text-decoration-underline fst-normal fw-medium"
-                                    >
-                                      Terms of Use
-                                    </Link>
-                                  </p>
-                                </div>
+                             
 
                                 <div className="mt-2">
                                   <button
@@ -410,36 +390,11 @@ const Register = () => {
                                 <div className="mt-4 text-center">
                                   <div className="signin-other-title">
                                     <h5 className="fs-15 mb-3 title">
-                                      Create account with
+                                     Have an Acoount
                                     </h5>
                                   </div>
 
-                                  <ul className="list-inline">
-                                    <li className="list-inline-item">
-                                      <Link
-                                        to="#"
-                                        className="social-list-item bg-primary text-white border-primary"
-                                      >
-                                        <i className="mdi mdi-facebook"></i>
-                                      </Link>
-                                    </li>
-                                    <li className="list-inline-item">
-                                      <Link
-                                        to="#"
-                                        className="social-list-item bg-info text-white border-info"
-                                      >
-                                        <i className="mdi mdi-twitter"></i>
-                                      </Link>
-                                    </li>
-                                    <li className="list-inline-item">
-                                      <Link
-                                        to="#"
-                                        className="social-list-item bg-danger text-white border-danger"
-                                      >
-                                        <i className="mdi mdi-google"></i>
-                                      </Link>
-                                    </li>
-                                  </ul>
+                                  
                                 </div>
 
                                 <div className="mt-4 text-center">
