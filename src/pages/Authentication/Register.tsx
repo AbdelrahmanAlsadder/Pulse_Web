@@ -56,14 +56,15 @@ const Register = () => {
     enableReinitialize: true,
 
     initialValues: {
-      email: String,
-      username: String,
-      password: String,
-      phone: String,
-      city:String,
-      street:String,
-      CommercialRegister: File,
+      email: "",
+      username: "",
+      password: "",
+      phone: "",
+      city: "",
+      street: "",
+      CommercialRegister: null,
     },
+    
     validationSchema: Yup.object({
       email: Yup.string().required("Please Enter Email"),
       username: Yup.string().required("Please Enter Username"),
