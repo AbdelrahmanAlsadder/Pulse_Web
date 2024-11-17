@@ -56,11 +56,22 @@ const AddProduct = () => {
     return setselectedFiles([]);
   };
 
+
+  //comment this out when you get the firebase storage for images and delete the handle accepted files function
+  // don't forget to change in line 216
+   // const uploadImageToFirebase = async (file) => {
+        //   const storageRef = firebase.storage().ref(`products/${file.name}`);
+        //   const uploadTask = await storageRef.put(file);
+        //   return await uploadTask.ref.getDownloadURL();
+        // };
+
   const handleAcceptedFiles = (files: any) => {
     files.map((file: any) =>
       Object.assign(file, {
         preview: URL.createObjectURL(file),
         formattedSize: formatBytes(file.size),
+
+       
       })
     );
     setselectedFiles(files);
