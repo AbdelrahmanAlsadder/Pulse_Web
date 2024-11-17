@@ -191,32 +191,40 @@ const AddProduct = () => {
                       </div>
 
                       <Dropzone
-                        isInvalid={
-                          formik.touched.productImage &&
-                          !!formik.errors.productImage
-                        }
-                        onDrop={(acceptedFiles: any) => {
-                          handleAcceptedFiles(acceptedFiles);
-                          formik.setFieldValue(
-                            "productImage",
-                            acceptedFiles[0].name
-                          ); // Set image name in Formik
-                        }}
-                      >
-                        {({ getRootProps }: any) => (
-                          <div className="dropzone dz-clickable text-center">
-                            <div
-                              className="dz-message needsclick"
-                              {...getRootProps()}
-                            >
-                              <div className="mb-3">
-                                <i className="display-4 text-muted ri-upload-cloud-2-fill" />
-                              </div>
-                              <h4>Drop files here or click to upload.</h4>
-                            </div>
-                          </div>
-                        )}
-                      </Dropzone>
+  isInvalid={
+    formik.touched.productImage && !!formik.errors.productImage
+  }
+  accept={{ 'image/jpeg': ['.jpg', '.jpeg'] }} // Only accept JPG files
+  onDrop={(acceptedFiles: any) => {
+    // Filter to ensure only JPG files are accepted
+    const jpgFiles = acceptedFiles.filter(
+      (file: File) => file.type === "image/jpeg" || file.type === "image/jpg"
+    );
+
+    if (jpgFiles.length > 0) {
+      handleAcceptedFiles(jpgFiles);
+      formik.setFieldValue("productImage", jpgFiles[0].name); // Set image name in Formik
+    } else {
+      alert("Only JPG files are allowed!"); // Alert if the file is not a JPG
+    }
+  }}
+>
+  {({ getRootProps, getInputProps }: any) => (
+    <div className="dropzone dz-clickable text-center">
+      <div
+        className="dz-message needsclick"
+        {...getRootProps()}
+      >
+        <input {...getInputProps()} />
+        <div className="mb-3">
+          <i className="display-4 text-muted ri-upload-cloud-2-fill" />
+        </div>
+        <h4>Drop JPG files here or click to upload.</h4>
+      </div>
+    </div>
+  )}
+</Dropzone>
+
                       <div className="list-unstyled mb-0" id="file-previews">
                         {selectedFiles.map((f: any, i: number) => {
                           return (
