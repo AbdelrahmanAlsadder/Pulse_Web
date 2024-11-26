@@ -21,8 +21,9 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
   const firebaseBackend = getFirebaseBackend();
 
   console.log("edit :>> ", edit);
+
   // image
-  const [selectedImage, setSelectedImage] = useState<any>();
+  const [selectedImage, setSelectedImage] = useState<any>(edit?.images || dummy);
   const [categories, setCategories] = useState<any[]>([]); // State for categories
 
   // Fetch categories from Firebase
@@ -31,7 +32,6 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
       try {
         const categoryCollection = await firebaseBackend.fetchCategories();
         setCategories(categoryCollection);
-       
       } catch (error) {
         toast.error("Failed to load categories.");
       }
@@ -40,14 +40,18 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
     fetchCategories();
   }, [firebaseBackend]);
 
-  const handleImageChange = (event: any) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      formik.setFieldValue("productImage", e.target.result);
-      setSelectedImage(e.target.result);
-    };
-    reader.readAsDataURL(file);
+  const [newImageFile, setNewImageFile] = useState<File | null>(null);
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (file) {
+      setNewImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const dispatch = useDispatch();
@@ -75,7 +79,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
     }),
 
     onSubmit: async (values: any) => {
-      await firebaseBackend.updateProductById(edit.id, values);
+      await firebaseBackend.updateProductById(edit.id, values, newImageFile);
       formik.resetForm();
       toast.success("Product Edited Successfully", { autoClose: 2000 });
       handleClose(true);
@@ -83,7 +87,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
   });
 
   useEffect(() => {
-    setSelectedImage(edit?.productImage);
+    setSelectedImage(edit?.images || dummy);  // Reset to existing image when `edit` changes
   }, [edit]);
 
   return (
@@ -110,49 +114,49 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
           <Modal.Body className="p-4">
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <div className="text-center">
-              <div className="position-relative d-inline-block">
-      <div className="position-absolute bottom-0 end-0">
-        <Form.Label
-          htmlFor="product-image-input"
-          className="mb-0"
-          data-bs-toggle="tooltip"
-          data-bs-placement="right"
-          title="Select Image"
-        >
-          <div className="avatar-xs cursor-pointer">
-            <div className="avatar-title bg-light border rounded-circle text-muted">
-              <i className="ri-image-fill"></i>
-            </div>
-          </div>
-        </Form.Label>
-        <Form.Control
-          name="productImage"
-          className="form-control d-none"
-          value=""
-          id="product-image-input"
-          type="file"
-          accept="image/png, image/gif, image/jpeg"
-          onChange={handleImageChange}
-        />
-      </div>
-      <div className="avatar-lg p-1">
-        <div className="avatar-title bg-light rounded-circle">
-          <img
-            src={formik.values.images || dummy}  // Use 'images' for the source or fallback to dummy image
-            alt="Product"
-            id="product-img"
-            className="avatar-md rounded-circle object-cover"
-          />
-        </div>
-      </div>
-    </div>
+                <div className="position-relative d-inline-block">
+                  <div className="position-absolute bottom-0 end-0">
+                    <Form.Label
+                      htmlFor="product-image-input"
+                      className="mb-0"
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="right"
+                      title="Select Image"
+                    >
+                      <div className="avatar-xs cursor-pointer">
+                        <div className="avatar-title bg-light border rounded-circle text-muted">
+                          <i className="ri-image-fill"></i>
+                        </div>
+                      </div>
+                    </Form.Label>
+                    <Form.Control
+                      name="productImage"
+                      className="form-control d-none"
+                      value=""
+                      id="product-image-input"
+                      type="file"
+                      accept="image/png, image/gif, image/jpeg"
+                      onChange={handleImageChange}
+                    />
+                  </div>
+                  <div className="avatar-lg p-1">
+                    <div className="avatar-title bg-light rounded-circle">
+                      <img
+                        src={selectedImage}
+                        alt="Product"
+                        id="product-img"
+                        className="avatar-md rounded-circle object-cover"
+                      />
+                    </div>
+                  </div>
+                </div>
                 {formik.errors.productImage && formik.touched.productImage ? (
                   <Form.Control.Feedback type="invalid" className="d-block">
-                    {" "}
-                    {formik.errors.productImage}{" "}
+                    {formik.errors.productImage}
                   </Form.Control.Feedback>
                 ) : null}
               </div>
+
               <div className="mb-3">
                 <Form.Label htmlFor="Product-Name-input">
                   Product Name<span className="text-danger">*</span>
@@ -173,6 +177,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                   </Form.Control.Feedback>
                 ) : null}
               </div>
+
               <div className="mb-3">
                 <Form.Label htmlFor="Category-input">
                   Category<span className="text-danger">*</span>
@@ -180,7 +185,6 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                 <Form.Select
                   id="Category-input"
                   name="category"
-                  placeholder="Enter Category"
                   value={formik.values.category || ""}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -199,6 +203,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                   </Form.Control.Feedback>
                 ) : null}
               </div>
+
               <Row>
                 <Col lg={6}>
                   <div className="mb-3">
@@ -221,6 +226,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                     )}
                   </div>
                 </Col>
+
                 <Col lg={6}>
                   <div className="mb-3">
                     <Form.Label htmlFor="quantity">Product Quantity</Form.Label>
@@ -242,6 +248,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                   </div>
                 </Col>
               </Row>
+
               <div className="mb-3">
                 <Form.Label htmlFor="Price-input">
                   Price<span className="text-danger">*</span>
@@ -261,6 +268,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                   </Form.Control.Feedback>
                 ) : null}
               </div>
+
               <div className="hstack gap-2 justify-content-end">
                 <Button
                   type="button"
@@ -272,8 +280,8 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                 >
                   Close
                 </Button>
-                <Button type="submit" className="btn btn-success">
-                  Edit
+                <Button type="submit" className="btn btn-primary">
+                  Save Changes
                 </Button>
               </div>
             </Form>

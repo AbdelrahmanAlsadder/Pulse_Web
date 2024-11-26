@@ -415,18 +415,38 @@ class FirebaseAuthBackend {
   };
 
   // Function to update a product by ID
-  async updateProductById(id: string, updatedData: any) {
+  async updateProductById(id: string, updatedData: any, newImageFile: File | null) {
     try {
       const productRef = this.firestore.collection("products").doc(id);
-      await productRef.update({
+      
+      let updatedProductData: any = {
         title: updatedData.title || "",
-        images: updatedData.images || "",
         category: updatedData.category || "",
         price: updatedData.price || "",
         quantity: updatedData.quantity || "",
         expiryDate: updatedData.expiryDate || "",
-      });
+      };
+  
+      if (newImageFile) {
+        // If a new image is provided, upload it to Firebase Storage
+        const storage = getStorage();
+        const imageRef = ref(storage, `images/${newImageFile.name}`);
+  
+        console.log("Uploading new image:", newImageFile.name);
+  
+        const snapshot = await uploadBytes(imageRef, newImageFile);  // Upload the new image
+        const newImageUrl = await getDownloadURL(snapshot.ref);  // Get the URL of the uploaded image
+  
+        console.log("New image URL:", newImageUrl);
+  
+        updatedProductData.images = newImageUrl;  // Update the `images` field with the new URL
+      }
+  
+      // Update the product document in Firestore with the new data
+      await productRef.update(updatedProductData);
+  
       console.log("Product updated successfully");
+  
     } catch (error) {
       console.error("Error updating product:", error);
       throw error;
