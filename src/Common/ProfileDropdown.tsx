@@ -1,37 +1,45 @@
 import React, { useEffect, useState } from "react";
 import { Dropdown } from "react-bootstrap";
-//import images
-import avatar1 from "../assets/images/users/avatar-4.jpg";
 import { useSelector } from "react-redux";
 import { createSelector } from "reselect";
 import { getFirebaseBackend } from "../helpers/firebase_helper";
+import avatar1 from "../assets/images/users/avatar-4.jpg"; // Fallback avatar
 
 const ProfileDropdown = () => {
-  const [userName, setUserName] = useState<any>("");
+  const [userName, setUserName] = useState<string>("");
+  const [userImage, setUserImage] = useState<string>("");
+  const [profilePicture, setProfilePicture] = useState<string>(avatar1); // Default to avatar1
   const firebaseBackend = getFirebaseBackend();
+
+  // Selector to access user profile from Redux state
   const profiledropdownData = createSelector(
     (state: any) => state.Profile,
     (user: any) => user
   );
-
-  // Inside your component
   const user = useSelector(profiledropdownData);
-  const loadUserName = async (uid: String) => {
+
+  // Function to load the username from Firebase
+  const loadUserName = async (uid: string) => {
     try {
       const data = await firebaseBackend.getUserDetailsByUid(uid);
-      setUserName(data ? data.username : "Admin");
+      setUserName(data ? data.username : "Admin"); // Default to "Admin" if username is not found
+      setUserImage(data ? data.picture : "");
     } catch (error) {
-      console.error("Error loading products:", error);
-    } finally {
+      console.error("Error loading user details:", error);
     }
   };
+
+ 
+
+
+  // Load user details when component mounts or when `user` changes
   useEffect(() => {
-    const authUser: any = sessionStorage.getItem("authUser");
+    const authUser = sessionStorage.getItem("authUser");
     if (authUser) {
       const obj = JSON.parse(authUser);
-      if (obj.uid) loadUserName(obj.uid);
+      if (obj?.uid) loadUserName(obj.uid);
     }
-  }, [userName, user]);
+  }, [user]);
 
   return (
     <React.Fragment>
@@ -42,18 +50,25 @@ const ProfileDropdown = () => {
           id="page-header-user-dropdown"
         >
           <span className="d-flex align-items-center">
+            {/* Image */}
             <img
               className="rounded-circle header-profile-user"
-              src={avatar1}
+              src={userImage} // Use profilePicture state
               alt="Header Avatar"
+              onError={() => {
+                console.error("Failed to load image, falling back to default.");
+                setProfilePicture(avatar1); // Fallback to default avatar on error
+              }}
             />
             <span className="text-start ms-xl-2">
               <span className="d-none d-xl-inline-block fw-medium user-name-text fs-16">
-                {userName} <i className="las la-angle-down fs-12 ms-1"></i>
+                {userName || "Loading..."} {/* Display username or loading if not set */}
+                <i className="las la-angle-down fs-12 ms-1"></i>
               </span>
             </span>
           </span>
         </Dropdown.Toggle>
+
         <Dropdown.Menu className="dropdown-menu-end">
           <Dropdown.Item className="dropdown-item" href="/user-profile">
             <i className="bx bx-user fs-15 align-middle me-1"></i>{" "}
