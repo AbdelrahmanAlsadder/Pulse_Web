@@ -241,35 +241,49 @@ class FirebaseAuthBackend {
   /*
     add New User To Firestore
   */
-  addNewUserToFirestore = async (user: any) => {
-    const collection = firebase.firestore().collection("users");
-    // const { profile } = user.additionalUserInfo;
-    let commercial_register;
-    if (user.CommercialRegister) {
-      // try {
-      //   commercial_register = await this.uploadFileToStorage(
-      //     user.CommercialRegister
-      //   );
-      // } catch (error) {
-      //   console.error("Failed to upload commercial register:", error);
-      // }
-    }
-
-    const details = {
-      username: user.username,
-      email: user.email,
-      phone: user.phone,
-      picture: "",
-      commercial_register: commercial_register ?? "",
-      status: 0, // 1-admin 2-warehouse 3-pharmacy  (-1)- Disabled  0-pending
-      street: user.street,
-      city: user.city,
-      createdDtm: firebase.firestore.FieldValue.serverTimestamp(),
-      lastLoginTime: firebase.firestore.FieldValue.serverTimestamp(),
+    addNewUserToFirestore = async (user: any) => {
+      const collection = firebase.firestore().collection("users");
+      let commercial_register = "";
+    
+      // Check if the Commercial Register file exists
+      if (user.CommercialRegister) {
+        try {
+          const storage = getStorage();
+          const storageRef = ref(storage, `commercial-registers/${user.CommercialRegister.name}`); // File path in Firebase Storage
+    
+          // Upload the Commercial Register PDF to Firebase Storage
+          const snapshot = await uploadBytes(storageRef, user.CommercialRegister);
+    
+          // Get the download URL for the uploaded file
+          commercial_register = await getDownloadURL(snapshot.ref);  // Correctly pass the reference
+    
+          console.log("Commercial Register uploaded successfully:", commercial_register);
+        } catch (error) {
+          console.error("Failed to upload commercial register:", error);
+          // Handle the error appropriately (e.g., fallback to default behavior or rethrow)
+        }
+      }
+    
+      // Create the user document in Firestore with the commercial register URL
+      const details = {
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        picture: "",  // You can modify this if you want to upload a user profile picture as well
+        commercial_register: commercial_register,  // Store the URL of the uploaded Commercial Register
+        status: 0,  // 1-admin, 2-warehouse, 3-pharmacy, -1-disabled, 0-pending
+        street: user.street,
+        city: user.city,
+        createdDtm: firebase.firestore.FieldValue.serverTimestamp(),
+        lastLoginTime: firebase.firestore.FieldValue.serverTimestamp(),
+      };
+    
+      // Save the user details to Firestore under the current user ID
+      await collection.doc(firebase.auth().currentUser?.uid).set(details);
+      
+      // Return the user and details object
+      return { user, details };
     };
-    collection.doc(firebase.auth().currentUser?.uid).set(details);
-    return { user, details };
-  };
 
   /*
     Returns the fetch Products

@@ -59,6 +59,17 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
   //       }
   //     };
 
+  const handleOpenFile = (item: any) => {
+    const commercialRegisterUrl = item.commercial_register; // Get the URL from the user data
+  
+    if (commercialRegisterUrl) {
+      // Open the PDF in a new tab
+      window.open(commercialRegisterUrl, "_blank");
+    } else {
+      // Handle the case where no commercial register URL is found
+      alert("Commercial Register not available.");
+    }
+  };
   const loadUsers = async (item?: undefined) => {
     try {
       setIsLoading(true);
@@ -237,7 +248,8 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
               <Link
                 to="#"
                 className="btn btn-soft-danger btn-sm d-inline-block"
-                //onClick={handleOpenFile}
+                onClick={() => handleOpenFile(cell.row.original)}
+                
                 title="Open Commercial Register"
               >
                 <i className="las la-file-download fs-17 align-middle"></i>
