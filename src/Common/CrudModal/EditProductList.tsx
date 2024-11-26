@@ -110,42 +110,42 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
           <Modal.Body className="p-4">
             <Form autoComplete="off" onSubmit={formik.handleSubmit}>
               <div className="text-center">
-                <div className="position-relative d-inline-block">
-                  <div className="position-absolute bottom-0 end-0">
-                    <Form.Label
-                      htmlFor="product-image-input"
-                      className="mb-0"
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="right"
-                      title="Select Image"
-                    >
-                      <div className="avatar-xs cursor-pointer">
-                        <div className="avatar-title bg-light border rounded-circle text-muted">
-                          <i className="ri-image-fill"></i>
-                        </div>
-                      </div>
-                    </Form.Label>
-                    <Form.Control
-                      name="productImage"
-                      className="form-control d-none"
-                      value=""
-                      id="product-image-input"
-                      type="file"
-                      accept="image/png, image/gif, image/jpeg"
-                      onChange={handleImageChange}
-                    />
-                  </div>
-                  <div className="avatar-lg p-1">
-                    <div className="avatar-title bg-light rounded-circle">
-                      <img
-                        src={selectedImage || dummy}
-                        alt=""
-                        id="product-img"
-                        className="avatar-md rounded-circle object-cover"
-                      />
-                    </div>
-                  </div>
-                </div>
+              <div className="position-relative d-inline-block">
+      <div className="position-absolute bottom-0 end-0">
+        <Form.Label
+          htmlFor="product-image-input"
+          className="mb-0"
+          data-bs-toggle="tooltip"
+          data-bs-placement="right"
+          title="Select Image"
+        >
+          <div className="avatar-xs cursor-pointer">
+            <div className="avatar-title bg-light border rounded-circle text-muted">
+              <i className="ri-image-fill"></i>
+            </div>
+          </div>
+        </Form.Label>
+        <Form.Control
+          name="productImage"
+          className="form-control d-none"
+          value=""
+          id="product-image-input"
+          type="file"
+          accept="image/png, image/gif, image/jpeg"
+          onChange={handleImageChange}
+        />
+      </div>
+      <div className="avatar-lg p-1">
+        <div className="avatar-title bg-light rounded-circle">
+          <img
+            src={formik.values.images || dummy}  // Use 'images' for the source or fallback to dummy image
+            alt="Product"
+            id="product-img"
+            className="avatar-md rounded-circle object-cover"
+          />
+        </div>
+      </div>
+    </div>
                 {formik.errors.productImage && formik.touched.productImage ? (
                   <Form.Control.Feedback type="invalid" className="d-block">
                     {" "}
