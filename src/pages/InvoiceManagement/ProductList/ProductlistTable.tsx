@@ -128,27 +128,43 @@ const ProductlistTable = () => {
         Filter: false,
         isSortable: true,
         Cell: (cell: any) => {
+          const { images, title } = cell.row.original;  // Destructure to get images and title
+          
+          // Log the product data before rendering
+          console.log("Product data:", cell.row.original);  // Log entire product data
+          console.log("Images field:", images);  // Log the image URL or empty string
+          console.log("Title field:", title);  // Log the product title
+      
+          // Check if images exist and is a non-empty string
+          const renderImage = () => {
+            if (images && images.length > 0) {
+              // Log the image URL being used
+              console.log("Rendering image from URL:", images);
+              return <img src={images} alt="Product Image" className="avatar-xs" style={{ objectFit: "cover" }} />;
+            } else {
+              // If no image, log that there's no image available
+              console.log("No image available for product:", title);
+              return <span>No Image</span>;
+            }
+          };
+      
           return (
             <div className="d-flex align-items-center">
               <div className="flex-shrink-0 me-3 avatar-sm">
-                {cell.row.original.images?.length > 0 && (
-                  <div className="avatar-title bg-light rounded">
-                    {" "}
-                    <img
-                      src={cell.row.original.images[0]}
-                      alt=""
-                      className="avatar-xs"
-                    />
-                  </div>
-                )}
+                <div className="avatar-title bg-light rounded">
+                  {renderImage()}  {/* Render image or placeholder */}
+                </div>
               </div>
               <div className="flex-grow-1">
-                <h6 className="fs-16 mb-1">{cell.row.original.title}</h6>
+                <h6 className="fs-16 mb-1">{title}</h6>
               </div>
             </div>
           );
         },
-      },
+      }
+      
+      
+      ,
       {
         Header: "CATEGORY",
         accessor: "category",

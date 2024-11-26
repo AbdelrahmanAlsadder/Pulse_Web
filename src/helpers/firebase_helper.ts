@@ -6,6 +6,7 @@ import "firebase/compat/firestore";
 import "firebase/compat/storage";
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { toast } from "react-toastify";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 class FirebaseAuthBackend {
   firestore: firebase.firestore.Firestore;
@@ -273,34 +274,46 @@ class FirebaseAuthBackend {
   /*
     Returns the fetch Products
   */
-  async fetchProducts(keyword = "") {
-    try {
-      if (this.uuid != undefined) {
-        let query = this.firestore
-          .collection("products")
-          .where("store_id", "==", this.uuid); // Filter by store_id
-
-        // If a keyword is provided, filter products by name or description
-        if (keyword) {
-          query = query
-            .where("title", ">=", keyword)
-            .where("title", "<=", keyword + "\uf8ff");
+    async fetchProducts(keyword = ""): Promise<any[]> {
+      try {
+        if (this.uuid !== undefined) {
+          console.log("Fetching products for store_id:", this.uuid);
+    
+          let query = this.firestore
+            .collection("products")
+            .where("store_id", "==", this.uuid); // Filter by store_id
+    
+          // If a keyword is provided, filter products by name or description
+          if (keyword) {
+            console.log("Filtering products by keyword:", keyword);
+            query = query
+              .where("title", ">=", keyword)
+              .where("title", "<=", keyword + "\uf8ff");
+          }
+    
+          const querySnapshot = await query.get();
+    
+          const products = querySnapshot.docs.map((doc) => {
+            const data = doc.data();
+            console.log("Product fetched:", { id: doc.id, ...data });
+            return {
+              id: doc.id,
+              ...data,
+            };
+          });
+    
+          console.log("Fetched products:", products);
+          return products;
         }
-
-        const querySnapshot = await query.get();
-
-        return querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+    
+        console.warn("UUID is undefined. Returning empty product list.");
+        return [];
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        throw error;
       }
-      // Return an empty array if uuid is undefined
-      return [];
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      throw error;
     }
-  }
+    
 
   async fetchUsers(keyword = "") {
     try {
@@ -445,21 +458,47 @@ class FirebaseAuthBackend {
    * @param {Object} productData - The product data to be added
    * @returns {Promise} - A promise that resolves when the product is added
    */
-  addProductToFirestore = (productData: any): Promise<any> => {
+
+
+   addProductToFirestore = (productData: any, imageFile: File): Promise<any> => {
     return new Promise((resolve, reject) => {
       // Ensure user is authenticated before adding the product
       if (this.uuid) {
         const collection = this.firestore.collection("products");
-        const newProduct = {
-          ...productData,
-          store_id: this.uuid, // Ensure the product is associated with the user's store
-          createdDtm: firebase.firestore.FieldValue.serverTimestamp(), // Automatically set the creation timestamp
-        };
-
-        collection
-          .add(newProduct)
+        const storage = getStorage();
+        
+        // Ensure the image file name is correct
+        if (!imageFile || !imageFile.name) {
+          reject("No image file provided or image file name is undefined.");
+          return;
+        }
+  
+        const storageRef = ref(storage, `images/${imageFile.name}`);  // Using imageFile.name to set the file name
+  
+        console.log("Uploading image with filename:", imageFile.name);  // Log filename
+  
+        // Upload the image to Firebase Storage
+        uploadBytes(storageRef, imageFile)
+          .then((snapshot) => {
+            // Get the download URL for the uploaded image
+            return getDownloadURL(snapshot.ref);
+          })
+          .then((downloadURL) => {
+            console.log("Image URL:", downloadURL);  // Log the URL to ensure it's correct
+  
+            // Add the image URL to the product data
+            const newProduct = {
+              ...productData,
+              images: downloadURL,  // Store the image URL correctly
+              store_id: this.uuid,  // Associate the product with the user's store
+              createdDtm: firebase.firestore.FieldValue.serverTimestamp(), // Set the creation timestamp
+            };
+  
+            // Add the product data with the image URL to Firestore
+            return collection.add(newProduct);
+          })
           .then((docRef) => {
-            resolve({ id: docRef.id, ...newProduct });
+            resolve({ id: docRef.id, ...productData });
           })
           .catch((error) => {
             reject(this._handleError(error));
@@ -469,6 +508,9 @@ class FirebaseAuthBackend {
       }
     });
   };
+  
+  
+
 
   /**
    * Retrieves all orders containing products from the specified store (by store ID).

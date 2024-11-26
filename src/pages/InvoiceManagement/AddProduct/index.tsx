@@ -111,7 +111,7 @@ const AddProduct = () => {
     onSubmit: async (values: {
       productName: any;
       productScientificName: any;
-      productImage: File;
+      productImage: null;
       category: any;
       price: any;
       quantity: any;
@@ -121,7 +121,7 @@ const AddProduct = () => {
       const newProduct = {
         title: values.productName,
         scientificTitle: values.productScientificName,
-        images: values.productImage, // Handle image upload to Firestore
+        // images: values.productImage, // Handle image upload to Firestore
         category: values.category,
         price: values.price,
         quantity: values.quantity,
@@ -133,11 +133,11 @@ const AddProduct = () => {
       // For example: addProductToFirestore(newProduct);
       try {
         setIsLoading(true);
-        await firebaseBackend.addProductToFirestore(newProduct);
+        await firebaseBackend.addProductToFirestore(newProduct, values.productImage);  // Pass both the product data and image file
         toast.success("Product Added Successfully", { autoClose: 2000 });
       } catch (error) {
         console.error("Error loading products:", error);
-        toast.error("Invoice Deleted Successfully", { autoClose: 2000 });
+        toast.error("Error adding product", { autoClose: 2000 });
       } finally {
         setIsLoading(false);
         formik.resetForm();
@@ -214,7 +214,7 @@ const AddProduct = () => {
 
     if (jpgFiles.length > 0) {
       handleAcceptedFiles(jpgFiles);
-      formik.setFieldValue("productImage", jpgFiles[0].name); // Set image name in Formik
+      formik.setFieldValue("productImage", jpgFiles[0]); // Set image name in Formik
     } else {
       alert("Only JPG files are allowed!"); // Alert if the file is not a JPG
     }
