@@ -2,10 +2,7 @@ import { useFormik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import dummy from "../../assets/images/users/user-dummy-img.jpg";
-
 import * as Yup from "yup";
-
-import { editProductList as onEditProductList } from "../../slices/thunk";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import { getFirebaseBackend } from "../../helpers/firebase_helper";
 import { toast } from "react-toastify";
@@ -215,9 +212,16 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                       placeholder="Expiry Date"
                       options={{ dateFormat: "d M, Y" }}
                       value={formik.values.expiryDate ? new Date(formik.values.expiryDate) : null}
-                      onChange={(date: Date[]) =>
-                        formik.setFieldValue("expiryDate", date[0])
-                      }
+                      onChange={(date: Date[]) => {
+                        if (date[0]) {
+                          const year = date[0].getFullYear();
+                          const month = String(date[0].getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+                          const day = String(date[0].getDate()).padStart(2, '0');
+                      
+                          const formattedDate = `${year}-${month}-${day}`; // Format as YYYY-MM-DD
+                          formik.setFieldValue("expiryDate", formattedDate); // Store as a string
+                        }
+                      }}
                     />
                     {formik.errors.expiryDate && formik.touched.expiryDate && (
                       <Form.Control.Feedback type="invalid">
