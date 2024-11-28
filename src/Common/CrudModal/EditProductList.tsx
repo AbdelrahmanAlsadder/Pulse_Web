@@ -214,7 +214,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                       className="form-control"
                       placeholder="Expiry Date"
                       options={{ dateFormat: "d M, Y" }}
-                      value={formik.values.expiryDate}
+                      value={formik.values.expiryDate ? new Date(formik.values.expiryDate) : null}
                       onChange={(date: Date[]) =>
                         formik.setFieldValue("expiryDate", date[0])
                       }
