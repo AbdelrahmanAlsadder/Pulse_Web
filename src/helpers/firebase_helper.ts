@@ -148,7 +148,8 @@ class FirebaseAuthBackend {
   };
 
   /**
-   * Social Login user with given details
+   * Social Login user with given details , this function is written in case
+   * we wanted to add login by google/facebook, it's currently not used
    */
   socialLoginUser = async (type: any) => {
     let provider: any;
@@ -327,7 +328,8 @@ class FirebaseAuthBackend {
         throw error;
       }
     }
-    
+
+    //fetches the users from the firebase
 
   async fetchUsers(keyword = "") {
     try {
@@ -465,7 +467,7 @@ class FirebaseAuthBackend {
     }
   }
 
-  //return fetched categories
+  //return fetched categories, keep in mind that categories can be only added from the firebase for unification reasons
   async fetchCategories(keyword = "") {
     try {
       let query = this.firestore.collection("categories");
@@ -989,7 +991,7 @@ getOrderByUID3 = async (): Promise<any[]> => {
   
   
   
-  
+  //to update the product quantity in the edit function
   updateProductQuantity = async (productId: string, quantityToUpdate: number, status: string): Promise<void> => {
    
     try {
