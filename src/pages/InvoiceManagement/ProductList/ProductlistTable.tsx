@@ -2,17 +2,13 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, Col, Dropdown, Form, Row, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import TableContainer from "../../../Common/Tabledata/TableContainer";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getProductList as onGetProductList,
-  deleteProductList as onDeleteProductList,
-} from "../../../slices/thunk";
+import { useDispatch } from "react-redux";
 import { createSelector } from "reselect";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
 import { DeleteModal } from "../../../Common/DeleteModal";
 import EditProductList from "../../../Common/CrudModal/EditProductList";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
-import { toast, Slide, ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ProductlistTable = () => {

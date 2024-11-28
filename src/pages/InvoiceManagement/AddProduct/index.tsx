@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, Container, Form, Row } from "react-bootstrap";
-
 import Dropzone from "react-dropzone";
-import { Link } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
-import firebase from "firebase/compat/app";
 import { toast, Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { collection, getDocs } from "firebase/firestore";
+
 
 const AddProduct = () => {
   document.title = "Add Product";

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Container, Row, Col, Table, Dropdown } from "react-bootstrap";
 import logoDark from "../../../assets/images/logo-dark.png";
 import logoLight from "../../../assets/images/logo-light.png";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
 import moment from "moment";
 import { toast } from "react-toastify";
