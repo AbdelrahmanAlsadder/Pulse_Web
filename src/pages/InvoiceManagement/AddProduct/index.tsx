@@ -94,6 +94,7 @@ const AddProduct = () => {
       quantity: "",
       expiryDate: "",
       productDesc: "",
+      status:"0",
     },
     validationSchema: Yup.object({
       productName: Yup.string().required("Please enter your product commercial name"),
@@ -114,6 +115,7 @@ const AddProduct = () => {
       quantity: any;
       expiryDate: any;
       productDesc: any;
+      status:"0",
     }) => {
       const newProduct = {
         title: values.productName,
@@ -124,6 +126,7 @@ const AddProduct = () => {
         quantity: values.quantity,
         expiryDate: values.expiryDate,
         description: values.productDesc,
+        status:"0",
       };
       console.log("newProduct :>> ", newProduct);
       // Call your method to add the product to Firestore here

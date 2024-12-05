@@ -296,7 +296,8 @@ class FirebaseAuthBackend {
     
           let query = this.firestore
             .collection("products")
-            .where("store_id", "==", this.uuid); // Filter by store_id
+            .where("store_id", "==", this.uuid) // Filter by store_id
+            .where("status", "==", "0");//the status should be 0 , -1 is deleted
     
           // If a keyword is provided, filter products by name or description
           if (keyword) {
@@ -459,10 +460,10 @@ class FirebaseAuthBackend {
   async deleteProductById(id: string) {
     try {
       const productRef = this.firestore.collection("products").doc(id);
-      await productRef.delete();
-      console.log("Product deleted successfully");
+      await productRef.update({ status: "-1" }); // Update the status to "-1"
+      console.log("Product status updated to '-1' successfully");
     } catch (error) {
-      console.error("Error deleting product:", error);
+      console.error("Error updating product status:", error);
       throw error;
     }
   }
