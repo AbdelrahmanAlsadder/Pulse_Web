@@ -168,7 +168,8 @@ const InvoiceDetails = () => {
                             src={logoDark}
                             className="card-logo card-logo-dark"
                             alt="logo dark"
-                            height="17"
+                            height="33"
+                            width="150"
                           />
                           <img
                             src={logoLight}
