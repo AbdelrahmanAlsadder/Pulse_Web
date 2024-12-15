@@ -375,6 +375,7 @@ const AddProduct = () => {
                               onChange={formik.handleChange}
                               onBlur={formik.handleBlur}
                               value={formik.values.expiryDate}
+                              min={new Date().toISOString().split("T")[0]} // Restrict to today's date or future dates, so the user can choose a date in the present only
                               isInvalid={
                                 formik.touched.expiryDate &&
                                 !!formik.errors.expiryDate
