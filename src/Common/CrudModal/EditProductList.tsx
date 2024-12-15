@@ -210,7 +210,9 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                     <Flatpickr
                       className="form-control"
                       placeholder="Expiry Date"
-                      options={{ dateFormat: "d M, Y" }}
+                      options={{ dateFormat: "d M, Y",
+                        minDate: "today", // Restrict selection to today or future dates
+                       }}
                       value={formik.values.expiryDate ? new Date(formik.values.expiryDate) : null}
                       onChange={(date: Date[]) => {
                         if (date[0]) {
