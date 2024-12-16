@@ -194,7 +194,7 @@ const OrderDetails = () => {
                             src={logoDark}
                             className="card-logo card-logo-dark"
                             alt="logo dark"
-                            height="17"
+                            height="33"
                           />
                           <img
                             src={logoLight}
