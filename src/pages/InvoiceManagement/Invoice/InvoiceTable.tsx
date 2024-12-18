@@ -133,7 +133,7 @@ const InvoiceTable = ({ isShow, hidePaymentModal }: paymentProps) => {
         accessor: "totalAmount",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>${cell.row.original.totalAmount}</>,
+        Cell: (cell: any) => <>${cell.row.original.totalAmount.toFixed(2)}</>,
       },
       {
         Header: "Status",

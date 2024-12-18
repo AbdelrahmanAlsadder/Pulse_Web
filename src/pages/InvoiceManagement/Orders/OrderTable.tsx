@@ -133,7 +133,7 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
         accessor: "totalAmount",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>${cell.row.original.totalAmount}</>,
+        Cell: (cell: any) => <>${cell.row.original.totalAmount.toFixed(2)}</>,//just fixed is to show the amount up to 2 decimal points
       },
       {
         Header: "Status",
