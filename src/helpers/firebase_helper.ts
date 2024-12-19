@@ -54,16 +54,20 @@ class FirebaseAuthBackend {
   /**
    * Registers the user with given details
    */
+  // Function to register a user with email and password
   registerUser = (email: any, password: any) => {
-    return new Promise((resolve, reject) => {
+     // Use Firebase Authentication service to create a new user
+        return new Promise((resolve, reject) => {
       firebase
         .auth()
-        .createUserWithEmailAndPassword(email, password)
+        .createUserWithEmailAndPassword(email, password)// Create a new user with the provided email and password
         .then(
           (user: any) => {
+            // On successful creation, resolve the promise with the current authenticated user
             resolve(firebase.auth().currentUser);
           },
           (error: any) => {
+            // On error, handle the error using a custom error handler and reject the promise
             reject(this._handleError(error));
           }
         );
@@ -92,16 +96,20 @@ class FirebaseAuthBackend {
   /**
    * Login user with given details
    */
+  // Function to log in a user with email and password
   loginUser = (email: any, password: any) => {
     return new Promise((resolve, reject) => {
+       // Use Firebase Authentication service to sign in with email and password
       firebase
         .auth()
-        .signInWithEmailAndPassword(email, password)
+        .signInWithEmailAndPassword(email, password) // Attempt to sign in the user with provided email and password
         .then(
           (user: any) => {
+            // On successful login, resolve the promise with the current authenticated user
             resolve(firebase.auth().currentUser);
           },
           (error: any) => {
+            // On error, handle the error using a custom error handler and reject the promise
             reject(this._handleError(error));
           }
         );
@@ -341,17 +349,20 @@ class FirebaseAuthBackend {
       // If a keyword is provided, filter users by title
       if (keyword) {
         query = query
+        // Use a greater-than or equal condition for the beginning of the range
           .where("username", ">=", keyword)
-          .where("username", "<=", keyword + "\uf8ff");
+          // Use a less-than or equal condition to include all matching usernames
+          .where("username", "<=", keyword + "\uf8ff"); // '\uf8ff' ensures all possible characters after the keyword are included
       }
-
+      // Execute the query and get the snapshot of the result
       const querySnapshot = await query.get();
-
+      // Map the results to an array of user data with user ID
       return querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+        id: doc.id,// Include the document ID
+        ...doc.data(),// Include all the fields from the document
       }));
     } catch (error) {
+      // Handle errors by logging the error and throwing it for further handling
       console.error("Error fetching users:", error);
       throw error;
     }
@@ -496,13 +507,13 @@ class FirebaseAuthBackend {
    * @returns {Promise} - A promise that resolves when the product is added
    */
 
-
+// Function to add a new product to Firestore along with its image file
    addProductToFirestore = (productData: any, imageFile: File): Promise<any> => {
     return new Promise((resolve, reject) => {
       // Ensure user is authenticated before adding the product
       if (this.uuid) {
-        const collection = this.firestore.collection("products");
-        const storage = getStorage();
+        const collection = this.firestore.collection("products");// Reference to the 'products' collection in Firestore
+        const storage = getStorage();// Get the Firebase storage service
         
         // Ensure the image file name is correct
         if (!imageFile || !imageFile.name) {
@@ -517,7 +528,7 @@ class FirebaseAuthBackend {
         // Upload the image to Firebase Storage
         uploadBytes(storageRef, imageFile)
           .then((snapshot) => {
-            // Get the download URL for the uploaded image
+            // Once the upload is complete, get the download URL for the uploaded image
             return getDownloadURL(snapshot.ref);
           })
           .then((downloadURL) => {
@@ -535,12 +546,15 @@ class FirebaseAuthBackend {
             return collection.add(newProduct);
           })
           .then((docRef) => {
+             // Once the product is successfully added, resolve the promise with the new product's ID and data
             resolve({ id: docRef.id, ...productData });
           })
           .catch((error) => {
+            // If an error occurs during the process, handle the error and reject the promise
             reject(this._handleError(error));
           });
       } else {
+        // Reject the promise if the user is not authenticated (no UUID)
         reject("User is not authenticated.");
       }
     });
@@ -559,20 +573,26 @@ class FirebaseAuthBackend {
   // invoice page
   getOrderByUID = async (): Promise<any[]> => {
     try {
+       // Fetch the collection of orders where the status is either 0 or 1
       const ordersCollection = this.firestore.collection("orders")
         .where("status", "in", [1, 0]); // Filter orders based on order status (0 and 1)
+      
+        // Get the snapshot of orders that match the query  
       const ordersSnapshot = await ordersCollection.get();
       const orders = [];
-  
+
+       // Loop through each order document in the snapshot
       for (const orderDoc of ordersSnapshot.docs) {
-        const orderData = orderDoc.data();
-        let totalAmount = 0;
+        const orderData = orderDoc.data();// Get the data of the order
+        let totalAmount = 0;// Initialize a variable to calculate the total amount of the order
   
         // Filter products within the order based on store ID
         const filteredProducts = await Promise.all(
           orderData.products.map(async (productItem: any) => {
+             // Fetch the details of the product by its ID
             const productData = await this.getProductById(productItem.product);
   
+            // If the product's store ID matches the current store and its status is 0 or 1
             if (productData && productData.store_id === this.uuid) {
               // Only calculate the total amount if the product's status is 0 or 1
               if (productItem.status === 0 || productItem.status === 1) {
@@ -589,29 +609,32 @@ class FirebaseAuthBackend {
                 
               };
             }
-  
+            // If the product doesn't meet the conditions, return null
             return null;
           })
         );
-  
+        // Filter out any null values (products that don't match the conditions)
         const nonNullProducts = filteredProducts.filter(Boolean);
-  
+
+        // If there are valid products, add the order to the orders array
         if (nonNullProducts.length > 0) {
           // Fetch user details using getUserDetailsByUid method
           const userDetails = await this.getUserDetailsByUid(orderData.user_id);
-  
+          
+          // Push the order data, including filtered products, total amount, and user details
           orders.push({
-            id: orderDoc.id,
-            ...orderData,
-            products: nonNullProducts,
-            user: userDetails,
-            totalAmount,
+            id: orderDoc.id,// Order ID
+            ...orderData, // Include all other order data
+            products: nonNullProducts,// Include the valid products for the order
+            user: userDetails,// User details for the order
+            totalAmount,// Total calculated amount for the order
           });
         }
       }
-  
+       // Return the final list of orders
       return orders;
     } catch (error) {
+      // If an error occurs during the process, log it and throw the error
       console.error("Error fetching orders by store UID:", error);
       throw error;
     }
