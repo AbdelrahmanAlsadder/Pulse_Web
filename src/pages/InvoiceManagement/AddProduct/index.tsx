@@ -102,7 +102,7 @@ const AddProduct = () => {
       productImage: Yup.mixed().required("Please select an image"),
       category: Yup.string().required("Please enter your category"),
       price: Yup.number().required("Please enter price"),
-      quantity: Yup.number().required("Please enter the quantity"),
+      quantity: Yup.number().required("Please enter the quantity").typeError('Quantity must be a number').positive('Quantity must be greater than 0'),
       expiryDate: Yup.date().required("Please enter the expiry date"),
       productDesc: Yup.string().required("Please enter product description"),
     }),
