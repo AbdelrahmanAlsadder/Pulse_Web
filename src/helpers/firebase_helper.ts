@@ -4,7 +4,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
 import "firebase/compat/storage";
-import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -56,11 +56,11 @@ class FirebaseAuthBackend {
    */
   // Function to register a user with email and password
   registerUser = (email: any, password: any) => {
-     // Use Firebase Authentication service to create a new user
-        return new Promise((resolve, reject) => {
+    // Use Firebase Authentication service to create a new user
+    return new Promise((resolve, reject) => {
       firebase
         .auth()
-        .createUserWithEmailAndPassword(email, password)// Create a new user with the provided email and password
+        .createUserWithEmailAndPassword(email, password) // Create a new user with the provided email and password
         .then(
           (user: any) => {
             // On successful creation, resolve the promise with the current authenticated user
@@ -99,7 +99,7 @@ class FirebaseAuthBackend {
   // Function to log in a user with email and password
   loginUser = (email: any, password: any) => {
     return new Promise((resolve, reject) => {
-       // Use Firebase Authentication service to sign in with email and password
+      // Use Firebase Authentication service to sign in with email and password
       firebase
         .auth()
         .signInWithEmailAndPassword(email, password) // Attempt to sign in the user with provided email and password
@@ -135,8 +135,6 @@ class FirebaseAuthBackend {
         });
     });
   };
-
-
 
   /**
    * Logout the user
@@ -250,95 +248,101 @@ class FirebaseAuthBackend {
   /*
     add New User To Firestore
   */
-    addNewUserToFirestore = async (user: any) => {
-      const collection = firebase.firestore().collection("users");
-      let commercial_register = "";
-    
-      // Check if the Commercial Register file exists
-      if (user.CommercialRegister) {
-        try {
-          const storage = getStorage();
-          const storageRef = ref(storage, `commercial-registers/${user.CommercialRegister.name}`); // File path in Firebase Storage
-    
-          // Upload the Commercial Register PDF to Firebase Storage
-          const snapshot = await uploadBytes(storageRef, user.CommercialRegister);
-    
-          // Get the download URL for the uploaded file
-          commercial_register = await getDownloadURL(snapshot.ref);  // Correctly pass the reference
-    
-          console.log("Commercial Register uploaded successfully:", commercial_register);
-        } catch (error) {
-          console.error("Failed to upload commercial register:", error);
-          // Handle the error appropriately (e.g., fallback to default behavior or rethrow)
-        }
+  addNewUserToFirestore = async (user: any) => {
+    const collection = firebase.firestore().collection("users");
+    let commercial_register = "";
+
+    // Check if the Commercial Register file exists
+    if (user.CommercialRegister) {
+      try {
+        const storage = getStorage();
+        const storageRef = ref(
+          storage,
+          `commercial-registers/${user.CommercialRegister.name}`
+        ); // File path in Firebase Storage
+
+        // Upload the Commercial Register PDF to Firebase Storage
+        const snapshot = await uploadBytes(storageRef, user.CommercialRegister);
+
+        // Get the download URL for the uploaded file
+        commercial_register = await getDownloadURL(snapshot.ref); // Correctly pass the reference
+
+        console.log(
+          "Commercial Register uploaded successfully:",
+          commercial_register
+        );
+      } catch (error) {
+        console.error("Failed to upload commercial register:", error);
+        // Handle the error appropriately (e.g., fallback to default behavior or rethrow)
       }
-    
-      // Create the user document in Firestore with the commercial register URL
-      const details = {
-        username: user.username,
-        email: user.email,
-        phone: user.phone,
-        picture: "",  // You can modify this if you want to upload a user profile picture as well
-        commercial_register: commercial_register,  // Store the URL of the uploaded Commercial Register
-        status: 0,  // 1-admin, 2-warehouse, 3-pharmacy, -1-disabled, 0-pending
-        street: user.street,
-        city: user.city,
-        createdDtm: firebase.firestore.FieldValue.serverTimestamp(),
-        lastLoginTime: firebase.firestore.FieldValue.serverTimestamp(),
-      };
-    
-      // Save the user details to Firestore under the current user ID
-      await collection.doc(firebase.auth().currentUser?.uid).set(details);
-      
-      // Return the user and details object
-      return { user, details };
+    }
+
+    // Create the user document in Firestore with the commercial register URL
+    const details = {
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      picture: "", // You can modify this if you want to upload a user profile picture as well
+      commercial_register: commercial_register, // Store the URL of the uploaded Commercial Register
+      status: 0, // 1-admin, 2-warehouse, 3-pharmacy, -1-disabled, 0-pending
+      street: user.street,
+      city: user.city,
+      createdDtm: firebase.firestore.FieldValue.serverTimestamp(),
+      lastLoginTime: firebase.firestore.FieldValue.serverTimestamp(),
     };
+
+    // Save the user details to Firestore under the current user ID
+    await collection.doc(firebase.auth().currentUser?.uid).set(details);
+
+    // Return the user and details object
+    return { user, details };
+  };
 
   /*
     Returns the fetch Products
   */
-    async fetchProducts(keyword = ""): Promise<any[]> {
-      try {
-        if (this.uuid !== undefined) {
-          console.log("Fetching products for store_id:", this.uuid);
-    
-          let query = this.firestore
-            .collection("products")
-            .where("store_id", "==", this.uuid) // Filter by store_id
-            .where("status", "==", "0");//the status should be 0 , -1 is deleted
-    
-          // If a keyword is provided, filter products by name or description
-          if (keyword) {
-            console.log("Filtering products by keyword:", keyword);
-            query = query
-              .where("title", ">=", keyword)
-              .where("title", "<=", keyword + "\uf8ff");
-          }
-    
-          const querySnapshot = await query.get();
-    
-          const products = querySnapshot.docs.map((doc) => {
-            const data = doc.data();
-            console.log("Product fetched:", { id: doc.id, ...data });
-            return {
-              id: doc.id,
-              ...data,
-            };
-          });
-    
-          console.log("Fetched products:", products);
-          return products;
-        }
-    
-        console.warn("UUID is undefined. Returning empty product list.");
-        return [];
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        throw error;
-      }
-    }
+  async fetchProducts(keyword = ""): Promise<any[]> {
+    try {
+      if (this.uuid !== undefined) {
+        console.log("Fetching products for store_id:", this.uuid);
 
-    //fetches the users from the firebase
+        let query = this.firestore
+          .collection("products")
+          .where("store_id", "==", this.uuid) // Filter by store_id
+          .where("status", "==", "0"); //the status should be 0 , -1 is deleted
+
+        // If a keyword is provided, filter products by name or description
+        if (keyword) {
+          console.log("Filtering products by keyword:", keyword);
+          query = query
+            .where("title", ">=", keyword)
+            .where("title", "<=", keyword + "\uf8ff");
+        }
+
+        const querySnapshot = await query.get();
+
+        const products = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          console.log("Product fetched:", { id: doc.id, ...data });
+          return {
+            id: doc.id,
+            ...data,
+          };
+        });
+
+        console.log("Fetched products:", products);
+        return products;
+      }
+
+      console.warn("UUID is undefined. Returning empty product list.");
+      return [];
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      throw error;
+    }
+  }
+
+  //fetches the users from the firebase
 
   async fetchUsers(keyword = "") {
     try {
@@ -349,7 +353,7 @@ class FirebaseAuthBackend {
       // If a keyword is provided, filter users by title
       if (keyword) {
         query = query
-        // Use a greater-than or equal condition for the beginning of the range
+          // Use a greater-than or equal condition for the beginning of the range
           .where("username", ">=", keyword)
           // Use a less-than or equal condition to include all matching usernames
           .where("username", "<=", keyword + "\uf8ff"); // '\uf8ff' ensures all possible characters after the keyword are included
@@ -358,8 +362,8 @@ class FirebaseAuthBackend {
       const querySnapshot = await query.get();
       // Map the results to an array of user data with user ID
       return querySnapshot.docs.map((doc) => ({
-        id: doc.id,// Include the document ID
-        ...doc.data(),// Include all the fields from the document
+        id: doc.id, // Include the document ID
+        ...doc.data(), // Include all the fields from the document
       }));
     } catch (error) {
       // Handle errors by logging the error and throwing it for further handling
@@ -368,43 +372,40 @@ class FirebaseAuthBackend {
     }
   }
 
-
-/**
- * Check if all products in the specified order have a status other than 0.
- * @param orderId - The ID of the order to check.
- * @returns A promise that resolves to `true` if all products are not pending, `false` otherwise.
- */
+  /**
+   * Check if all products in the specified order have a status other than 0.
+   * @param orderId - The ID of the order to check.
+   * @returns A promise that resolves to `true` if all products are not pending, `false` otherwise.
+   */
   checkOrderProductsStatus = async (orderId: string): Promise<boolean> => {
-  try {
-    // Reference to the specific order document
-    const orderRef = doc(this.firestore, 'orders', orderId);
-    const orderSnapshot = await getDoc(orderRef);
+    try {
+      // Reference to the specific order document
+      const orderRef = doc(this.firestore, "orders", orderId);
+      const orderSnapshot = await getDoc(orderRef);
 
-    if (!orderSnapshot.exists()) {
-      console.error('Order not found');
+      if (!orderSnapshot.exists()) {
+        console.error("Order not found");
+        return false;
+      }
+
+      const orderData = orderSnapshot.data();
+
+      if (!orderData || !Array.isArray(orderData.product)) {
+        console.error("Invalid order data");
+        return false;
+      }
+
+      // Check if all products have a status different from 0
+      const allProductsNotPending = orderData.product.every(
+        (product: { status: number }) => product.status !== 0
+      );
+
+      return allProductsNotPending;
+    } catch (error) {
+      console.error("Error checking product statuses:", error);
       return false;
     }
-
-    const orderData = orderSnapshot.data();
-
-    if (!orderData || !Array.isArray(orderData.product)) {
-      console.error('Invalid order data');
-      return false;
-    }
-
-    // Check if all products have a status different from 0
-    const allProductsNotPending = orderData.product.every(
-      (product: { status: number }) => product.status !== 0
-    );
-
-    return allProductsNotPending;
-  } catch (error) {
-    console.error('Error checking product statuses:', error);
-    return false;
-  }
-};
-
-
+  };
 
   /**
    * Fetches a product by its ID
@@ -429,10 +430,14 @@ class FirebaseAuthBackend {
   };
 
   // Function to update a product by ID
-  async updateProductById(id: string, updatedData: any, newImageFile: File | null) {
+  async updateProductById(
+    id: string,
+    updatedData: any,
+    newImageFile: File | null
+  ) {
     try {
       const productRef = this.firestore.collection("products").doc(id);
-      
+
       let updatedProductData: any = {
         title: updatedData.title || "",
         category: updatedData.category || "",
@@ -440,27 +445,26 @@ class FirebaseAuthBackend {
         quantity: updatedData.quantity || "",
         expiryDate: updatedData.expiryDate || "",
       };
-  
+
       if (newImageFile) {
         // If a new image is provided, upload it to Firebase Storage
         const storage = getStorage();
         const imageRef = ref(storage, `images/${newImageFile.name}`);
-  
+
         console.log("Uploading new image:", newImageFile.name);
-  
-        const snapshot = await uploadBytes(imageRef, newImageFile);  // Upload the new image
-        const newImageUrl = await getDownloadURL(snapshot.ref);  // Get the URL of the uploaded image
-  
+
+        const snapshot = await uploadBytes(imageRef, newImageFile); // Upload the new image
+        const newImageUrl = await getDownloadURL(snapshot.ref); // Get the URL of the uploaded image
+
         console.log("New image URL:", newImageUrl);
-  
-        updatedProductData.images = newImageUrl;  // Update the `images` field with the new URL
+
+        updatedProductData.images = newImageUrl; // Update the `images` field with the new URL
       }
-  
+
       // Update the product document in Firestore with the new data
       await productRef.update(updatedProductData);
-  
+
       console.log("Product updated successfully");
-  
     } catch (error) {
       console.error("Error updating product:", error);
       throw error;
@@ -507,24 +511,24 @@ class FirebaseAuthBackend {
    * @returns {Promise} - A promise that resolves when the product is added
    */
 
-// Function to add a new product to Firestore along with its image file
-   addProductToFirestore = (productData: any, imageFile: File): Promise<any> => {
+  // Function to add a new product to Firestore along with its image file
+  addProductToFirestore = (productData: any, imageFile: File): Promise<any> => {
     return new Promise((resolve, reject) => {
       // Ensure user is authenticated before adding the product
       if (this.uuid) {
-        const collection = this.firestore.collection("products");// Reference to the 'products' collection in Firestore
-        const storage = getStorage();// Get the Firebase storage service
-        
+        const collection = this.firestore.collection("products"); // Reference to the 'products' collection in Firestore
+        const storage = getStorage(); // Get the Firebase storage service
+
         // Ensure the image file name is correct
         if (!imageFile || !imageFile.name) {
           reject("No image file provided or image file name is undefined.");
           return;
         }
-  
-        const storageRef = ref(storage, `images/${imageFile.name}`);  // Using imageFile.name to set the file name
-  
-        console.log("Uploading image with filename:", imageFile.name);  // Log filename
-  
+
+        const storageRef = ref(storage, `images/${imageFile.name}`); // Using imageFile.name to set the file name
+
+        console.log("Uploading image with filename:", imageFile.name); // Log filename
+
         // Upload the image to Firebase Storage
         uploadBytes(storageRef, imageFile)
           .then((snapshot) => {
@@ -532,21 +536,21 @@ class FirebaseAuthBackend {
             return getDownloadURL(snapshot.ref);
           })
           .then((downloadURL) => {
-            console.log("Image URL:", downloadURL);  // Log the URL to ensure it's correct
-  
+            console.log("Image URL:", downloadURL); // Log the URL to ensure it's correct
+
             // Add the image URL to the product data
             const newProduct = {
               ...productData,
-              images: downloadURL,  // Store the image URL correctly
-              store_id: this.uuid,  // Associate the product with the user's store
+              images: downloadURL, // Store the image URL correctly
+              store_id: this.uuid, // Associate the product with the user's store
               createdDtm: firebase.firestore.FieldValue.serverTimestamp(), // Set the creation timestamp
             };
-  
+
             // Add the product data with the image URL to Firestore
             return collection.add(newProduct);
           })
           .then((docRef) => {
-             // Once the product is successfully added, resolve the promise with the new product's ID and data
+            // Once the product is successfully added, resolve the promise with the new product's ID and data
             resolve({ id: docRef.id, ...productData });
           })
           .catch((error) => {
@@ -559,9 +563,6 @@ class FirebaseAuthBackend {
       }
     });
   };
-  
-  
-
 
   /**
    * Retrieves all orders containing products from the specified store (by store ID).
@@ -569,44 +570,44 @@ class FirebaseAuthBackend {
    * @param {string} uid - The store's user ID to filter orders by.
    * @returns {Promise<any[]>} - A promise that resolves to an array of orders with user details and total amount.
    */
-  // to list the orders when their id is 0 or 1 the other status will be displayed in the 
+  // to list the orders when their id is 0 or 1 the other status will be displayed in the
   // invoice page
   getOrderByUID = async (): Promise<any[]> => {
     try {
-       // Fetch the collection of orders where the status is either 0 or 1
-      const ordersCollection = this.firestore.collection("orders")
+      // Fetch the collection of orders where the status is either 0 or 1
+      const ordersCollection = this.firestore
+        .collection("orders")
         .where("status", "in", [1, 0]); // Filter orders based on order status (0 and 1)
-      
-        // Get the snapshot of orders that match the query  
+
+      // Get the snapshot of orders that match the query
       const ordersSnapshot = await ordersCollection.get();
       const orders = [];
 
-       // Loop through each order document in the snapshot
+      // Loop through each order document in the snapshot
       for (const orderDoc of ordersSnapshot.docs) {
-        const orderData = orderDoc.data();// Get the data of the order
-        let totalAmount = 0;// Initialize a variable to calculate the total amount of the order
-  
+        const orderData = orderDoc.data(); // Get the data of the order
+        let totalAmount = 0; // Initialize a variable to calculate the total amount of the order
+
         // Filter products within the order based on store ID
         const filteredProducts = await Promise.all(
           orderData.products.map(async (productItem: any) => {
-             // Fetch the details of the product by its ID
+            // Fetch the details of the product by its ID
             const productData = await this.getProductById(productItem.product);
-  
+
             // If the product's store ID matches the current store and its status is 0 or 1
             if (productData && productData.store_id === this.uuid) {
               // Only calculate the total amount if the product's status is 0 or 1
               if (productItem.status === 0 || productItem.status === 1) {
                 const quantity = productItem.quantity;
                 const price = parseFloat(productData.price);
-  
+
                 // Accumulate total amount for the order
                 totalAmount += quantity * price;
               }
-  
+
               return {
                 ...productItem,
                 productDetails: productData,
-                
               };
             }
             // If the product doesn't meet the conditions, return null
@@ -620,18 +621,18 @@ class FirebaseAuthBackend {
         if (nonNullProducts.length > 0) {
           // Fetch user details using getUserDetailsByUid method
           const userDetails = await this.getUserDetailsByUid(orderData.user_id);
-          
+
           // Push the order data, including filtered products, total amount, and user details
           orders.push({
-            id: orderDoc.id,// Order ID
+            id: orderDoc.id, // Order ID
             ...orderData, // Include all other order data
-            products: nonNullProducts,// Include the valid products for the order
-            user: userDetails,// User details for the order
-            totalAmount,// Total calculated amount for the order
+            products: nonNullProducts, // Include the valid products for the order
+            user: userDetails, // User details for the order
+            totalAmount, // Total calculated amount for the order
           });
         }
       }
-       // Return the final list of orders
+      // Return the final list of orders
       return orders;
     } catch (error) {
       // If an error occurs during the process, log it and throw the error
@@ -639,13 +640,13 @@ class FirebaseAuthBackend {
       throw error;
     }
   };
-  
-  
-  //to list the orders invoice which status is -1 or 2 
+
+  //to list the orders invoice which status is -1 or 2
   getOrderByUID2 = async (): Promise<any[]> => {
     try {
-      const ordersCollection = this.firestore.collection("orders")
-      .where("status", "in", [2, -1]); // Filter orders based on status;
+      const ordersCollection = this.firestore
+        .collection("orders")
+        .where("status", "in", [2, -1]); // Filter orders based on status;
       const ordersSnapshot = await ordersCollection.get();
       const orders = [];
 
@@ -665,7 +666,7 @@ class FirebaseAuthBackend {
               if (productItem.status === 0 || productItem.status === 1) {
                 const quantity = productItem.quantity;
                 const price = parseFloat(productData.price);
-  
+
                 // Accumulate total amount for the order
                 totalAmount += quantity * price;
               }
@@ -702,72 +703,71 @@ class FirebaseAuthBackend {
       throw error;
     }
   };
-// to return the top 6 recent invoices only
-getOrderByUID3 = async (): Promise<any[]> => {
-  try {
-    const ordersCollection = this.firestore.collection("orders")
-      .where("status", "in", [2, -1])  // Filter orders based on status
-      .orderBy("date", "desc")  // Order by the 'date' field which is a Timestamp
-      .limit(6);  // Limit to the top 6 latest orders
+  // to return the top 6 recent invoices only
+  getOrderByUID3 = async (): Promise<any[]> => {
+    try {
+      const ordersCollection = this.firestore
+        .collection("orders")
+        .where("status", "in", [2, -1]) // Filter orders based on status
+        .orderBy("date", "desc") // Order by the 'date' field which is a Timestamp
+        .limit(6); // Limit to the top 6 latest orders
 
-    const ordersSnapshot = await ordersCollection.get();
-    const orders = [];
+      const ordersSnapshot = await ordersCollection.get();
+      const orders = [];
 
-    for (const orderDoc of ordersSnapshot.docs) {
-      const orderData = orderDoc.data();
-      let totalAmount = 0;
+      for (const orderDoc of ordersSnapshot.docs) {
+        const orderData = orderDoc.data();
+        let totalAmount = 0;
 
-      // Filter products within the order based on store ID
-      const filteredProducts = await Promise.all(
-        orderData.products.map(async (productItem: any) => {
-          const productData = await this.getProductById(productItem.product);
+        // Filter products within the order based on store ID
+        const filteredProducts = await Promise.all(
+          orderData.products.map(async (productItem: any) => {
+            const productData = await this.getProductById(productItem.product);
 
-          if (productData && productData.store_id === this.uuid) {
-            const quantity = productItem.quantity;
-            const price = parseFloat(productData.price);
-
-            if (productItem.status === 0 || productItem.status === 1) {
+            if (productData && productData.store_id === this.uuid) {
               const quantity = productItem.quantity;
               const price = parseFloat(productData.price);
 
-              // Accumulate total amount for the order
-              totalAmount += quantity * price;
+              if (productItem.status === 0 || productItem.status === 1) {
+                const quantity = productItem.quantity;
+                const price = parseFloat(productData.price);
+
+                // Accumulate total amount for the order
+                totalAmount += quantity * price;
+              }
+
+              return {
+                ...productItem,
+                productDetails: productData,
+              };
             }
 
-            return {
-              ...productItem,
-              productDetails: productData,
-            };
-          }
+            return null;
+          })
+        );
 
-          return null;
-        })
-      );
+        const nonNullProducts = filteredProducts.filter(Boolean);
 
-      const nonNullProducts = filteredProducts.filter(Boolean);
+        if (nonNullProducts.length > 0) {
+          // Fetch user details using getUserDetailsByUid method
+          const userDetails = await this.getUserDetailsByUid(orderData.user_id);
 
-      if (nonNullProducts.length > 0) {
-        // Fetch user details using getUserDetailsByUid method
-        const userDetails = await this.getUserDetailsByUid(orderData.user_id);
-
-        orders.push({
-          id: orderDoc.id,
-          ...orderData,
-          products: nonNullProducts,
-          user: userDetails,
-          totalAmount,
-        });
+          orders.push({
+            id: orderDoc.id,
+            ...orderData,
+            products: nonNullProducts,
+            user: userDetails,
+            totalAmount,
+          });
+        }
       }
+
+      return orders;
+    } catch (error) {
+      console.error("Error fetching orders by store UID:", error);
+      throw error;
     }
-
-    return orders;
-  } catch (error) {
-    console.error("Error fetching orders by store UID:", error);
-    throw error;
-  }
-};
-
-
+  };
 
   /**
    * Retrieves a specific order by its ID, containing products from the specified store (by store ID).
@@ -844,10 +844,6 @@ getOrderByUID3 = async (): Promise<any[]> => {
     }
   };
 
-
-    
-  
-
   /**
    * Updates the status of the order by order ID.
    * @param {string} orderId - The ID of the order to update.
@@ -894,7 +890,7 @@ getOrderByUID3 = async (): Promise<any[]> => {
     quantityToUpdate: number
   ) => {
     let updatedStock = currentStock;
-  
+
     console.log("New Status:", status);
     if (status === 1) {
       // Decrease stock when changing to active
@@ -905,7 +901,7 @@ getOrderByUID3 = async (): Promise<any[]> => {
       updatedStock = currentStock + quantityToUpdate;
       console.log("The updated stock (set to inactive) is:", updatedStock);
     }
-  
+
     return updatedStock;
   };
   async updateOrderItemStatus(
@@ -916,24 +912,24 @@ getOrderByUID3 = async (): Promise<any[]> => {
     try {
       const orderRef = this.firestore.collection("orders").doc(orderId);
       const orderDoc = await orderRef.get();
-  
+
       if (!orderDoc.exists) {
         throw new Error("Order not found");
       }
-  
+
       const orderData = orderDoc.data();
-  
+
       // Find the existing product in the order
       const existingProduct = orderData?.products.find(
         (item: any) => item.product === productId
       );
-  
+
       if (!existingProduct) {
         throw new Error("Product not found in the order");
       }
-  
+
       const previousStatus = existingProduct.status; // Get the previous status
-  
+
       // Update the product's status in the order
       const updatedProducts = orderData?.products.map((item: any) => {
         if (item.product === productId) {
@@ -941,21 +937,21 @@ getOrderByUID3 = async (): Promise<any[]> => {
         }
         return item;
       });
-  
+
       // Step 3: Fetch the product details from the "products" collection
       const productRef = this.firestore.collection("products").doc(productId);
       const productDoc = await productRef.get();
-  
+
       if (!productDoc.exists) {
         throw new Error("Product not found in the products collection");
       }
-  
+
       const productData = productDoc.data();
       const currentStock = productData?.quantity || 0;
       const quantityToUpdate = existingProduct.quantity || 0;
-  
+
       let updatedStock = currentStock;
-  
+
       // Step 4: Adjust stock based on status changes
       if (previousStatus !== newStatus) {
         if (previousStatus === 1 && (newStatus === 0 || newStatus === -1)) {
@@ -964,22 +960,26 @@ getOrderByUID3 = async (): Promise<any[]> => {
           console.log(
             `Stock increased due to status change from 1 to ${newStatus}, new stock: ${updatedStock}`
           );
-        } else if ((previousStatus === 0 || previousStatus === -1) && newStatus === 1) {
+        } else if (
+          (previousStatus === 0 || previousStatus === -1) &&
+          newStatus === 1
+        ) {
           // If moving from Pending (0) or Rejected (-1) to Approved (1) -> Decrease Stock
           updatedStock = currentStock - quantityToUpdate;
-  
+
           // **New Check**: Prevent stock from going negative
           if (updatedStock < 0) {
             console.error(
               `Insufficient stock to approve the order. Current stock: ${currentStock}, Requested quantity: ${quantityToUpdate}`
-              
             );
-            toast.error("UnderStock, Please Check the Product Stock.", { autoClose: 2000 });
+            toast.error("UnderStock, Please Check the Product Stock.", {
+              autoClose: 2000,
+            });
             throw new Error(
               "Cannot approve order. Not enough stock available."
             );
           }
-  
+
           console.log(
             `Stock decreased due to status change to active, new stock: ${updatedStock}`
           );
@@ -991,19 +991,21 @@ getOrderByUID3 = async (): Promise<any[]> => {
           );
         }
       }
-  
+
       // Step 5: Update the product's stock in Firestore if it changed
       if (updatedStock !== currentStock) {
         await productRef.update({ quantity: updatedStock });
-        console.log(`Product quantity updated for ${productId}, new stock: ${updatedStock}`);
+        console.log(
+          `Product quantity updated for ${productId}, new stock: ${updatedStock}`
+        );
       }
-  
+
       // Step 6: Update the order with the modified item status
       await orderRef.update({
         products: updatedProducts,
         updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
       });
-  
+
       // Fetch and return the updated order
       const updatedOrderDoc = await orderRef.get();
       return { id: updatedOrderDoc.id, ...updatedOrderDoc.data() };
@@ -1012,54 +1014,53 @@ getOrderByUID3 = async (): Promise<any[]> => {
       throw error;
     }
   }
-  
-  
-  
+
   //to update the product quantity in the edit function
-  updateProductQuantity = async (productId: string, quantityToUpdate: number, status: string): Promise<void> => {
-   
+  updateProductQuantity = async (
+    productId: string,
+    quantityToUpdate: number,
+    status: string
+  ): Promise<void> => {
     try {
       // Get the product document
       const productRef = this.firestore.collection("products").doc(productId);
       const productDoc = await productRef.get();
-  
+
       if (!productDoc.exists) {
         throw new Error("Product not found");
       }
-  
+
       const productData = productDoc.data();
       const currentStock = productData?.quantity || 0; // Get the current stock quantity
-  
+
       let updatedStock = currentStock;
-      
+
       const statusString = String(status); // Ensure it's a string
-console.log("Status after conversion:", statusString);
+      console.log("Status after conversion:", statusString);
 
-        if (statusString === '1') {
-          updatedStock = currentStock - quantityToUpdate;
-          console.log("The updated stock (status 1) is:", updatedStock);
-        }
+      if (statusString === "1") {
+        updatedStock = currentStock - quantityToUpdate;
+        console.log("The updated stock (status 1) is:", updatedStock);
+      }
 
-        if (statusString === '0' || statusString === '-1') {
-          updatedStock = currentStock + quantityToUpdate;
-          console.log("The updated stock (status 0 or -1) is:", updatedStock);
-        }
+      if (statusString === "0" || statusString === "-1") {
+        updatedStock = currentStock + quantityToUpdate;
+        console.log("The updated stock (status 0 or -1) is:", updatedStock);
+      }
 
-  
       // Update the product quantity in the Firestore database
-      console.log("the updated stock is"+updatedStock)
+      console.log("the updated stock is" + updatedStock);
       await productRef.update({
-       
         quantity: updatedStock,
       });
-  
-      console.log(`Product quantity updated for ${productId}, new stock: ${updatedStock}`);
+
+      console.log(
+        `Product quantity updated for ${productId}, new stock: ${updatedStock}`
+      );
     } catch (error) {
       console.error("Error updating product quantity:", error);
     }
   };
-    
-  
 
   setLoggeedInUser = (user: any) => {
     sessionStorage.setItem("authUser", JSON.stringify(user));
