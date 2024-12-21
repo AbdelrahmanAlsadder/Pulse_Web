@@ -35,7 +35,7 @@ const InvoiceList = ({ isShow, hidePaymentModal }: paymentProps) => {
   const loadOrder = async (item?: undefined) => {
     try {
       setIsLoading(true);
-      const productsList = await firebaseBackend.getOrderByUID3(item);
+      const productsList = await firebaseBackend.getOrderByUID2(item, 6);
       setPayments(productsList);
     } catch (error) {
       console.error("Error loading products:", error);
@@ -121,10 +121,9 @@ const InvoiceList = ({ isShow, hidePaymentModal }: paymentProps) => {
         accessor: "date",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>{moment(cell.row.original.date.toDate()).format(
-          "MMMM Do YYYY"
-        )}</>,
-        
+        Cell: (cell: any) => (
+          <>{moment(cell.row.original.date.toDate()).format("MMMM Do YYYY")}</>
+        ),
       },
 
       {
@@ -141,33 +140,27 @@ const InvoiceList = ({ isShow, hidePaymentModal }: paymentProps) => {
         Filter: false,
         isSortable: true,
         Cell: (cell) => {
-          switch (cell.row.original.status) {
-            case -1:
-              return (
-                <span className="badge bg-danger-subtle text-danger p-2">
-                  Rejected
-                </span>
-              );
-            case 0:
-              return (
-                <span className="badge bg-warning-subtle text-warning p-2">
-                  Order Placed
-                </span>
-              );
-            case 1:
-              return (
-                <span className="badge bg-success-subtle text-success p-2">
-                  In Transit
-                </span>
-              );
-            case 2:
-              return (
-                <span className="badge bg-info-subtle text-info p-2">
-                  Completed
-                </span>
-              );
-            default:
-              return null; // Return null if the status is not recognized
+          if (
+            cell.row.original.status.find(
+              (i: { uid: any }) => i.uid == firebaseBackend.uuid
+            ).status == -1
+          ) {
+            return (
+              <span className="badge bg-danger-subtle text-danger p-2">
+                Rejected
+              </span>
+            );
+          }
+          if (
+            cell.row.original.status.find(
+              (i: { uid: any }) => i.uid == firebaseBackend.uuid
+            ).status == 2
+          ) {
+            return (
+              <span className="badge bg-info-subtle text-info p-2">
+                Completed
+              </span>
+            );
           }
         },
       },
@@ -241,7 +234,9 @@ const InvoiceList = ({ isShow, hidePaymentModal }: paymentProps) => {
                   as="ul"
                   variant="tabs"
                   className="nav-tabs nav-tabs-custom nav-success mb-3"
-                >   {/* 
+                >
+                  {" "}
+                  {/* 
                   <Nav.Item as="li">
                     <Nav.Link
                       eventKey="all"
@@ -275,11 +270,12 @@ const InvoiceList = ({ isShow, hidePaymentModal }: paymentProps) => {
                 </Nav>
 
                 <Card>
-                <Card.Header className="border-0 align-items-center d-flex">
-                    <h4 className="card-title mb-0 flex-grow-1">Recent Invoices</h4>
-                </Card.Header>
+                  <Card.Header className="border-0 align-items-center d-flex">
+                    <h4 className="card-title mb-0 flex-grow-1">
+                      Recent Invoices
+                    </h4>
+                  </Card.Header>
                   <Card.Body>
-                    
                     {payments && payments.length > 0 ? (
                       <TableContainer
                         // isPagination={true}
@@ -324,7 +320,5 @@ const InvoiceList = ({ isShow, hidePaymentModal }: paymentProps) => {
     </React.Fragment>
   );
 };
-
-
 
 export default InvoiceList;

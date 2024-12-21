@@ -122,10 +122,9 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
         accessor: "date",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>{moment(cell.row.original.date.toDate()).format(
-          "MMMM Do YYYY"
-        )}</>,
-        
+        Cell: (cell: any) => (
+          <>{moment(cell.row.original.date.toDate()).format("MMMM Do YYYY")}</>
+        ),
       },
 
       {
@@ -133,7 +132,7 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
         accessor: "totalAmount",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>${cell.row.original.totalAmount.toFixed(2)}</>,//just fixed is to show the amount up to 2 decimal points
+        Cell: (cell: any) => <>${cell.row.original.totalAmount.toFixed(2)}</>, //just fixed is to show the amount up to 2 decimal points
       },
       {
         Header: "Status",
@@ -142,33 +141,30 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
         Filter: false,
         isSortable: true,
         Cell: (cell) => {
-          switch (cell.row.original.status) {
-            case -1:
-              return (
-                <span className="badge bg-danger-subtle text-danger p-2">
-                  Rejected
-                </span>
-              );
-            case 0:
-              return (
-                <span className="badge bg-warning-subtle text-warning p-2">
-                  Order Placed
-                </span>
-              );
-            case 1:
-              return (
-                <span className="badge bg-success-subtle text-success p-2">
-                  In Transit
-                </span>
-              );
-            case 2:
-              return (
-                <span className="badge bg-info-subtle text-info p-2">
-                  Completed
-                </span>
-              );
-            default:
-              return null; // Return null if the status is not recognized
+          if (
+            !cell.row.original.status.some(
+              (item: { uid: any }) => item.uid == firebaseBackend.uuid
+            ) ||
+            cell.row.original.status.find(
+              (i: { uid: any }) => i.uid == firebaseBackend.uuid
+            ).status == 0
+          ) {
+            return (
+              <span className="badge bg-warning-subtle text-warning p-2">
+                Order Placed
+              </span>
+            );
+          }
+          if (
+            cell.row.original.status.find(
+              (i: { uid: any }) => i.uid == firebaseBackend.uuid
+            ).status == 1
+          ) {
+            return (
+              <span className="badge bg-success-subtle text-success p-2">
+                In Transit
+              </span>
+            );
           }
         },
       },
@@ -242,7 +238,9 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
                   as="ul"
                   variant="tabs"
                   className="nav-tabs nav-tabs-custom nav-success mb-3"
-                >   {/* 
+                >
+                  {" "}
+                  {/* 
                   <Nav.Item as="li">
                     <Nav.Link
                       eventKey="all"
@@ -290,7 +288,12 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
                         PaginationClass="align-items-center mt-4 gy-3"
                       />
                     ) : (
-                      <NoSearchResult />
+                      <NoSearchResult
+                        title1={"No Orders Yet!"}
+                        title2={
+                          "Don't worry, if any orders have been placed, you'll find them here."
+                        }
+                      />
                     )}
                   </Card.Body>
                 </Card>

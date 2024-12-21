@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Container, Row, Col, Table, Dropdown } from "react-bootstrap";
 import logoDark from "../../../assets/images/logo-dark.png";
 import logoLight from "../../../assets/images/logo-light.png";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
 import moment from "moment";
 import { toast } from "react-toastify";
@@ -10,10 +10,15 @@ import { Modal, Button } from "react-bootstrap";
 
 const OrderDetails = () => {
   document.title = "Invoice Details ";
+
+  const navigate = useNavigate();
+
   const { orderId } = useParams();
   const [showSaveButton, setShowSaveButton] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [order, setOrder] = useState<any>(null);
+  const [userDetails, setUserDetails] = useState<any>(null);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const firebaseBackend = getFirebaseBackend();
   const [notPending, setNotPending] = useState<boolean>(true);
@@ -51,6 +56,7 @@ const OrderDetails = () => {
       ) {
         setNotPending(false); // Set notPending state accordingly
       }
+      await loadUserDetails(OrderDetails.user_id);
     } catch (error) {
       console.error("Error fetching order:", error);
     } finally {
@@ -58,6 +64,19 @@ const OrderDetails = () => {
     }
   };
 
+  const loadUserDetails = async (uid: string) => {
+    console.log("uid :>> ", uid);
+    try {
+      setIsLoading(true);
+      const userd = await firebaseBackend.getUserDetailsByUid(uid);
+      console.log("userd :>> ", userd);
+      setUserDetails(userd);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const checkOrderStatusOnSave = async (orderId: string) => {
     try {
       if (!orderId) {
@@ -153,33 +172,33 @@ const OrderDetails = () => {
                             Order Status
                           </p>
                           {(() => {
-                            switch (order.status) {
-                              case -1:
-                                return (
-                                  <span className="badge bg-danger-subtle text-danger p-2">
-                                    Rejected
-                                  </span>
-                                );
-                              case 0:
-                                return (
-                                  <span className="badge bg-warning-subtle text-warning p-2">
-                                    Order Placed
-                                  </span>
-                                );
-                              case 1:
-                                return (
-                                  <span className="badge bg-success-subtle text-success p-2">
-                                    In Transit
-                                  </span>
-                                );
-                              case 2:
-                                return (
-                                  <span className="badge bg-info-subtle text-info p-2">
-                                    Completed
-                                  </span>
-                                );
-                              default:
-                                return null; // Return null if the status is not recognized
+                            if (
+                              !order.status.some(
+                                (item: { uid: any }) =>
+                                  item.uid == firebaseBackend.uuid
+                              ) ||
+                              order.status.find(
+                                (i: { uid: any }) =>
+                                  i.uid == firebaseBackend.uuid
+                              ).status == 0
+                            ) {
+                              return (
+                                <span className="badge bg-warning-subtle text-warning p-2">
+                                  Order Placed
+                                </span>
+                              );
+                            }
+                            if (
+                              order.status.find(
+                                (i: { uid: any }) =>
+                                  i.uid == firebaseBackend.uuid
+                              ).status == 1
+                            ) {
+                              return (
+                                <span className="badge bg-success-subtle text-success p-2">
+                                  In Transit
+                                </span>
+                              );
                             }
                           })()}
                         </Col>
@@ -211,50 +230,25 @@ const OrderDetails = () => {
                           />
                         </div>
                       </div>
+                      <div className="">
+                        <h6 className="text-muted text-uppercase fw-semibold mb-3">
+                          Shipping Address
+                        </h6>
+                        <p className="fw-medium mb-2">
+                          Pharmacy Name: {userDetails?.username}
+                        </p>
+                        <p className="text-muted mb-1">
+                          City: {userDetails?.city}
+                        </p>
+                        <p className="text-muted mb-1">
+                          Street: {userDetails?.street}
+                        </p>
+                        <p className="text-muted mb-1">
+                          <span>Phone: </span>
+                          <span>{userDetails?.phone}</span>
+                        </p>
+                      </div>
                     </Col>
-                  </Row>
-
-                  <Row className="p-4 border-top border-top-dashed">
-                    <Col lg={9}>
-                      <Row className="g-3">
-                        <div className="col-6">
-                          <h6 className="text-muted text-uppercase fw-semibold mb-3">
-                            Warehouse Address
-                          </h6>
-                          {/* <p className="fw-medium mb-2">
-                            {order.billingAddress.name}
-                          </p>
-                          <p className="text-muted mb-1">
-                            {order.billingAddress.line1}
-                          </p>
-                          <p className="text-muted mb-1">
-                            <span>Phone: </span>
-                            <span>{order.billingAddress.phone}</span>
-                          </p>
-                          <p className="text-muted mb-0">
-                            <span>Tax: </span>
-                            <span>{order.billingAddress.tax}</span>
-                          </p> */}
-                        </div>
-
-                        <div className="col-6">
-                          <h6 className="text-muted text-uppercase fw-semibold mb-3">
-                            Shipping Address
-                          </h6>
-                          {/* <p className="fw-medium mb-2">
-                            {order.shippingAddress.name}
-                          </p>
-                          <p className="text-muted mb-1">
-                            {order.shippingAddress.line1}
-                          </p>
-                          <p className="text-muted mb-1">
-                            <span>Phone: </span>
-                            <span>{order.shippingAddress.phone}</span>
-                          </p> */}
-                        </div>
-                      </Row>
-                    </Col>
-                    <Col lg={3}></Col>
                   </Row>
 
                   <Row>
@@ -488,15 +482,28 @@ const OrderDetails = () => {
                                 variant="danger"
                                 onClick={async () => {
                                   try {
-                                    await firebaseBackend.updateOrderStatus(
-                                      orderId,
-                                      2
+                                    const final_state = order.products.every(
+                                      (product: { status: number }) =>
+                                        product.status === -1
                                     );
+                                    if (final_state) {
+                                      await firebaseBackend.updateOrderStatus(
+                                        orderId,
+                                        -1
+                                      );
+                                    } else {
+                                      await firebaseBackend.updateOrderStatus(
+                                        orderId,
+                                        2
+                                      );
+                                    }
                                     toast.success(
                                       "Status Updated Successfully",
                                       { autoClose: 2000 }
                                     );
-                                    loadOrder(String(orderId));
+                                    // loadOrder(String(orderId));
+                                    navigate(-1);
+
                                     setShowSaveButton(false); // Hide the main Save button
                                   } catch (error) {
                                     toast.error("Status Update Failed", {

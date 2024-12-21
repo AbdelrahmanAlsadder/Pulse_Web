@@ -311,7 +311,12 @@ const ProductlistTable = () => {
                   PaginationClass="align-items-center mt-4 gy-3"
                 />
               ) : (
-                <NoSearchResult />
+                <NoSearchResult
+                  title1={"No products have been added yet."}
+                  title2={
+                    'To add a product, click on the "Add Product" button!'
+                  }
+                />
               )}
             </Card.Body>
           </Card>

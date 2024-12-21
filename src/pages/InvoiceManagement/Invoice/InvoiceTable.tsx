@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Card, Col, Nav, Row, Tab } from "react-bootstrap";
-import {  useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { createSelector } from "reselect";
 
@@ -122,10 +122,9 @@ const InvoiceTable = ({ isShow, hidePaymentModal }: paymentProps) => {
         accessor: "date",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>{moment(cell.row.original.date.toDate()).format(
-          "MMMM Do YYYY"
-        )}</>,
-        
+        Cell: (cell: any) => (
+          <>{moment(cell.row.original.date.toDate()).format("MMMM Do YYYY")}</>
+        ),
       },
 
       {
@@ -142,33 +141,27 @@ const InvoiceTable = ({ isShow, hidePaymentModal }: paymentProps) => {
         Filter: false,
         isSortable: true,
         Cell: (cell) => {
-          switch (cell.row.original.status) {
-            case -1:
-              return (
-                <span className="badge bg-danger-subtle text-danger p-2">
-                  Rejected
-                </span>
-              );
-            case 0:
-              return (
-                <span className="badge bg-warning-subtle text-warning p-2">
-                  Order Placed
-                </span>
-              );
-            case 1:
-              return (
-                <span className="badge bg-success-subtle text-success p-2">
-                  In Transit
-                </span>
-              );
-            case 2:
-              return (
-                <span className="badge bg-info-subtle text-info p-2">
-                  Completed
-                </span>
-              );
-            default:
-              return null; // Return null if the status is not recognized
+          if (
+            cell.row.original.status.find(
+              (i: { uid: any }) => i.uid == firebaseBackend.uuid
+            ).status == -1
+          ) {
+            return (
+              <span className="badge bg-danger-subtle text-danger p-2">
+                Rejected
+              </span>
+            );
+          }
+          if (
+            cell.row.original.status.find(
+              (i: { uid: any }) => i.uid == firebaseBackend.uuid
+            ).status == 2
+          ) {
+            return (
+              <span className="badge bg-info-subtle text-info p-2">
+                Completed
+              </span>
+            );
           }
         },
       },
@@ -242,7 +235,9 @@ const InvoiceTable = ({ isShow, hidePaymentModal }: paymentProps) => {
                   as="ul"
                   variant="tabs"
                   className="nav-tabs nav-tabs-custom nav-success mb-3"
-                >   {/* 
+                >
+                  {" "}
+                  {/* 
                   <Nav.Item as="li">
                     <Nav.Link
                       eventKey="all"
@@ -290,7 +285,12 @@ const InvoiceTable = ({ isShow, hidePaymentModal }: paymentProps) => {
                         PaginationClass="align-items-center mt-4 gy-3"
                       />
                     ) : (
-                      <NoSearchResult />
+                      <NoSearchResult
+                        title1={"No Invoices Yet!"}
+                        title2={
+                          "If an order has been saved, it will be fined as an invoice here."
+                        }
+                      />
                     )}
                   </Card.Body>
                 </Card>
@@ -321,7 +321,5 @@ const InvoiceTable = ({ isShow, hidePaymentModal }: paymentProps) => {
     </React.Fragment>
   );
 };
-
-
 
 export default InvoiceTable;

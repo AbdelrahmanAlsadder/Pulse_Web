@@ -574,34 +574,37 @@ class FirebaseAuthBackend {
   // invoice page
   getOrderByUID = async (): Promise<any[]> => {
     try {
-      // Fetch the collection of orders where the status is either 0 or 1
-      const ordersCollection = this.firestore
-        .collection("orders")
-        .where("status", "in", [1, 0]); // Filter orders based on order status (0 and 1)
+      // Fetch the collection of orders
+      const ordersCollection = this.firestore.collection("orders");
 
-      // Get the snapshot of orders that match the query
+      // Get the snapshot of orders
       const ordersSnapshot = await ordersCollection.get();
       const orders = [];
 
       // Loop through each order document in the snapshot
       for (const orderDoc of ordersSnapshot.docs) {
-        const orderData = orderDoc.data(); // Get the data of the order
-        let totalAmount = 0; // Initialize a variable to calculate the total amount of the order
+        const orderData = orderDoc.data(); // Get the order data
 
-        // Filter products within the order based on store ID
+        // Check if your UID exists in the status array and check if the status is not 0 or 1
+        const statusInfo = orderData.status.find(
+          (statusItem: any) => statusItem.uid === this.uuid
+        );
+        if (statusInfo && statusInfo.status !== 0 && statusInfo.status !== 1) {
+          // If the status is not 0 or 1, skip this order
+          continue;
+        }
+
+        let totalAmount = 0; // Initialize total amount calculation
+
+        // Filter products based on store ID and status
         const filteredProducts = await Promise.all(
           orderData.products.map(async (productItem: any) => {
-            // Fetch the details of the product by its ID
             const productData = await this.getProductById(productItem.product);
 
-            // If the product's store ID matches the current store and its status is 0 or 1
             if (productData && productData.store_id === this.uuid) {
-              // Only calculate the total amount if the product's status is 0 or 1
               if (productItem.status === 0 || productItem.status === 1) {
                 const quantity = productItem.quantity;
                 const price = parseFloat(productData.price);
-
-                // Accumulate total amount for the order
                 totalAmount += quantity * price;
               }
 
@@ -610,81 +613,16 @@ class FirebaseAuthBackend {
                 productDetails: productData,
               };
             }
-            // If the product doesn't meet the conditions, return null
+
             return null;
           })
         );
-        // Filter out any null values (products that don't match the conditions)
+
+        // Remove any null values from the products
         const nonNullProducts = filteredProducts.filter(Boolean);
 
         // If there are valid products, add the order to the orders array
         if (nonNullProducts.length > 0) {
-          // Fetch user details using getUserDetailsByUid method
-          const userDetails = await this.getUserDetailsByUid(orderData.user_id);
-
-          // Push the order data, including filtered products, total amount, and user details
-          orders.push({
-            id: orderDoc.id, // Order ID
-            ...orderData, // Include all other order data
-            products: nonNullProducts, // Include the valid products for the order
-            user: userDetails, // User details for the order
-            totalAmount, // Total calculated amount for the order
-          });
-        }
-      }
-      // Return the final list of orders
-      return orders;
-    } catch (error) {
-      // If an error occurs during the process, log it and throw the error
-      console.error("Error fetching orders by store UID:", error);
-      throw error;
-    }
-  };
-
-  //to list the orders invoice which status is -1 or 2
-  getOrderByUID2 = async (): Promise<any[]> => {
-    try {
-      const ordersCollection = this.firestore
-        .collection("orders")
-        .where("status", "in", [2, -1]); // Filter orders based on status;
-      const ordersSnapshot = await ordersCollection.get();
-      const orders = [];
-
-      for (const orderDoc of ordersSnapshot.docs) {
-        const orderData = orderDoc.data();
-        let totalAmount = 0;
-
-        // Filter products within the order based on store ID
-        const filteredProducts = await Promise.all(
-          orderData.products.map(async (productItem: any) => {
-            const productData = await this.getProductById(productItem.product);
-
-            if (productData && productData.store_id === this.uuid) {
-              const quantity = productItem.quantity;
-              const price = parseFloat(productData.price);
-
-              if (productItem.status === 0 || productItem.status === 1) {
-                const quantity = productItem.quantity;
-                const price = parseFloat(productData.price);
-
-                // Accumulate total amount for the order
-                totalAmount += quantity * price;
-              }
-
-              return {
-                ...productItem,
-                productDetails: productData,
-              };
-            }
-
-            return null;
-          })
-        );
-
-        const nonNullProducts = filteredProducts.filter(Boolean);
-
-        if (nonNullProducts.length > 0) {
-          // Fetch user details using getUserDetailsByUid method
           const userDetails = await this.getUserDetailsByUid(orderData.user_id);
 
           orders.push({
@@ -703,13 +641,93 @@ class FirebaseAuthBackend {
       throw error;
     }
   };
+
+  //to list the orders invoice which status is -1 or 2
+  getOrderByUID2 = async (limit?: any): Promise<any[]> => {
+    try {
+      // Fetch the collection of orders
+      const ordersCollection = limit
+        ? this.firestore
+            .collection("orders")
+            .limitToLast(limit)
+            .orderBy("date", "desc") //Limit to the top 6 latest orders Order by the 'date' field which is a Timestamp
+        : this.firestore.collection("orders");
+
+      // Get the snapshot of orders
+      const ordersSnapshot = await ordersCollection.get();
+      const orders = [];
+
+      // Loop through each order document in the snapshot
+      for (const orderDoc of ordersSnapshot.docs) {
+        const orderData = orderDoc.data(); // Get the order data
+
+        // Check if your UID exists in the status array and check if the status is not -1 or 2
+        const statusInfo = orderData.status.find(
+          (statusItem: any) => statusItem.uid === this.uuid
+        );
+        if (
+          !statusInfo ||
+          (statusInfo && statusInfo.status !== -1 && statusInfo.status !== 2)
+        ) {
+          // If the status is -1 or 2, skip this order
+          continue;
+        }
+
+        let totalAmount = 0; // Initialize total amount calculation
+
+        // Filter products based on store ID and status
+        const filteredProducts = await Promise.all(
+          orderData.products.map(async (productItem: any) => {
+            const productData = await this.getProductById(productItem.product);
+
+            if (productData && productData.store_id === this.uuid) {
+              if (productItem.status === -1 || productItem.status === 2) {
+                const quantity = productItem.quantity;
+                const price = parseFloat(productData.price);
+                totalAmount += quantity * price;
+              }
+
+              return {
+                ...productItem,
+                productDetails: productData,
+              };
+            }
+
+            return null;
+          })
+        );
+
+        // Remove any null values from the products
+        const nonNullProducts = filteredProducts.filter(Boolean);
+
+        // If there are valid products, add the order to the orders array
+        if (nonNullProducts.length > 0) {
+          const userDetails = await this.getUserDetailsByUid(orderData.user_id);
+
+          orders.push({
+            id: orderDoc.id,
+            ...orderData,
+            products: nonNullProducts,
+            user: userDetails,
+            totalAmount,
+          });
+        }
+      }
+
+      return orders;
+    } catch (error) {
+      console.error("Error fetching orders by store UID:", error);
+      throw error;
+    }
+  };
+
   // to return the top 6 recent invoices only
   getOrderByUID3 = async (): Promise<any[]> => {
     try {
       const ordersCollection = this.firestore
         .collection("orders")
         .where("status", "in", [2, -1]) // Filter orders based on status
-        .orderBy("date", "desc") // Order by the 'date' field which is a Timestamp
+        .orderBy("date", "desc") //Limit to the top 6 latest orders Order by the 'date' field which is a Timestamp
         .limit(6); // Limit to the top 6 latest orders
 
       const ordersSnapshot = await ordersCollection.get();
@@ -857,9 +875,31 @@ class FirebaseAuthBackend {
     try {
       const orderRef = this.firestore.collection("orders").doc(orderId);
 
-      // Update the order status
+      // Fetch the current order document
+      const orderDoc = await orderRef.get();
+      if (!orderDoc.exists) {
+        throw new Error("Order not found");
+      }
+
+      const orderData = orderDoc.data();
+      const currentStatusArray = orderData?.status || [];
+
+      // Check if the uid exists in the array
+      const existingIndex = currentStatusArray.findIndex(
+        (item: { uid: string; status: string }) => item.uid === this.uuid
+      );
+
+      if (existingIndex !== -1) {
+        // Update the status if uid exists
+        currentStatusArray[existingIndex].status = newStatus;
+      } else {
+        // Add a new entry if uid does not exist
+        currentStatusArray.push({ uid: this.uuid, status: newStatus });
+      }
+
+      // Update Firestore with the modified array
       await orderRef.update({
-        status: newStatus,
+        status: currentStatusArray,
         updatedDtm: firebase.firestore.FieldValue.serverTimestamp(),
       });
 
@@ -868,7 +908,7 @@ class FirebaseAuthBackend {
       if (updatedOrderDoc.exists) {
         return { id: updatedOrderDoc.id, ...updatedOrderDoc.data() };
       } else {
-        throw new Error("Order not found");
+        throw new Error("Order not found after update");
       }
     } catch (error) {
       console.error("Error updating order status:", error);
