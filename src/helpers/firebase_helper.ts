@@ -681,7 +681,7 @@ class FirebaseAuthBackend {
             const productData = await this.getProductById(productItem.product);
 
             if (productData && productData.store_id === this.uuid) {
-              if (productItem.status === -1 || productItem.status === 2) {
+              if ( productItem.status === 1) {
                 const quantity = productItem.quantity;
                 const price = parseFloat(productData.price);
                 totalAmount += quantity * price;
