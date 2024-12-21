@@ -4,6 +4,7 @@ import "./App.css";
 //import Scss
 import "./assets/scss/themes.scss";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 // routes
 import Route from "./Routes/Index";
 import { initializeApp } from "firebase/app";
@@ -26,9 +27,11 @@ const firebaseConfig = {
 initFirebaseBackend(firebaseConfig);
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage= getStorage(app);
 
 // Export the database to use it in other files
 export { db };
+export { storage };
 
 function App() {
   return (

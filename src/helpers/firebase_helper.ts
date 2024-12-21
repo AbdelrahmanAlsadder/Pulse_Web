@@ -6,6 +6,7 @@ import "firebase/compat/firestore";
 import "firebase/compat/storage";
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { toast } from "react-toastify";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 class FirebaseAuthBackend {
   firestore: firebase.firestore.Firestore;
@@ -53,16 +54,20 @@ class FirebaseAuthBackend {
   /**
    * Registers the user with given details
    */
+  // Function to register a user with email and password
   registerUser = (email: any, password: any) => {
-    return new Promise((resolve, reject) => {
+     // Use Firebase Authentication service to create a new user
+        return new Promise((resolve, reject) => {
       firebase
         .auth()
-        .createUserWithEmailAndPassword(email, password)
+        .createUserWithEmailAndPassword(email, password)// Create a new user with the provided email and password
         .then(
           (user: any) => {
+            // On successful creation, resolve the promise with the current authenticated user
             resolve(firebase.auth().currentUser);
           },
           (error: any) => {
+            // On error, handle the error using a custom error handler and reject the promise
             reject(this._handleError(error));
           }
         );
@@ -91,16 +96,20 @@ class FirebaseAuthBackend {
   /**
    * Login user with given details
    */
+  // Function to log in a user with email and password
   loginUser = (email: any, password: any) => {
     return new Promise((resolve, reject) => {
+       // Use Firebase Authentication service to sign in with email and password
       firebase
         .auth()
-        .signInWithEmailAndPassword(email, password)
+        .signInWithEmailAndPassword(email, password) // Attempt to sign in the user with provided email and password
         .then(
           (user: any) => {
+            // On successful login, resolve the promise with the current authenticated user
             resolve(firebase.auth().currentUser);
           },
           (error: any) => {
+            // On error, handle the error using a custom error handler and reject the promise
             reject(this._handleError(error));
           }
         );
@@ -147,7 +156,8 @@ class FirebaseAuthBackend {
   };
 
   /**
-   * Social Login user with given details
+   * Social Login user with given details , this function is written in case
+   * we wanted to add login by google/facebook, it's currently not used
    */
   socialLoginUser = async (type: any) => {
     let provider: any;
@@ -240,67 +250,95 @@ class FirebaseAuthBackend {
   /*
     add New User To Firestore
   */
-  addNewUserToFirestore = async (user: any) => {
-    const collection = firebase.firestore().collection("users");
-    // const { profile } = user.additionalUserInfo;
-    let commercial_register;
-    if (user.CommercialRegister) {
-      // try {
-      //   commercial_register = await this.uploadFileToStorage(
-      //     user.CommercialRegister
-      //   );
-      // } catch (error) {
-      //   console.error("Failed to upload commercial register:", error);
-      // }
-    }
-
-    const details = {
-      username: user.username,
-      email: user.email,
-      phone: user.phone,
-      picture: "",
-      commercial_register: commercial_register ?? "",
-      status: 0, // 1-admin 2-warehouse 3-pharmacy  (-1)- Disabled  0-pending
-      street: user.street,
-      city: user.city,
-      createdDtm: firebase.firestore.FieldValue.serverTimestamp(),
-      lastLoginTime: firebase.firestore.FieldValue.serverTimestamp(),
+    addNewUserToFirestore = async (user: any) => {
+      const collection = firebase.firestore().collection("users");
+      let commercial_register = "";
+    
+      // Check if the Commercial Register file exists
+      if (user.CommercialRegister) {
+        try {
+          const storage = getStorage();
+          const storageRef = ref(storage, `commercial-registers/${user.CommercialRegister.name}`); // File path in Firebase Storage
+    
+          // Upload the Commercial Register PDF to Firebase Storage
+          const snapshot = await uploadBytes(storageRef, user.CommercialRegister);
+    
+          // Get the download URL for the uploaded file
+          commercial_register = await getDownloadURL(snapshot.ref);  // Correctly pass the reference
+    
+          console.log("Commercial Register uploaded successfully:", commercial_register);
+        } catch (error) {
+          console.error("Failed to upload commercial register:", error);
+          // Handle the error appropriately (e.g., fallback to default behavior or rethrow)
+        }
+      }
+    
+      // Create the user document in Firestore with the commercial register URL
+      const details = {
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        picture: "",  // You can modify this if you want to upload a user profile picture as well
+        commercial_register: commercial_register,  // Store the URL of the uploaded Commercial Register
+        status: 0,  // 1-admin, 2-warehouse, 3-pharmacy, -1-disabled, 0-pending
+        street: user.street,
+        city: user.city,
+        createdDtm: firebase.firestore.FieldValue.serverTimestamp(),
+        lastLoginTime: firebase.firestore.FieldValue.serverTimestamp(),
+      };
+    
+      // Save the user details to Firestore under the current user ID
+      await collection.doc(firebase.auth().currentUser?.uid).set(details);
+      
+      // Return the user and details object
+      return { user, details };
     };
-    collection.doc(firebase.auth().currentUser?.uid).set(details);
-    return { user, details };
-  };
 
   /*
     Returns the fetch Products
   */
-  async fetchProducts(keyword = "") {
-    try {
-      if (this.uuid != undefined) {
-        let query = this.firestore
-          .collection("products")
-          .where("store_id", "==", this.uuid); // Filter by store_id
-
-        // If a keyword is provided, filter products by name or description
-        if (keyword) {
-          query = query
-            .where("title", ">=", keyword)
-            .where("title", "<=", keyword + "\uf8ff");
+    async fetchProducts(keyword = ""): Promise<any[]> {
+      try {
+        if (this.uuid !== undefined) {
+          console.log("Fetching products for store_id:", this.uuid);
+    
+          let query = this.firestore
+            .collection("products")
+            .where("store_id", "==", this.uuid) // Filter by store_id
+            .where("status", "==", "0");//the status should be 0 , -1 is deleted
+    
+          // If a keyword is provided, filter products by name or description
+          if (keyword) {
+            console.log("Filtering products by keyword:", keyword);
+            query = query
+              .where("title", ">=", keyword)
+              .where("title", "<=", keyword + "\uf8ff");
+          }
+    
+          const querySnapshot = await query.get();
+    
+          const products = querySnapshot.docs.map((doc) => {
+            const data = doc.data();
+            console.log("Product fetched:", { id: doc.id, ...data });
+            return {
+              id: doc.id,
+              ...data,
+            };
+          });
+    
+          console.log("Fetched products:", products);
+          return products;
         }
-
-        const querySnapshot = await query.get();
-
-        return querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+    
+        console.warn("UUID is undefined. Returning empty product list.");
+        return [];
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        throw error;
       }
-      // Return an empty array if uuid is undefined
-      return [];
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      throw error;
     }
-  }
+
+    //fetches the users from the firebase
 
   async fetchUsers(keyword = "") {
     try {
@@ -311,17 +349,20 @@ class FirebaseAuthBackend {
       // If a keyword is provided, filter users by title
       if (keyword) {
         query = query
+        // Use a greater-than or equal condition for the beginning of the range
           .where("username", ">=", keyword)
-          .where("username", "<=", keyword + "\uf8ff");
+          // Use a less-than or equal condition to include all matching usernames
+          .where("username", "<=", keyword + "\uf8ff"); // '\uf8ff' ensures all possible characters after the keyword are included
       }
-
+      // Execute the query and get the snapshot of the result
       const querySnapshot = await query.get();
-
+      // Map the results to an array of user data with user ID
       return querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+        id: doc.id,// Include the document ID
+        ...doc.data(),// Include all the fields from the document
       }));
     } catch (error) {
+      // Handle errors by logging the error and throwing it for further handling
       console.error("Error fetching users:", error);
       throw error;
     }
@@ -388,18 +429,38 @@ class FirebaseAuthBackend {
   };
 
   // Function to update a product by ID
-  async updateProductById(id: string, updatedData: any) {
+  async updateProductById(id: string, updatedData: any, newImageFile: File | null) {
     try {
       const productRef = this.firestore.collection("products").doc(id);
-      await productRef.update({
+      
+      let updatedProductData: any = {
         title: updatedData.title || "",
-        images: updatedData.images || "",
         category: updatedData.category || "",
         price: updatedData.price || "",
         quantity: updatedData.quantity || "",
         expiryDate: updatedData.expiryDate || "",
-      });
+      };
+  
+      if (newImageFile) {
+        // If a new image is provided, upload it to Firebase Storage
+        const storage = getStorage();
+        const imageRef = ref(storage, `images/${newImageFile.name}`);
+  
+        console.log("Uploading new image:", newImageFile.name);
+  
+        const snapshot = await uploadBytes(imageRef, newImageFile);  // Upload the new image
+        const newImageUrl = await getDownloadURL(snapshot.ref);  // Get the URL of the uploaded image
+  
+        console.log("New image URL:", newImageUrl);
+  
+        updatedProductData.images = newImageUrl;  // Update the `images` field with the new URL
+      }
+  
+      // Update the product document in Firestore with the new data
+      await productRef.update(updatedProductData);
+  
       console.log("Product updated successfully");
+  
     } catch (error) {
       console.error("Error updating product:", error);
       throw error;
@@ -410,15 +471,15 @@ class FirebaseAuthBackend {
   async deleteProductById(id: string) {
     try {
       const productRef = this.firestore.collection("products").doc(id);
-      await productRef.delete();
-      console.log("Product deleted successfully");
+      await productRef.update({ status: "-1" }); // Update the status to "-1"
+      console.log("Product status updated to '-1' successfully");
     } catch (error) {
-      console.error("Error deleting product:", error);
+      console.error("Error updating product status:", error);
       throw error;
     }
   }
 
-  //return fetched categories
+  //return fetched categories, keep in mind that categories can be only added from the firebase for unification reasons
   async fetchCategories(keyword = "") {
     try {
       let query = this.firestore.collection("categories");
@@ -445,30 +506,62 @@ class FirebaseAuthBackend {
    * @param {Object} productData - The product data to be added
    * @returns {Promise} - A promise that resolves when the product is added
    */
-  addProductToFirestore = (productData: any): Promise<any> => {
+
+// Function to add a new product to Firestore along with its image file
+   addProductToFirestore = (productData: any, imageFile: File): Promise<any> => {
     return new Promise((resolve, reject) => {
       // Ensure user is authenticated before adding the product
       if (this.uuid) {
-        const collection = this.firestore.collection("products");
-        const newProduct = {
-          ...productData,
-          store_id: this.uuid, // Ensure the product is associated with the user's store
-          createdDtm: firebase.firestore.FieldValue.serverTimestamp(), // Automatically set the creation timestamp
-        };
-
-        collection
-          .add(newProduct)
+        const collection = this.firestore.collection("products");// Reference to the 'products' collection in Firestore
+        const storage = getStorage();// Get the Firebase storage service
+        
+        // Ensure the image file name is correct
+        if (!imageFile || !imageFile.name) {
+          reject("No image file provided or image file name is undefined.");
+          return;
+        }
+  
+        const storageRef = ref(storage, `images/${imageFile.name}`);  // Using imageFile.name to set the file name
+  
+        console.log("Uploading image with filename:", imageFile.name);  // Log filename
+  
+        // Upload the image to Firebase Storage
+        uploadBytes(storageRef, imageFile)
+          .then((snapshot) => {
+            // Once the upload is complete, get the download URL for the uploaded image
+            return getDownloadURL(snapshot.ref);
+          })
+          .then((downloadURL) => {
+            console.log("Image URL:", downloadURL);  // Log the URL to ensure it's correct
+  
+            // Add the image URL to the product data
+            const newProduct = {
+              ...productData,
+              images: downloadURL,  // Store the image URL correctly
+              store_id: this.uuid,  // Associate the product with the user's store
+              createdDtm: firebase.firestore.FieldValue.serverTimestamp(), // Set the creation timestamp
+            };
+  
+            // Add the product data with the image URL to Firestore
+            return collection.add(newProduct);
+          })
           .then((docRef) => {
-            resolve({ id: docRef.id, ...newProduct });
+             // Once the product is successfully added, resolve the promise with the new product's ID and data
+            resolve({ id: docRef.id, ...productData });
           })
           .catch((error) => {
+            // If an error occurs during the process, handle the error and reject the promise
             reject(this._handleError(error));
           });
       } else {
+        // Reject the promise if the user is not authenticated (no UUID)
         reject("User is not authenticated.");
       }
     });
   };
+  
+  
+
 
   /**
    * Retrieves all orders containing products from the specified store (by store ID).
@@ -480,20 +573,26 @@ class FirebaseAuthBackend {
   // invoice page
   getOrderByUID = async (): Promise<any[]> => {
     try {
+       // Fetch the collection of orders where the status is either 0 or 1
       const ordersCollection = this.firestore.collection("orders")
         .where("status", "in", [1, 0]); // Filter orders based on order status (0 and 1)
+      
+        // Get the snapshot of orders that match the query  
       const ordersSnapshot = await ordersCollection.get();
       const orders = [];
-  
+
+       // Loop through each order document in the snapshot
       for (const orderDoc of ordersSnapshot.docs) {
-        const orderData = orderDoc.data();
-        let totalAmount = 0;
+        const orderData = orderDoc.data();// Get the data of the order
+        let totalAmount = 0;// Initialize a variable to calculate the total amount of the order
   
         // Filter products within the order based on store ID
         const filteredProducts = await Promise.all(
           orderData.products.map(async (productItem: any) => {
+             // Fetch the details of the product by its ID
             const productData = await this.getProductById(productItem.product);
   
+            // If the product's store ID matches the current store and its status is 0 or 1
             if (productData && productData.store_id === this.uuid) {
               // Only calculate the total amount if the product's status is 0 or 1
               if (productItem.status === 0 || productItem.status === 1) {
@@ -510,29 +609,32 @@ class FirebaseAuthBackend {
                 
               };
             }
-  
+            // If the product doesn't meet the conditions, return null
             return null;
           })
         );
-  
+        // Filter out any null values (products that don't match the conditions)
         const nonNullProducts = filteredProducts.filter(Boolean);
-  
+
+        // If there are valid products, add the order to the orders array
         if (nonNullProducts.length > 0) {
           // Fetch user details using getUserDetailsByUid method
           const userDetails = await this.getUserDetailsByUid(orderData.user_id);
-  
+          
+          // Push the order data, including filtered products, total amount, and user details
           orders.push({
-            id: orderDoc.id,
-            ...orderData,
-            products: nonNullProducts,
-            user: userDetails,
-            totalAmount,
+            id: orderDoc.id,// Order ID
+            ...orderData, // Include all other order data
+            products: nonNullProducts,// Include the valid products for the order
+            user: userDetails,// User details for the order
+            totalAmount,// Total calculated amount for the order
           });
         }
       }
-  
+       // Return the final list of orders
       return orders;
     } catch (error) {
+      // If an error occurs during the process, log it and throw the error
       console.error("Error fetching orders by store UID:", error);
       throw error;
     }
@@ -913,7 +1015,7 @@ getOrderByUID3 = async (): Promise<any[]> => {
   
   
   
-  
+  //to update the product quantity in the edit function
   updateProductQuantity = async (productId: string, quantityToUpdate: number, status: string): Promise<void> => {
    
     try {

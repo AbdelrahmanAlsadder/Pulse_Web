@@ -12,7 +12,6 @@ import {
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import AuthCarousel from "../AuthenticationInner/AuthCarousel";
-import logoDark from "../../assets/images/logo-dark.png";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";

@@ -2,10 +2,7 @@ import { useFormik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import dummy from "../../assets/images/users/user-dummy-img.jpg";
-
 import * as Yup from "yup";
-
-import { editProductList as onEditProductList } from "../../slices/thunk";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import { getFirebaseBackend } from "../../helpers/firebase_helper";
 import { toast } from "react-toastify";
@@ -21,8 +18,9 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
   const firebaseBackend = getFirebaseBackend();
 
   console.log("edit :>> ", edit);
+
   // image
-  const [selectedImage, setSelectedImage] = useState<any>();
+  const [selectedImage, setSelectedImage] = useState<any>(edit?.images || dummy);
   const [categories, setCategories] = useState<any[]>([]); // State for categories
 
   // Fetch categories from Firebase
@@ -31,7 +29,6 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
       try {
         const categoryCollection = await firebaseBackend.fetchCategories();
         setCategories(categoryCollection);
-       
       } catch (error) {
         toast.error("Failed to load categories.");
       }
@@ -40,14 +37,18 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
     fetchCategories();
   }, [firebaseBackend]);
 
-  const handleImageChange = (event: any) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      formik.setFieldValue("productImage", e.target.result);
-      setSelectedImage(e.target.result);
-    };
-    reader.readAsDataURL(file);
+  const [newImageFile, setNewImageFile] = useState<File | null>(null);
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (file) {
+      setNewImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const dispatch = useDispatch();
@@ -75,7 +76,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
     }),
 
     onSubmit: async (values: any) => {
-      await firebaseBackend.updateProductById(edit.id, values);
+      await firebaseBackend.updateProductById(edit.id, values, newImageFile);
       formik.resetForm();
       toast.success("Product Edited Successfully", { autoClose: 2000 });
       handleClose(true);
@@ -83,7 +84,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
   });
 
   useEffect(() => {
-    setSelectedImage(edit?.productImage);
+    setSelectedImage(edit?.images || dummy);  // Reset to existing image when `edit` changes
   }, [edit]);
 
   return (
@@ -138,8 +139,8 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                   <div className="avatar-lg p-1">
                     <div className="avatar-title bg-light rounded-circle">
                       <img
-                        src={selectedImage || dummy}
-                        alt=""
+                        src={selectedImage}
+                        alt="Product"
                         id="product-img"
                         className="avatar-md rounded-circle object-cover"
                       />
@@ -148,11 +149,11 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                 </div>
                 {formik.errors.productImage && formik.touched.productImage ? (
                   <Form.Control.Feedback type="invalid" className="d-block">
-                    {" "}
-                    {formik.errors.productImage}{" "}
+                    {formik.errors.productImage}
                   </Form.Control.Feedback>
                 ) : null}
               </div>
+
               <div className="mb-3">
                 <Form.Label htmlFor="Product-Name-input">
                   Product Name<span className="text-danger">*</span>
@@ -173,6 +174,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                   </Form.Control.Feedback>
                 ) : null}
               </div>
+
               <div className="mb-3">
                 <Form.Label htmlFor="Category-input">
                   Category<span className="text-danger">*</span>
@@ -180,7 +182,6 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                 <Form.Select
                   id="Category-input"
                   name="category"
-                  placeholder="Enter Category"
                   value={formik.values.category || ""}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
@@ -199,6 +200,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                   </Form.Control.Feedback>
                 ) : null}
               </div>
+
               <Row>
                 <Col lg={6}>
                   <div className="mb-3">
@@ -208,11 +210,20 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                     <Flatpickr
                       className="form-control"
                       placeholder="Expiry Date"
-                      options={{ dateFormat: "d M, Y" }}
-                      value={formik.values.expiryDate}
-                      onChange={(date: Date[]) =>
-                        formik.setFieldValue("expiryDate", date[0])
-                      }
+                      options={{ dateFormat: "d M, Y",
+                        minDate: "today", // Restrict selection to today or future dates
+                       }}
+                      value={formik.values.expiryDate ? new Date(formik.values.expiryDate) : null}
+                      onChange={(date: Date[]) => {
+                        if (date[0]) {
+                          const year = date[0].getFullYear();
+                          const month = String(date[0].getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+                          const day = String(date[0].getDate()).padStart(2, '0');
+                      
+                          const formattedDate = `${year}-${month}-${day}`; // Format as YYYY-MM-DD
+                          formik.setFieldValue("expiryDate", formattedDate); // Store as a string
+                        }
+                      }}
                     />
                     {formik.errors.expiryDate && formik.touched.expiryDate && (
                       <Form.Control.Feedback type="invalid">
@@ -221,6 +232,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                     )}
                   </div>
                 </Col>
+
                 <Col lg={6}>
                   <div className="mb-3">
                     <Form.Label htmlFor="quantity">Product Quantity</Form.Label>
@@ -242,6 +254,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                   </div>
                 </Col>
               </Row>
+
               <div className="mb-3">
                 <Form.Label htmlFor="Price-input">
                   Price<span className="text-danger">*</span>
@@ -261,6 +274,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                   </Form.Control.Feedback>
                 ) : null}
               </div>
+
               <div className="hstack gap-2 justify-content-end">
                 <Button
                   type="button"
@@ -272,8 +286,8 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
                 >
                   Close
                 </Button>
-                <Button type="submit" className="btn btn-success">
-                  Edit
+                <Button type="submit" className="btn btn-primary">
+                  Save Changes
                 </Button>
               </div>
             </Form>

@@ -8,8 +8,7 @@ import {
   Button,
   Form,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
-import logoDark from "../../assets/images/logo-dark.png";
+
 
 import * as Yup from "yup";
 import { useFormik } from "formik";
@@ -17,12 +16,13 @@ import { useFormik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import withRouter from "../../Common/withRouter";
 
-import avatar from "../../assets/images/users/avatar-1.jpg";
+// import avatar from "../../assets/images/users/avatar-1.jpg";
 
 import { createSelector } from "reselect";
-import { editProfile, resetProfileFlag } from "../../slices/profile/thunk";
 import { getFirebaseBackend } from "../../helpers/firebase_helper";
 import { toast } from "react-toastify";
+import { storage } from "../../App"; // Assuming you've set up Firebase storage helper
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 interface ProfileState {
   user: {
@@ -44,6 +44,7 @@ const UserProfile: React.FC = () => {
   const [phone, setPhone] = useState<string>("");
   const [city, setCity] = useState<string>("");
   const [street, setStreet] = useState<string>("");
+  const [avatarURL, setAvatarURL] = useState<string>(""); // Initial avatar state
 
   const selectLayoutState = (state: any) => state.Profile;
   const userprofileData = createSelector(selectLayoutState, (state: any) => ({
@@ -52,20 +53,22 @@ const UserProfile: React.FC = () => {
 
   const { user } = useSelector(userprofileData);
 
-  const loadUserName = async (uid: String) => {
+  const loadUserName = async (uid: string) => {
     try {
       const data = await firebaseBackend.getUserDetailsByUid(uid);
       if (data) {
-        setCity(data.address.city);
-        setStreet(data.address.street);
+        setCity(data.city);
+        setStreet(data.street);
         setUsername(data.username);
         setEmail(data.email);
         setPhone(data.phone);
+        setAvatarURL(data.picture ); // Set avatar URL from Firestore
       }
     } catch (error) {
-      console.error("Error loading products:", error);
+      console.error("Error loading user details:", error);
     }
   };
+
   useEffect(() => {
     const authUser: any = sessionStorage.getItem("authUser");
     if (authUser) {
@@ -87,20 +90,53 @@ const UserProfile: React.FC = () => {
     }),
     onSubmit: async (values: any) => {
       try {
-        await firebaseBackend.updateUserDetails({
-          ...((values.city || values.street) && {
+        console.log("Submitting form with values:", values);
+
+        if (values.avatar) {
+          console.log("Uploading avatar image...");
+          const avatarFile = values.avatar;
+          const storageRef = ref(storage, `avatars/${user.idx}`);
+
+          const uploadTask = uploadBytesResumable(storageRef, avatarFile);
+
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              console.log("Upload is " + progress + "% done");
+            },
+            (error) => {
+              console.error("Error uploading avatar:", error);
+              toast.error("Avatar upload failed", { autoClose: 2000 });
+            },
+            async () => {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              console.log("Avatar uploaded successfully:", downloadURL);
+
+              await firebaseBackend.updateUserDetails({
+                address: {
+                  ...(values.city && { city: values.city }),
+                  ...(values.street && { street: values.street }),
+                },
+                picture: downloadURL, // Save the new avatar URL to Firestore
+              });
+
+              setAvatarURL(downloadURL); // Update avatar state after successful upload
+              toast.success("Profile updated successfully", { autoClose: 2000 });
+            }
+          );
+        } else {
+          await firebaseBackend.updateUserDetails({
             address: {
               ...(values.city && { city: values.city }),
               ...(values.street && { street: values.street }),
             },
-          }),
-
-          ...(values.avatar && { picture: values.avatar }),
-        });
-
-        toast.success("Info Updated Successfully", { autoClose: 2000 });
+          });
+          toast.success("Profile updated successfully", { autoClose: 2000 });
+        }
       } catch (error) {
-        toast.error("Info Updated Failed", { autoClose: 2000 });
+        console.error("Error updating profile:", error);
+        toast.error("Profile update failed", { autoClose: 2000 });
       }
     },
   });
@@ -123,7 +159,7 @@ const UserProfile: React.FC = () => {
                             <div className="d-flex">
                               <div className="mx-3">
                                 <img
-                                  src={avatar}
+                                  src={avatarURL} // Use updated avatar URL here
                                   alt=""
                                   className="avatar-lg rounded-circle img-thumbnail"
                                 />
@@ -165,8 +201,7 @@ const UserProfile: React.FC = () => {
                               onBlur={validation.handleBlur}
                               value={validation.values.city || ""}
                               isInvalid={
-                                validation.touched.city &&
-                                validation.errors.city
+                                validation.touched.city && validation.errors.city
                               }
                             />
                             <Form.Control.Feedback type="invalid">
@@ -185,8 +220,7 @@ const UserProfile: React.FC = () => {
                               onBlur={validation.handleBlur}
                               value={validation.values.street || ""}
                               isInvalid={
-                                validation.touched.street &&
-                                validation.errors.street
+                                validation.touched.street && validation.errors.street
                               }
                             />
                             <Form.Control.Feedback type="invalid">
@@ -200,6 +234,7 @@ const UserProfile: React.FC = () => {
                               name="avatar"
                               className="form-control"
                               type="file"
+                              accept="image/png, image/jpeg" // Only allows PNG and JPG files to be selected
                               onChange={(
                                 event: React.ChangeEvent<HTMLInputElement>
                               ) =>

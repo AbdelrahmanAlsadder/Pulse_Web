@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Card, Col, Container, Form, Row } from "react-bootstrap";
-
 import Dropzone from "react-dropzone";
-import { Link } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
-import firebase from "firebase/compat/app";
 import { toast, Slide, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { collection, getDocs } from "firebase/firestore";
+
 
 const AddProduct = () => {
   document.title = "Add Product";
@@ -56,11 +53,22 @@ const AddProduct = () => {
     return setselectedFiles([]);
   };
 
+
+  //comment this out when you get the firebase storage for images and delete the handle accepted files function
+  // don't forget to change in line 216
+   // const uploadImageToFirebase = async (file) => {
+        //   const storageRef = firebase.storage().ref(`products/${file.name}`);
+        //   const uploadTask = await storageRef.put(file);
+        //   return await uploadTask.ref.getDownloadURL();
+        // };
+
   const handleAcceptedFiles = (files: any) => {
     files.map((file: any) =>
       Object.assign(file, {
         preview: URL.createObjectURL(file),
         formattedSize: formatBytes(file.size),
+
+       
       })
     );
     setselectedFiles(files);
@@ -86,6 +94,7 @@ const AddProduct = () => {
       quantity: "",
       expiryDate: "",
       productDesc: "",
+      status:"0",
     },
     validationSchema: Yup.object({
       productName: Yup.string().required("Please enter your product commercial name"),
@@ -93,40 +102,42 @@ const AddProduct = () => {
       productImage: Yup.mixed().required("Please select an image"),
       category: Yup.string().required("Please enter your category"),
       price: Yup.number().required("Please enter price"),
-      quantity: Yup.number().required("Please enter the quantity"),
+      quantity: Yup.number().required("Please enter the quantity").typeError('Quantity must be a number').positive('Quantity must be greater than 0'),
       expiryDate: Yup.date().required("Please enter the expiry date"),
       productDesc: Yup.string().required("Please enter product description"),
     }),
     onSubmit: async (values: {
       productName: any;
       productScientificName: any;
-      productImage: File;
+      productImage: null;
       category: any;
       price: any;
       quantity: any;
       expiryDate: any;
       productDesc: any;
+      status:"0",
     }) => {
       const newProduct = {
         title: values.productName,
         scientificTitle: values.productScientificName,
-        images: values.productImage, // Handle image upload to Firestore
+        // images: values.productImage, // Handle image upload to Firestore
         category: values.category,
         price: values.price,
         quantity: values.quantity,
         expiryDate: values.expiryDate,
         description: values.productDesc,
+        status:"0",
       };
       console.log("newProduct :>> ", newProduct);
       // Call your method to add the product to Firestore here
       // For example: addProductToFirestore(newProduct);
       try {
         setIsLoading(true);
-        await firebaseBackend.addProductToFirestore(newProduct);
+        await firebaseBackend.addProductToFirestore(newProduct, values.productImage);  // Pass both the product data and image file
         toast.success("Product Added Successfully", { autoClose: 2000 });
       } catch (error) {
         console.error("Error loading products:", error);
-        toast.error("Invoice Deleted Successfully", { autoClose: 2000 });
+        toast.error("Error adding product", { autoClose: 2000 });
       } finally {
         setIsLoading(false);
         formik.resetForm();
@@ -191,32 +202,40 @@ const AddProduct = () => {
                       </div>
 
                       <Dropzone
-                        isInvalid={
-                          formik.touched.productImage &&
-                          !!formik.errors.productImage
-                        }
-                        onDrop={(acceptedFiles: any) => {
-                          handleAcceptedFiles(acceptedFiles);
-                          formik.setFieldValue(
-                            "productImage",
-                            acceptedFiles[0].name
-                          ); // Set image name in Formik
-                        }}
-                      >
-                        {({ getRootProps }: any) => (
-                          <div className="dropzone dz-clickable text-center">
-                            <div
-                              className="dz-message needsclick"
-                              {...getRootProps()}
-                            >
-                              <div className="mb-3">
-                                <i className="display-4 text-muted ri-upload-cloud-2-fill" />
-                              </div>
-                              <h4>Drop files here or click to upload.</h4>
-                            </div>
-                          </div>
-                        )}
-                      </Dropzone>
+  isInvalid={
+    formik.touched.productImage && !!formik.errors.productImage
+  }
+  accept={{ 'image/jpeg': ['.jpg', '.jpeg'] }} // Only accept JPG files
+  onDrop={(acceptedFiles: any) => {
+    // Filter to ensure only JPG files are accepted
+    const jpgFiles = acceptedFiles.filter(
+      (file: File) => file.type === "image/jpeg" || file.type === "image/jpg"
+    );
+
+    if (jpgFiles.length > 0) {
+      handleAcceptedFiles(jpgFiles);
+      formik.setFieldValue("productImage", jpgFiles[0]); // Set image name in Formik
+    } else {
+      alert("Only JPG files are allowed!"); // Alert if the file is not a JPG
+    }
+  }}
+>
+  {({ getRootProps, getInputProps }: any) => (
+    <div className="dropzone dz-clickable text-center">
+      <div
+        className="dz-message needsclick"
+        {...getRootProps()}
+      >
+        <input {...getInputProps()} />
+        <div className="mb-3">
+          <i className="display-4 text-muted ri-upload-cloud-2-fill" />
+        </div>
+        <h4>Drop JPG files here or click to upload.</h4>
+      </div>
+    </div>
+  )}
+</Dropzone>
+
                       <div className="list-unstyled mb-0" id="file-previews">
                         {selectedFiles.map((f: any, i: number) => {
                           return (
@@ -356,6 +375,7 @@ const AddProduct = () => {
                               onChange={formik.handleChange}
                               onBlur={formik.handleBlur}
                               value={formik.values.expiryDate}
+                              min={new Date().toISOString().split("T")[0]} // Restrict to today's date or future dates, so the user can choose a date in the present only
                               isInvalid={
                                 formik.touched.expiryDate &&
                                 !!formik.errors.expiryDate

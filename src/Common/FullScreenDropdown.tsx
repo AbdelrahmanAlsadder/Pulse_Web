@@ -27,6 +27,13 @@ const FullScreenDropdown = () => {
             } else if (document.documentElement.webkitRequestFullscreen) {
                 document.documentElement.webkitRequestFullscreen();
             }
+            /*
+            Different browsers use different APIs for fullscreen
+            Requests the browser to enter fullscreen mode for the entire document.
+            requestFullscreen: Standard API.
+            mozRequestFullScreen: Firefox-specific.
+            webkitRequestFullscreen: Safari/Chrome-specific.
+            */
         } else {
             setIsFullScreenMode(true);
             if (document.cancelFullScreen) {
@@ -36,9 +43,15 @@ const FullScreenDropdown = () => {
             } else if (document.webkitCancelFullScreen) {
                 document.webkitCancelFullScreen();
             }
+            //same as the above but to exit full screen
         }
 
         // handle fullscreen exit
+        /*
+        Adds event listeners for detecting changes in fullscreen state.
+        The exitHandler function ensures that when fullscreen mode exits (via any method),
+         the fullscreen-enable class is removed from the <body> element.
+        */
         const exitHandler = () => {
             if (
                 !document.webkitIsFullScreen &&

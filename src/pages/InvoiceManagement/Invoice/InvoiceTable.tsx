@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { Card, Col, Dropdown, Form, Nav, Row, Tab } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
+import { Card, Col, Nav, Row, Tab } from "react-bootstrap";
+import {  useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { createSelector } from "reselect";
 
@@ -133,7 +133,7 @@ const InvoiceTable = ({ isShow, hidePaymentModal }: paymentProps) => {
         accessor: "totalAmount",
         Filter: false,
         isSortable: true,
-        Cell: (cell: any) => <>${cell.row.original.totalAmount}</>,
+        Cell: (cell: any) => <>${cell.row.original.totalAmount.toFixed(2)}</>,
       },
       {
         Header: "Status",
