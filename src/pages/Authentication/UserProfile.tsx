@@ -13,7 +13,7 @@ import {
 import * as Yup from "yup";
 import { useFormik } from "formik";
 
-import { useSelector, useDispatch } from "react-redux";
+
 import withRouter from "../../Common/withRouter";
 
 // import avatar from "../../assets/images/users/avatar-1.jpg";
@@ -51,7 +51,7 @@ const UserProfile: React.FC = () => {
     user: state.user,
   }));
 
-  const { user } = useSelector(userprofileData);
+  
 
   const loadUserName = async (uid: string) => {
     try {
@@ -75,7 +75,7 @@ const UserProfile: React.FC = () => {
       const obj = JSON.parse(authUser);
       if (obj.uid) loadUserName(obj.uid);
     }
-  }, [user]);
+  }, );
 
   const validation = useFormik({
     enableReinitialize: true,
@@ -95,7 +95,7 @@ const UserProfile: React.FC = () => {
         if (values.avatar) {
           console.log("Uploading avatar image...");
           const avatarFile = values.avatar;
-          const storageRef = ref(storage, `avatars/${user.idx}`);
+          const storageRef = ref(storage, `avatars`);
 
           const uploadTask = uploadBytesResumable(storageRef, avatarFile);
 

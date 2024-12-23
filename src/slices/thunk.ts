@@ -16,6 +16,3 @@ export * from "./login/thunk";
 
 // register
 export * from './register/thunk';
-
-// profile
-export * from './profile/thunk';

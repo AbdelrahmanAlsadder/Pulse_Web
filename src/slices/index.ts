@@ -10,7 +10,7 @@ import LayoutReducer from "./layouts/reducer";
 import LoginReducer from "./login/reducer";
 import AccountReducer from "./register/reducer";
 
-import ProfileReducer from "./profile/reducer";
+
 
 
 const rootReducer = combineReducers ({
@@ -19,7 +19,7 @@ const rootReducer = combineReducers ({
     Login: LoginReducer,
     Account: AccountReducer,
 
-    Profile: ProfileReducer,
+
 })
 
 
