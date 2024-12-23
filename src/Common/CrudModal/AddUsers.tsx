@@ -6,7 +6,6 @@ import { addUsers as onAddUsers } from "../../slices/thunk";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import moment from "moment";
 import FlatPickr from "react-flatpickr";
-import dummy from "../../assets/images/users/user-dummy-img.jpg";
 import { PatternFormat } from "react-number-format";
 
 interface userProps {
@@ -130,7 +129,7 @@ const AddUsers = ({ isShow, handleClose, handleShow }: userProps) => {
                   <div className="avatar-lg p-1">
                     <div className="avatar-title bg-light rounded-circle">
                       <img
-                        src={selectedImage || dummy}
+                        src={selectedImage}
                         alt=""
                         id="product-img"
                         className="avatar-md rounded-circle object-cover"

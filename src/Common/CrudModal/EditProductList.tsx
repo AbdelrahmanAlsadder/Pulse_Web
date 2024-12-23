@@ -1,7 +1,6 @@
 import { useFormik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import dummy from "../../assets/images/users/user-dummy-img.jpg";
 import * as Yup from "yup";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import { getFirebaseBackend } from "../../helpers/firebase_helper";
@@ -20,7 +19,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
   console.log("edit :>> ", edit);
 
   // image
-  const [selectedImage, setSelectedImage] = useState<any>(edit?.images || dummy);
+  const [selectedImage, setSelectedImage] = useState<any>(edit?.images);
   const [categories, setCategories] = useState<any[]>([]); // State for categories
 
   // Fetch categories from Firebase
@@ -84,7 +83,7 @@ const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
   });
 
   useEffect(() => {
-    setSelectedImage(edit?.images || dummy);  // Reset to existing image when `edit` changes
+    setSelectedImage(edit?.images);  // Reset to existing image when `edit` changes
   }, [edit]);
 
   return (

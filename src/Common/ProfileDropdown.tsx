@@ -3,12 +3,11 @@ import { Dropdown } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { createSelector } from "reselect";
 import { getFirebaseBackend } from "../helpers/firebase_helper";
-import avatar1 from "../assets/images/users/avatar-4.jpg"; // Fallback avatar
+
 
 const ProfileDropdown = () => {
   const [userName, setUserName] = useState<string>("");
   const [userImage, setUserImage] = useState<string>("");
-  const [profilePicture, setProfilePicture] = useState<string>(avatar1); // Default to avatar1
   const firebaseBackend = getFirebaseBackend();
 
   // Selector to access user profile from Redux state
@@ -57,7 +56,7 @@ const ProfileDropdown = () => {
               alt="Header Avatar"
               onError={() => {
                 console.error("Failed to load image, falling back to default.");
-                setProfilePicture(avatar1); // Fallback to default avatar on error
+            
               }}
             />
             <span className="text-start ms-xl-2">
