@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Card, Col, Dropdown, Form, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+
 import { ToastContainer } from "react-toastify";
 import { createSelector } from "reselect";
 import TableContainer from "../../../Common/Tabledata/TableContainer";
@@ -17,7 +17,7 @@ interface userProps {
 }
 
 const UserTable = ({ isShow, hideUserModal }: userProps) => {
-  const dispatch = useDispatch();
+ 
 
   const selectUsersList = createSelector(
     (state: any) => state.Invoice,
@@ -27,32 +27,10 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
   );
   const [users, setUsers] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { usersList } = useSelector(selectUsersList);
+ 
   const firebaseBackend = getFirebaseBackend();
 
-  //comment this out when you get the storage on your firebase
-  // don't forget to comment out the onClick inside the link tag that opens the pdf (line 251 approximately)
 
-  // const fetchCommercialRegister = async () => {
-  //     try {
-  //       const fileRef = storage.ref().child("commercial_register.pdf"); // Update the file path if needed
-  //       const fileUrl = await fileRef.getDownloadURL();
-  //       return fileUrl;
-  //     } catch (error) {
-  //       console.error("Error fetching file:", error);
-  //       return null;
-  //     }
-  //   };
-  // const CommercialRegisterLink = () => {
-  //     const handleOpenFile = async () => {
-  //       const fileUrl = await fetchCommercialRegister();
-  //       if (fileUrl) {
-  //         // Open the file in a new tab
-  //         window.open(fileUrl, "_blank");
-  //       } else {
-  //         alert("Failed to fetch the commercial register file.");
-  //       }
-  //     };
 
   const handleOpenFile = (item: any) => {
     const commercialRegisterUrl = item.commercial_register; // Get the URL from the user data
@@ -80,9 +58,7 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
     loadUsers();
   }, [firebaseBackend]);
 
-  useEffect(() => {
-    setUsers(usersList);
-  }, [usersList]);
+ 
 
   // Delete modal
 
@@ -98,15 +74,7 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
   );
 
   // // search
-  // const handleSearch = (ele: any) => {
-  //     let item = ele.value;
 
-  //     if (item === "All Tasks") {
-  //         setUsers([...usersList]);
-  //     } else {
-  //         handleSearchData({ data: usersList, item: item, setState: setUsers })
-  //     }
-  // }
   // search
   const handleSearch = async (ele: any) => {
     const item = ele.value.trim(); // Trim whitespace
