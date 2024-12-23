@@ -10,7 +10,7 @@ import createInvoice from "../assets/images/create-invoice.png";
 //Import Components
 import VerticalLayout from "./VerticalLayouts/index";
 import { Container } from "react-bootstrap";
-import HorizontalLayout from "./HorizontalLayout";
+
 
 const Sidebar = ({ layoutType }: any) => {
 
@@ -76,9 +76,7 @@ const Sidebar = ({ layoutType }: any) => {
           <div id="scrollbar">
             <Container fluid>
               <div id="two-column-menu"></div>
-              <ul className="navbar-nav" id="navbar-nav">
-                <HorizontalLayout />
-              </ul>
+
             </Container>
           </div>        
         ) : (
