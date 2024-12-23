@@ -1,3 +1,6 @@
+//this file is imported when we want to delete 
+//a product from the product list
+//from here we control the message that appears
 import React from "react";
 import { Modal, Button, ModalHeader, ModalBody } from "react-bootstrap";
 

@@ -1,3 +1,5 @@
+//this file is imported for the dashboard chart colors
+
 const getChartColorsArray = (colors : any) => {
     colors = JSON.parse(colors);
     return colors.map(function (value : any) {
