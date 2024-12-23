@@ -1,3 +1,17 @@
+//This code defines a reusable and customizable table component (TableContainer) built using react-table. The table includes features like:
+
+// Global Search Filtering: Search across all table data.
+// Column Filters: Add individual column-level filters.
+// Sorting: Sort columns by clicking on headers.
+// Pagination: Navigate through data pages.
+// Dynamic Page Size: Change the number of rows per page.
+// Bootstrap Styling: Leverage react-bootstrap for layout and styling.
+
+//the logic is commonly used in other websites to display the data as tables
+
+
+
+
 import React, { Fragment } from "react";
 import PropTypes from "prop-types";
 import {
