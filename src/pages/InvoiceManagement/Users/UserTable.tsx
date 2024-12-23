@@ -4,13 +4,8 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { createSelector } from "reselect";
-import {
-  getUsers as onGetUsers,
-  deleteUsers as onDeleteUsers,
-} from "../../../slices/thunk";
 import TableContainer from "../../../Common/Tabledata/TableContainer";
 import EditUsers from "../../../Common/CrudModal/EditUsers";
-import AddUsers from "../../../Common/CrudModal/AddUsers";
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
 import moment from "moment";
@@ -303,15 +298,9 @@ const UserTable = ({ isShow, hideUserModal }: userProps) => {
         </Col>
       </Row>
 
-      <AddUsers
-        isShow={isShow}
-        handleClose={hideUserModal}
-        handleShow={isShow}
-      />
+  
 
       <EditUsers isShow={editUser} handleClose={handleCloseEdit} edit={edit} />
-
-      {/* <DeleteModal show={delet} handleClose={handleDeleteModal} deleteModalFunction={handleDeleteId} /> */}
       <ToastContainer />
     </React.Fragment>
   );

@@ -3,11 +3,8 @@ import { Card, Col, Dropdown, Form, Nav, Row, Tab } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { createSelector } from "reselect";
-
 import TableContainer from "../../Common/Tabledata/TableContainer";
 import { DeleteModal } from "../../Common/DeleteModal";
-import EditPayment from "../../Common/CrudModal/EditPayment";
-
 import NoSearchResult from "../../Common/Tabledata/NoSearchResult";
 import { getFirebaseBackend } from "../../helpers/firebase_helper";
 import { Link } from "react-router-dom";
@@ -299,17 +296,7 @@ const InvoiceList = ({ isShow, hidePaymentModal }: paymentProps) => {
         </Col>
       </Row>
 
-      {/* <Addpayment
-        isShow={isShow}
-        handleClose={hidePaymentModal}
-        handleShow={isShow}
-      /> */}
 
-      <EditPayment
-        isShow={editPayment}
-        handleClose={handleCloseEdit}
-        edit={edit}
-      />
 
       <DeleteModal
         show={delet}

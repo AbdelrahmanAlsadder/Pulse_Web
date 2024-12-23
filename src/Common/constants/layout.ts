@@ -1,3 +1,11 @@
+// constants file is to define and export enumerations (enums)
+//  for various layout configurations and settings.
+//   These enums provide a centralized way to define
+//    and reference fixed values, ensuring consistency 
+//    and making the code easier to maintain.
+
+
+
 enum LAYOUT_TYPES {
   VERTICAL = "vertical",
   HORIZONTAL = "horizontal",

@@ -3,12 +3,8 @@ import { Card, Col, Nav, Row, Tab } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { ToastContainer } from "react-toastify";
 import { createSelector } from "reselect";
-
 import TableContainer from "../../../Common/Tabledata/TableContainer";
 import { DeleteModal } from "../../../Common/DeleteModal";
-
-import EditPayment from "../../../Common/CrudModal/EditPayment";
-
 import NoSearchResult from "../../../Common/Tabledata/NoSearchResult";
 import { getFirebaseBackend } from "../../../helpers/firebase_helper";
 import { Link } from "react-router-dom";
@@ -197,33 +193,7 @@ const InvoiceTable = ({ isShow, hidePaymentModal }: paymentProps) => {
           </button> */}
         </Col>
 
-        {/* <div className="col-sm-auto ms-auto">
-          <div className="d-flex gap-3">
-            <div className="search-box">
-              <Form.Control
-                type="text"
-                id="searchMemberList"
-                placeholder="Search for Result"
-                onChange={(e: any) => handleSearch(e.target)}
-              />
-              <i className="las la-search search-icon"></i>
-            </div>
-            <Dropdown>
-              <Dropdown.Toggle
-                as="button"
-                className="btn btn-soft-info btn-icon fs-14 arrow-none"
-              >
-                <i className="las la-ellipsis-v fs-18"></i>
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Item>All</Dropdown.Item>
-                <Dropdown.Item>Last Week</Dropdown.Item>
-                <Dropdown.Item>Last Month</Dropdown.Item>
-                <Dropdown.Item>Last Year</Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-          </div>
-        </div> */}
+
       </Row>
 
       <Row>
@@ -237,37 +207,7 @@ const InvoiceTable = ({ isShow, hidePaymentModal }: paymentProps) => {
                   className="nav-tabs nav-tabs-custom nav-success mb-3"
                 >
                   {" "}
-                  {/* 
-                  <Nav.Item as="li">
-                    <Nav.Link
-                      eventKey="all"
-                      onClick={() => {
-                        toggleTab("all");
-                      }}
-                    >
-                      All
-                    </Nav.Link>
-                  </Nav.Item>
-               <Nav.Item as="li">
-                    <Nav.Link
-                      eventKey="paid"
-                      onClick={() => {
-                        toggleTab("Paid");
-                      }}
-                    >
-                      Paid
-                    </Nav.Link>
-                  </Nav.Item>
-                  <Nav.Item as="li">
-                    <Nav.Link
-                      eventKey="pending"
-                      onClick={() => {
-                        toggleTab("Pending");
-                      }}
-                    >
-                      Pending
-                    </Nav.Link>
-                  </Nav.Item> */}
+   
                 </Nav>
 
                 <Card>
@@ -300,17 +240,8 @@ const InvoiceTable = ({ isShow, hidePaymentModal }: paymentProps) => {
         </Col>
       </Row>
 
-      {/* <Addpayment
-        isShow={isShow}
-        handleClose={hidePaymentModal}
-        handleShow={isShow}
-      /> */}
 
-      <EditPayment
-        isShow={editPayment}
-        handleClose={handleCloseEdit}
-        edit={edit}
-      />
+
 
       <DeleteModal
         show={delet}
