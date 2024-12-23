@@ -1,3 +1,7 @@
+//from here we take the side bar data
+// meaning from here we edit the names and titles for each item in the side bar
+//and we can add more pages of we want
+
 import React, { useEffect, useState } from "react";
 
 const Navdata = () => {

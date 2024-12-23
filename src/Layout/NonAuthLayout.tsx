@@ -1,10 +1,12 @@
+// layout component is responsible for dynamically applying layout settings (like layout type and mode) throughout the application
+//it controls the layout of the login page which can be edited from the redux
 import React, { useEffect } from 'react';
 import withRouter from '../Common/withRouter';
 
-//redux
+// Redux
 import { useDispatch, useSelector } from "react-redux";
 
-//import actions
+// Import actions
 import {
     changeLayout,
     // changeLayoutTheme,
@@ -12,7 +14,9 @@ import {
 } from "../slices/thunk";
 
 const NonAuthLayout = ({ children }: any) => {
-    const dispatch: any = useDispatch();
+    const dispatch: any = useDispatch();  // Redux dispatch function to trigger actions
+
+    // Using `useSelector` to access the current layout settings from Redux state
     const {
         layoutType,
         layoutThemeType,
@@ -23,42 +27,44 @@ const NonAuthLayout = ({ children }: any) => {
         layoutModeType: state.Layout.layoutModeType,
     }));
 
-    /*
-    layout settings
-    */
+    // useEffect to update layout settings whenever the layout values change
     useEffect(() => {
         if (
-            layoutType ||
-            layoutThemeType ||
-            layoutModeType 
+            layoutType ||  // Check if layoutType is available
+            layoutThemeType ||  // Check if layoutThemeType is available
+            layoutModeType  // Check if layoutModeType is available
         ) {
+            // Trigger a window resize event after layout changes (to recalculate styles, etc.)
             window.dispatchEvent(new Event('resize'));
-            // dispatch(changeLayoutTheme(layoutThemeType));
+            
+            // Dispatch actions to change layout settings in the Redux store
+            // dispatch(changeLayoutTheme(layoutThemeType)); // Currently commented out
             dispatch(changeLayoutMode(layoutModeType));
             dispatch(changeLayout(layoutType));
         }
-    }, [layoutType,
-        layoutThemeType,
-        layoutModeType,
-        dispatch]);
+    }, [layoutType, layoutThemeType, layoutModeType, dispatch]);  // Dependencies: will rerun if these values change
 
+    // useEffect to apply the layout mode (dark or light) to the document body
     useEffect(() => {
         if (layoutModeType === "dark") {
-            document.body.setAttribute("data-layout-mode", "dark");
+            document.body.setAttribute("data-layout-mode", "dark");  // Apply dark mode attribute to body
         } else {
-            document.body.setAttribute("data-layout-mode", "light");
+            document.body.setAttribute("data-layout-mode", "light");  // Apply light mode attribute to body
         }
+
+        // Cleanup: remove the layout mode attribute on component unmount
         return () => {
             document.body.removeAttribute("data-layout-mode");
         };
-    }, [layoutModeType]);
+    }, [layoutModeType]);  // Runs when layoutModeType changes
+
     return (
         <React.Fragment>
             <div>
-                {children}
+                {children}  {/* Render the child components */}
             </div>
         </React.Fragment>
     );
 };
 
-export default withRouter(NonAuthLayout);
+export default withRouter(NonAuthLayout);  // Wrap the component with withRouter HOC to get access to router props
