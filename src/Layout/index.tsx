@@ -18,8 +18,6 @@ import { useSelector, useDispatch } from "react-redux";
 
 import Header from "./Header";
 import Sidebar from "./Sidebar";
-import RightSidebar from "./RightSidebar";
-
 // import { changeLayoutTheme } from '../slices/layouts/thunk';
 import withRouter from "../Common/withRouter";
 import { createSelector } from "reselect";
