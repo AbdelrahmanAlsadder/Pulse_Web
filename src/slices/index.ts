@@ -4,7 +4,7 @@ import { combineReducers } from "redux";
 import LayoutReducer from "./layouts/reducer";
 
 //Invoice
-import InvoiceReducer from "./invoices/reducer";
+
 
 //authantication
 import LoginReducer from "./login/reducer";
@@ -15,7 +15,7 @@ import ProfileReducer from "./profile/reducer";
 
 const rootReducer = combineReducers ({
     Layout: LayoutReducer,
-    Invoice : InvoiceReducer,
+   
     Login: LoginReducer,
     Account: AccountReducer,
 

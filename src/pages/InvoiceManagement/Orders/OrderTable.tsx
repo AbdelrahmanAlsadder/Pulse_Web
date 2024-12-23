@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Card, Col, Nav, Row, Tab } from "react-bootstrap";
-import { useSelector } from "react-redux";
+
 import { ToastContainer } from "react-toastify";
-import { createSelector } from "reselect";
+
 
 import TableContainer from "../../../Common/Tabledata/TableContainer";
 import { DeleteModal } from "../../../Common/DeleteModal";
@@ -17,14 +17,7 @@ interface paymentProps {
 }
 
 const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
-  const selectPaymentsList = createSelector(
-    (state: any) => state.Invoice,
-    (invoices: any) => ({
-      paymentList: invoices.paymentList,
-    })
-  );
 
-  const { paymentList } = useSelector(selectPaymentsList);
 
   const [payments, setPayments] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -60,40 +53,6 @@ const PaymentTable = ({ isShow, hidePaymentModal }: paymentProps) => {
   const handleDeleteId = () => {
     // dispatch(onDeletePayment(deletid.id));
     setDelet(false);
-  };
-
-  const toggleTab = (type: any) => {
-    if (type !== "all") {
-      setPayments(
-        paymentList.filter((payment: any) => payment.status === type)
-      );
-    } else {
-      setPayments(paymentList);
-    }
-  };
-
-  const [editPayment, setEditPayment] = useState<boolean>(false);
-  const [edit, setEdit] = useState<any>();
-
-  const handleCloseEdit = () => setEditPayment(false);
-  const handleEditPayment = (item: any) => {
-    setEditPayment(true);
-    setEdit({
-      id: item.id,
-      member: item.member,
-      date: item.date,
-      paymentDetails: item.paymentDetails,
-      paymentType: item.paymentType,
-      amount: item.amount,
-      status: item.status,
-    });
-  };
-
-  // search
-  const handleSearch = async (ele: any) => {
-    const item = ele.value.trim(); // Trim whitespace
-
-    loadOrder(item);
   };
 
   interface columnsType {

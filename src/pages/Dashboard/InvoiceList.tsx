@@ -16,14 +16,9 @@ interface paymentProps {
 }
 
 const InvoiceList = ({ isShow, hidePaymentModal }: paymentProps) => {
-  const selectPaymentsList = createSelector(
-    (state: any) => state.Invoice,
-    (invoices: any) => ({
-      paymentList: invoices.paymentList,
-    })
-  );
 
-  const { paymentList } = useSelector(selectPaymentsList);
+
+ 
 
   const [payments, setPayments] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -61,15 +56,7 @@ const InvoiceList = ({ isShow, hidePaymentModal }: paymentProps) => {
     setDelet(false);
   };
 
-  const toggleTab = (type: any) => {
-    if (type !== "all") {
-      setPayments(
-        paymentList.filter((payment: any) => payment.status === type)
-      );
-    } else {
-      setPayments(paymentList);
-    }
-  };
+
 
   const [editPayment, setEditPayment] = useState<boolean>(false);
   const [edit, setEdit] = useState<any>();
