@@ -1,3 +1,5 @@
+//this file is used for the logic of getting the full screen
+
 import React, { useState } from 'react';
 
 const FullScreenDropdown = () => {
