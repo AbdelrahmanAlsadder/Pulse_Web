@@ -1,5 +1,14 @@
 //Include Both Helper File with needed methods
 
+
+//The main purpose of this code is to manage the user authentication flow (login, logout, social login) and update the state accordingly using Redux actions.
+// Login Flow: The loginUser function handles different user statuses, displays appropriate notifications, and redirects users based on their role (admin, warehouse, pharmacy).
+// Social Login: The socialLogin function allows users to log in using social media accounts (e.g., Google, Facebook) via Firebase.
+// Logout: The logoutUser function logs the user out by removing authentication data from local storage and dispatching the relevant action.
+// Error Handling: Every function includes error handling where any failure is caught, and an error message is dispatched via the apiError action.
+// Notifications: The toast notifications provide real-time feedback to users during the login and logout process.
+
+
 import { getFirebaseBackend } from "../../helpers/firebase_helper";
 import {
   loginSuccess,

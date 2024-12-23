@@ -1,3 +1,14 @@
+//Purpose of the slice: This slice is dedicated to managing the registration flow. 
+// It tracks whether the registration is in progress (loading), 
+// whether it was successful (success), and handles error states
+//(registrationError, error). It also manages the user data once registration is completed.
+
+//Reducers: Each reducer is responsible for updating specific pieces of state.
+//For example, registerUserSuccessful is used when registration is successful,
+//whereas registerUserFailed handles errors. resetRegisterFlagChange resets flags,
+//and apiErrorChange handles errors from API calls.
+
+
 import { createSlice } from "@reduxjs/toolkit";
 
 export const initialState = {
