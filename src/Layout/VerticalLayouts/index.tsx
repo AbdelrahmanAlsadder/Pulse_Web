@@ -1,3 +1,5 @@
+//this code is responsible for the display and design og the side nav bar
+
 import React, { useEffect } from 'react';
 import PropTypes from "prop-types";
 import withRouter from '../../Common/withRouter';
