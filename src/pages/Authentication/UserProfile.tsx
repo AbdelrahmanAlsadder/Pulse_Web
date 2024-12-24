@@ -113,11 +113,9 @@ const UserProfile: React.FC = () => {
               const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
               console.log("Avatar uploaded successfully:", downloadURL);
 
-              await firebaseBackend.updateUserDetails({
-                address: {
-                  ...(values.city && { city: values.city }),
-                  ...(values.street && { street: values.street }),
-                },
+              await firebaseBackend.updateUserDetails({//we are sending the data as parameter
+                city: values.city,
+                street: values.street,
                 picture: downloadURL, // Save the new avatar URL to Firestore
               });
 
@@ -127,10 +125,8 @@ const UserProfile: React.FC = () => {
           );
         } else {
           await firebaseBackend.updateUserDetails({
-            address: {
-              ...(values.city && { city: values.city }),
-              ...(values.street && { street: values.street }),
-            },
+            city: values.city,
+            street: values.street,
           });
           toast.success("Profile updated successfully", { autoClose: 2000 });
         }
