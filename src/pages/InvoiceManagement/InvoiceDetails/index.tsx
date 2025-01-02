@@ -53,7 +53,7 @@ const InvoiceDetails = () => {
   const [userDetails, setUserDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const firebaseBackend = getFirebaseBackend();
-  console.log("order :>> ", order);
+ 
 
   const loadOrder = async (orderId: string) => {
     try {
@@ -69,11 +69,11 @@ const InvoiceDetails = () => {
   };
 
   const loadUserDetails = async (uid: string) => {
-    console.log("uid :>> ", uid);
+   
     try {
       setIsLoading(true);
       const userd = await firebaseBackend.getUserDetailsByUid(uid);
-      console.log("userd :>> ", userd);
+      
       setUserDetails(userd);
     } catch (error) {
       console.error("Error fetching user:", error);

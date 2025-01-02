@@ -29,17 +29,17 @@ export const loginUser = (user: any, history: any) => async (dispatch: any) => {
     var data = await response;
 
     if (data) {
-      console.log("data :>> ", data.uid);
+      
       var user_details = await fireBaseBackend.getUserDetailsByUid(data.uid);
       if (user_details) {
         if (user_details.status == -1) {
           // disabled
           toast.error("Sorry, But Your Account is Disabled", { autoClose: 2000 });
-          console.log("disabled");
+          
         } else if (user_details.status == 0) {
           // waiting for approval
           toast.info("Please Wait, Your Account is Under Approval", { autoClose: 2000 });
-          console.log("waiting for approval");
+         
         } else if (user_details.status == 1){//admin user go to the user page
           dispatch(loginSuccess(user_details));
           history("/user");
@@ -49,7 +49,7 @@ export const loginUser = (user: any, history: any) => async (dispatch: any) => {
           history("/dashboard");
         }
         else if (user_details.status == 3){//pharmacy user, he shouldn't be here
-          toast.error("This page is only for warehouse,\ndownload our app", { autoClose: 2000 });
+          toast.error("This Page is Only for Warehouse,\nPlease Download our App", { autoClose: 2000 });
         
         }
       }

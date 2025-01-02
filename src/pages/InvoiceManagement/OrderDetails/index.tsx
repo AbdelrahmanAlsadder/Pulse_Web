@@ -65,11 +65,11 @@ const OrderDetails = () => {
   };
 
   const loadUserDetails = async (uid: string) => {
-    console.log("uid :>> ", uid);
+   
     try {
       setIsLoading(true);
       const userd = await firebaseBackend.getUserDetailsByUid(uid);
-      console.log("userd :>> ", userd);
+      
       setUserDetails(userd);
     } catch (error) {
       console.error("Error fetching user:", error);

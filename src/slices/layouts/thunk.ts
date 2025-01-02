@@ -1,4 +1,4 @@
-import { changeHTMLAttribute } from './utils';
+import { changeHTMLAttribute } from './utils'; // Utility function to change HTML attributes
 import {
     changeLayoutAction,
     changeLayoutModeAction,
@@ -8,28 +8,34 @@ import {
     changeTopbarThemeAction,
     changeLeftsidebarSizeTypeAction,
     changeLeftsidebarViewTypeAction,
-} from './reducer';
+} from './reducer'; // Redux actions to update state
 
 /**
  * Changes the layout type
- * @param {*} param0
+ * @param {*} layout - The new layout type (e.g., "horizontal" or "vertical")
  */
 export const changeLayout = (layout: any) => async (dispatch: any) => {
     try {
         if (layout === "horizontal") {
+            // Remove the sidebar size attribute if the layout is horizontal
             document.documentElement.removeAttribute("data-sidebar-size");
         }
+        // Update the HTML attribute for layout
         changeHTMLAttribute("data-layout", layout);
+        // Dispatch Redux action to update layout state
         dispatch(changeLayoutAction(layout));
-    } catch (error) { }
+    } catch (error) {
+        // Handle potential errors
+    }
 };
 
 /**
  * Changes the layout mode
- * @param {*} param0
+ * @param {*} layoutMode - The layout mode (e.g., "light" or "dark")
  */
-export const changeLayoutMode = (layoutMode : any) => async (dispatch : any) => {
+export const changeLayoutMode = (layoutMode: any) => async (dispatch: any) => {
     try {
+        // Update the theme attribute based on the layout mode
         switch (layoutMode) {
             case "light":
                 changeHTMLAttribute("data-bs-theme", "light");
@@ -41,78 +47,81 @@ export const changeLayoutMode = (layoutMode : any) => async (dispatch : any) => 
                 changeHTMLAttribute("data-bs-theme", "light");
                 break;
         }
+        // Dispatch Redux actions to update layout and topbar themes
         dispatch(changeLayoutModeAction(layoutMode));
         dispatch(changeTopbarThemeAction(layoutMode));
     } catch (error) {
-        // Handle any errors if needed
+        // Handle errors if needed
     }
 };
 
 /**
  * Changes the left sidebar theme
- * @param {*} param0
+ * @param {*} sidebarTheme - The theme for the sidebar
  */
 export const changeSidebarTheme = (sidebarTheme: any) => async (dispatch: any) => {
     try {
+        // Update the HTML attribute for sidebar theme
         changeHTMLAttribute("data-sidebar", sidebarTheme);        
+        // Dispatch Redux action to update sidebar theme state
         dispatch(changeSidebarThemeAction(sidebarTheme));
     } catch (error) {
-        console.log(error);
+        console.log(error); // Log errors for debugging
     }
 };
 
 /**
  * Changes the layout width
- * @param {*} param0
+ * @param {*} layoutWidth - The width of the layout (e.g., "fluid" or "boxed")
  */
 export const changeLayoutWidth = (layoutWidth: any) => async (dispatch: any) => {
     try {
-        changeHTMLAttribute("data-layout-width",layoutWidth);
-        // if (layoutWidth === 'lg') {
-        //     changeHTMLAttribute("data-layout-width", "fluid");
-        // } else {
-        //     changeHTMLAttribute("data-layout-width", "boxed");
-        // }
+        // Update the HTML attribute for layout width
+        changeHTMLAttribute("data-layout-width", layoutWidth);
+        // Dispatch Redux action to update layout width state
         dispatch(changeLayoutWidthAction(layoutWidth));
     } catch (error) {
-        return error;
+        return error; // Return error if it occurs
     }
 };
 
 /**
  * Changes the layout position
- * @param {*} param0
+ * @param {*} layoutPosition - The position of the layout (e.g., "fixed" or "scrollable")
  */
 export const changeLayoutPosition = (layoutposition: any) => async (dispatch: any) => {
     try {
+        // Update the HTML attribute for layout position
         changeHTMLAttribute("data-layout-position", layoutposition);
+        // Dispatch Redux action to update layout position state
         dispatch(changeLayoutPositionAction(layoutposition));
     } catch (error) {
-        console.log(error);
+        console.log(error); // Log errors for debugging
     }
 };
 
 /**
- * Changes the topbar themes
- * @param {*} param0
+ * Changes the topbar theme
+ * @param {*} topbarTheme - The theme for the topbar
  */
 export const changeTopbarTheme = (topbarTheme: any) => async (dispatch: any) => {
     try {
+        // Update the HTML attribute for topbar theme
         changeHTMLAttribute("data-topbar", topbarTheme);
+        // Dispatch Redux action to update topbar theme state
         dispatch(changeTopbarThemeAction(topbarTheme));
-
     } catch (error) {
-        console.log(error);
+        console.log(error); // Log errors for debugging
     }
 };
 
-
 /**
  * Changes the left sidebar size
- * @param {*} param0
+ * @param {*} leftsidebarSizetype - The size of the left sidebar (e.g., "lg", "md", "sm", "sm-hover")
  */
 export const changeLeftsidebarSizeType = (leftsidebarSizetype: any) => async (dispatch: any) => {
     try {
+        // Set the sidebar size attribute based on the input
         switch (leftsidebarSizetype) {
             case 'lg':
                 changeHTMLAttribute("data-sidebar-size", "lg");
@@ -129,23 +138,24 @@ export const changeLeftsidebarSizeType = (leftsidebarSizetype: any) => async (di
             default:
                 changeHTMLAttribute("data-sidebar-size", "lg");
         }
+        // Dispatch Redux action to update sidebar size state
         dispatch(changeLeftsidebarSizeTypeAction(leftsidebarSizetype));
-
     } catch (error) {
-        console.log(error);
+        console.log(error); // Log errors for debugging
     }
 };
 
 /**
- * Changes the left sidebar views
- * @param {*} param0
+ * Changes the left sidebar view type
+ * @param {*} leftsidebarViewtype - The view type for the left sidebar (e.g., "default", "compact")
  */
 export const changeLeftsidebarViewType = (leftsidebarViewtype: any) => async (dispatch: any) => {
     try {
+        // Update the HTML attribute for sidebar view type
         changeHTMLAttribute("data-layout-style", leftsidebarViewtype);
+        // Dispatch Redux action to update sidebar view type state
         dispatch(changeLeftsidebarViewTypeAction(leftsidebarViewtype));
     } catch (error) {
-        console.log(error);
+        console.log(error); // Log errors for debugging
     }
 };
-

@@ -19,7 +19,7 @@ class FirebaseAuthBackend {
       this.storage = firebase.storage();
       firebase.auth().onAuthStateChanged((user: any) => {
         if (user) {
-          console.log("user :>> ", user);
+         
           this.uuid = user.uid;
           sessionStorage.setItem("authUser", JSON.stringify(user));
         } else {
@@ -184,7 +184,7 @@ class FirebaseAuthBackend {
       if (userDoc.exists) {
         return userDoc.data(); // returns the user's data if found
       } else {
-        console.log("No user found with the given UID.");
+        
         return null; // return null if no user found
       }
     } catch (error) {
@@ -208,7 +208,7 @@ class FirebaseAuthBackend {
 
       // Update the user's document with the new data
       await userRef.update(updatedData);
-      console.log("User updated successfully");
+    
     } catch (error) {
       console.error("Error updating user:", error);
       throw error;
@@ -218,7 +218,7 @@ class FirebaseAuthBackend {
   // Function to update a user by ID
   async updateUserById(id: string, updatedData: any) {
     try {
-      console.log("Submitting form with values2:", updatedData);
+      
       const productRef = this.firestore.collection("users").doc(id);
 
       // Make sure the document exists
@@ -232,7 +232,7 @@ class FirebaseAuthBackend {
         status: updatedData.status,
       });
 
-      console.log("User updated successfully");
+     
     } catch (error: any) {
       if (error.code === "permission-denied") {
         console.error("Permission denied: Check Firestore rules.");
@@ -267,10 +267,7 @@ class FirebaseAuthBackend {
         // Get the download URL for the uploaded file
         commercial_register = await getDownloadURL(snapshot.ref); // Correctly pass the reference
 
-        console.log(
-          "Commercial Register uploaded successfully:",
-          commercial_register
-        );
+       
       } catch (error) {
         console.error("Failed to upload commercial register:", error);
         // Handle the error appropriately (e.g., fallback to default behavior or rethrow)
@@ -304,7 +301,7 @@ class FirebaseAuthBackend {
   async fetchProducts(keyword = ""): Promise<any[]> {
     try {
       if (this.uuid !== undefined) {
-        console.log("Fetching products for store_id:", this.uuid);
+       
 
         let query = this.firestore
           .collection("products")
@@ -313,7 +310,7 @@ class FirebaseAuthBackend {
 
         // If a keyword is provided, filter products by name or description
         if (keyword) {
-          console.log("Filtering products by keyword:", keyword);
+        
           query = query
             .where("title", ">=", keyword)
             .where("title", "<=", keyword + "\uf8ff");
@@ -323,14 +320,14 @@ class FirebaseAuthBackend {
 
         const products = querySnapshot.docs.map((doc) => {
           const data = doc.data();
-          console.log("Product fetched:", { id: doc.id, ...data });
+          
           return {
             id: doc.id,
             ...data,
           };
         });
 
-        console.log("Fetched products:", products);
+        
         return products;
       }
 
@@ -420,7 +417,7 @@ class FirebaseAuthBackend {
       if (productDoc.exists) {
         return { id: productDoc.id, ...productDoc.data() }; // return product data if found
       } else {
-        console.log("No product found with the given ID.");
+        
         return null; // return null if no product found
       }
     } catch (error) {
@@ -451,12 +448,12 @@ class FirebaseAuthBackend {
         const storage = getStorage();
         const imageRef = ref(storage, `images/${newImageFile.name}`);
 
-        console.log("Uploading new image:", newImageFile.name);
+       
 
         const snapshot = await uploadBytes(imageRef, newImageFile); // Upload the new image
         const newImageUrl = await getDownloadURL(snapshot.ref); // Get the URL of the uploaded image
 
-        console.log("New image URL:", newImageUrl);
+       
 
         updatedProductData.images = newImageUrl; // Update the `images` field with the new URL
       }
@@ -464,7 +461,7 @@ class FirebaseAuthBackend {
       // Update the product document in Firestore with the new data
       await productRef.update(updatedProductData);
 
-      console.log("Product updated successfully");
+      
     } catch (error) {
       console.error("Error updating product:", error);
       throw error;
@@ -476,7 +473,7 @@ class FirebaseAuthBackend {
     try {
       const productRef = this.firestore.collection("products").doc(id);
       await productRef.update({ status: "-1" }); // Update the status to "-1"
-      console.log("Product status updated to '-1' successfully");
+    
     } catch (error) {
       console.error("Error updating product status:", error);
       throw error;
@@ -527,7 +524,7 @@ class FirebaseAuthBackend {
 
         const storageRef = ref(storage, `images/${imageFile.name}`); // Using imageFile.name to set the file name
 
-        console.log("Uploading image with filename:", imageFile.name); // Log filename
+        
 
         // Upload the image to Firebase Storage
         uploadBytes(storageRef, imageFile)
@@ -536,7 +533,7 @@ class FirebaseAuthBackend {
             return getDownloadURL(snapshot.ref);
           })
           .then((downloadURL) => {
-            console.log("Image URL:", downloadURL); // Log the URL to ensure it's correct
+           
 
             // Add the image URL to the product data
             const newProduct = {
@@ -931,15 +928,15 @@ class FirebaseAuthBackend {
   ) => {
     let updatedStock = currentStock;
 
-    console.log("New Status:", status);
+    
     if (status === 1) {
       // Decrease stock when changing to active
       updatedStock = currentStock - quantityToUpdate;
-      console.log("The updated stock (set to active) is:", updatedStock);
+     
     } else if (status === 0 || status === -1) {
       // Increase stock when changing to inactive (0 or -1)
       updatedStock = currentStock + quantityToUpdate;
-      console.log("The updated stock (set to inactive) is:", updatedStock);
+      
     }
 
     return updatedStock;
@@ -997,9 +994,7 @@ class FirebaseAuthBackend {
         if (previousStatus === 1 && (newStatus === 0 || newStatus === -1)) {
           // If moving from Approved (1) to Pending (0) or Rejected (-1) -> Increase Stock
           updatedStock = currentStock + quantityToUpdate;
-          console.log(
-            `Stock increased due to status change from 1 to ${newStatus}, new stock: ${updatedStock}`
-          );
+          
         } else if (
           (previousStatus === 0 || previousStatus === -1) &&
           newStatus === 1
@@ -1020,24 +1015,18 @@ class FirebaseAuthBackend {
             );
           }
 
-          console.log(
-            `Stock decreased due to status change to active, new stock: ${updatedStock}`
-          );
+          
         } else {
           // If the status changes between 0 and -1, do nothing to the stock
           updatedStock = currentStock;
-          console.log(
-            `No stock change for status change from ${previousStatus} to ${newStatus}`
-          );
+          
         }
       }
 
       // Step 5: Update the product's stock in Firestore if it changed
       if (updatedStock !== currentStock) {
         await productRef.update({ quantity: updatedStock });
-        console.log(
-          `Product quantity updated for ${productId}, new stock: ${updatedStock}`
-        );
+       
       }
 
       // Step 6: Update the order with the modified item status
@@ -1076,27 +1065,25 @@ class FirebaseAuthBackend {
       let updatedStock = currentStock;
 
       const statusString = String(status); // Ensure it's a string
-      console.log("Status after conversion:", statusString);
+      
 
       if (statusString === "1") {
         updatedStock = currentStock - quantityToUpdate;
-        console.log("The updated stock (status 1) is:", updatedStock);
+        
       }
 
       if (statusString === "0" || statusString === "-1") {
         updatedStock = currentStock + quantityToUpdate;
-        console.log("The updated stock (status 0 or -1) is:", updatedStock);
+        
       }
 
       // Update the product quantity in the Firestore database
-      console.log("the updated stock is" + updatedStock);
+     
       await productRef.update({
         quantity: updatedStock,
       });
 
-      console.log(
-        `Product quantity updated for ${productId}, new stock: ${updatedStock}`
-      );
+      
     } catch (error) {
       console.error("Error updating product quantity:", error);
     }

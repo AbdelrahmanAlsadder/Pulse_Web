@@ -24,9 +24,8 @@ const AddProduct = () => {
         const categoryCollection = await firebaseBackend.fetchCategories();
         setCategories(categoryCollection);
 
-        console.log("Fetched categories:", categoryCollection);
       } catch (error) {
-        console.error("Error fetching categories:", error);
+        
         toast.error("Failed to load categories.");
       }
     };
@@ -34,33 +33,14 @@ const AddProduct = () => {
     fetchCategories();
   }, [firebaseBackend]);
 
-  // useEffect(() => {
-  //   const loadProducts = async () => {
-  //     try {
-  //       setIsLoading(true);
-  //       const productsList = await firebaseBackend.fetchProducts();
-  //       setProducts(productsList);
-  //     } catch (error) {
-  //       console.error("Error loading products:", error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-  //   loadProducts();
-  // }, [firebaseBackend]);
+
 
   const handleRemoveImage = () => {
     return setselectedFiles([]);
   };
 
 
-  //comment this out when you get the firebase storage for images and delete the handle accepted files function
-  // don't forget to change in line 216
-   // const uploadImageToFirebase = async (file) => {
-        //   const storageRef = firebase.storage().ref(`products/${file.name}`);
-        //   const uploadTask = await storageRef.put(file);
-        //   return await uploadTask.ref.getDownloadURL();
-        // };
+ 
 
   const handleAcceptedFiles = (files: any) => {
     files.map((file: any) =>
@@ -128,7 +108,7 @@ const AddProduct = () => {
         description: values.productDesc,
         status:"0",
       };
-      console.log("newProduct :>> ", newProduct);
+     
       // Call your method to add the product to Firestore here
       // For example: addProductToFirestore(newProduct);
       try {

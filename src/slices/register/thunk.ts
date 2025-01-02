@@ -17,14 +17,14 @@ export const registerUser = (user: any) => async (dispatch: any) => {
   try {
     let response;
 
-    console.log("0"); // Logging for debugging purposes (before registration)
+    
     // Make a call to the Firebase backend to register the user with email and password
     response = await fireBaseBackend.registerUser(user.email, user.password);
-    console.log("1"); // Log after the registration response
+   
     if (response) {
       // If the registration is successful, add the new user details to Firestore
       await fireBaseBackend.addNewUserToFirestore(user);
-      console.log("2"); // Log after adding the user to Firestore
+    
     }
   } catch (error) {
     // If an error occurs, dispatch the registerUserFailed action to handle the error

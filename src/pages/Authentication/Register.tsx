@@ -114,31 +114,7 @@ const Register = () => {
 
   const { error, success } = useSelector(selectAccount);
 
-  // useEffect(() => {
-  //   dispatch(apiError());
-  // }, [dispatch]);
 
-  // useEffect(() => {
-  //   if (success) {
-  //     successnotify();
-  //     setTimeout(() => navigate("/login"), 3000);
-  //     setTimer(3);
-  //   } else if (error) {
-  //     console.log(error);
-  //     errornotify();
-  //   }
-  //   setTimeout(() => {
-  //     dispatch(resetRegisterFlag());
-  //   }, 3000);
-
-  //   setLoader(false);
-  // }, [dispatch, success, error, navigate]);
-
-  // useEffect(() => {
-  //   if (timer) {
-  //     setInterval(() => setTimer(timer - 1), 1000);
-  //   }
-  // }, [timer]);
   return (
     <React.Fragment>
       <div className="account-pages">

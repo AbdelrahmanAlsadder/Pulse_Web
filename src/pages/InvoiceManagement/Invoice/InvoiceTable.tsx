@@ -23,7 +23,7 @@ const InvoiceTable = ({ isShow, hidePaymentModal }: paymentProps) => {
   const [payments, setPayments] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const firebaseBackend = getFirebaseBackend();
-  console.log("payments :>> ", payments);
+  
   const loadOrder = async (item?: undefined) => {
     try {
       setIsLoading(true);

@@ -90,10 +90,10 @@ const UserProfile: React.FC = () => {
     }),
     onSubmit: async (values: any) => {
       try {
-        console.log("Submitting form with values:", values);
+        
 
         if (values.avatar) {
-          console.log("Uploading avatar image...");
+         
           const avatarFile = values.avatar;
           const storageRef = ref(storage, `avatars`);
 
@@ -103,7 +103,7 @@ const UserProfile: React.FC = () => {
             "state_changed",
             (snapshot) => {
               const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              console.log("Upload is " + progress + "% done");
+             
             },
             (error) => {
               console.error("Error uploading avatar:", error);
@@ -111,7 +111,7 @@ const UserProfile: React.FC = () => {
             },
             async () => {
               const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-              console.log("Avatar uploaded successfully:", downloadURL);
+              
 
               await firebaseBackend.updateUserDetails({//we are sending the data as parameter
                 city: values.city,

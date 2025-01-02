@@ -16,7 +16,7 @@ interface producteditProps {
 const EditProductList = ({ isShow, handleClose, edit }: producteditProps) => {
   const firebaseBackend = getFirebaseBackend();
 
-  console.log("edit :>> ", edit);
+
 
   // image
   const [selectedImage, setSelectedImage] = useState<any>(edit?.images);

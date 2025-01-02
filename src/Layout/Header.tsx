@@ -134,7 +134,7 @@ const Header = ({ onChangeLayoutMode, layoutModeType }: any) => {
                   data-bs-toggle="modal"
                   data-bs-target="#searchModal"
                 >
-                  <i className="bi bi-search fs-lg"></i>
+                  
                 </button>
               </div>
 

@@ -50,7 +50,7 @@ const EditUsers = ({ isShow, handleClose, edit }: usereditProps) => {
     onSubmit: async (values: any) => {
       try {
         setIsSubmitting(true);
-        console.log("Submitting form with values:", values);
+      
         await firebaseBackend.updateUserById(edit.id, values);
         formik.resetForm();
         toast.success("User Status Updated Successfully", { autoClose: 2000 });
