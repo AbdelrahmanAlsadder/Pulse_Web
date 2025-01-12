@@ -260,7 +260,7 @@ const ProductlistTable = () => {
 
         <div className="col-sm-auto ms-auto">
           <div className="d-flex gap-3">
-            <div className="search-box">
+            {/* <div className="search-box">
               <Form.Control
                 type="text"
                 id="searchMemberList"
@@ -268,7 +268,7 @@ const ProductlistTable = () => {
                 onChange={(e: any) => handleSearch(e.target)}
               />
               <i className="las la-search search-icon"></i>
-            </div>
+            </div> */}
             {/* <Dropdown>
               <Dropdown.Toggle
                 as="button"
